@@ -1,0 +1,48 @@
+services:
+  apache:
+    image: php:8.2-apache
+    container_name: apache
+    ports:
+      - "8800:80"
+    volumes:
+      - ./CrypMerce-Project:/var/www/html
+    restart: unless-stopped
+    networks:
+      - mybridge
+    command: >
+      bash -c "docker-php-ext-install pdo pdo_mysql &&
+               apache2-foreground"
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+    networks:
+      - mybridge
+
+  db:
+    image: mariadb:11
+    container_name: db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass123
+      MYSQL_DATABASE: TopanRG_DB
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: secret123
+    ports:
+      - "3309:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - mybridge
+
+volumes:
+  db_data:
+
+networks:
+  mybridge:
+    driver: bridge
