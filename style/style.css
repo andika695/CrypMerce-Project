@@ -1,13 +1,9 @@
-<<<<<<< HEAD
-/* =========================================
-   1. GLOBAL & BODY STYLING (DIKUNCI KE TINGGI LAYAR)
-   ========================================= */
 html, body {
     margin: 0;
     padding: 0;
-    height: 100%; /* KUNCI: Mengunci tinggi ke 100% layar */
-    overflow-y: auto; /* IZINKAN SCROLL Y JIKA MEMANG ADA KELEBIHAN */
-    overflow-x: hidden; /* Kunci: Menghilangkan scroll bar horizontal */
+    height: 100%; 
+    overflow-y: auto; 
+    overflow-x: hidden; 
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
     background-color: #e9ecef; 
 }
@@ -15,114 +11,61 @@ html, body {
 body {
     display: flex;
     justify-content: center;
-=======
-body {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif; 
-    background-color: #f7f7f7; 
-    display: flex;
-    justify-content: center; 
->>>>>>> 20d5ff05a1f9e699a9981dbfdd9005726f642223
     align-items: center; 
     min-height: 100vh;
 }
 
 .login-container {
-<<<<<<< HEAD
-    /* DEFAULT (Desktop/iPad Landscape) - Mode Split */
     background: url("../Image/newbg.png") center center/cover no-repeat;
     background-size: cover; 
     background-attachment: fixed; 
     width: 100%;
-    min-height: 100vh; /* Pastikan background setidaknya setinggi layar */
+    min-height: 100vh; 
     display: flex;
-    justify-content: flex-end; /* Form berada di kanan */
+    justify-content: flex-end; 
     align-items: center;
     padding-right: 8%; 
     box-sizing: border-box;
     max-width: 1400px;
 }
 
-/* =========================================
-   2. CARD (FORM CONTAINER) STYLING (DIBUAT RINGKAS)
-   ========================================= */
 .right-card {
     background-color: #ffffff;
     width: 100%;
     max-width: 480px; 
-    padding: 25px 40px; /* Padding vertikal lebih kecil */
+    padding: 25px 40px; 
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); 
     box-sizing: border-box;
     height: auto; 
-    max-height: 95vh; /* BATAS TINGGI MAX CARD (agar tidak menempel tepi) */
+    max-height: 95vh; 
     margin: 0; 
-    overflow-y: auto; /* JIKA KONTEN PANJANG, SCROLL HANYA TERJADI DI DALAM CARD */
+    overflow-y: auto; 
 }
 
-/* =========================================
-   3. FORM ELEMENTS & TYPOGRAPHY (JARAK DIPERCEPAT/DIKURANGI)
-   ========================================= */
 .form-login h3 {
     font-size: 24px; 
     font-weight: 700;
     color: #343a40; 
     margin-bottom: 20px; 
-=======
-    background: url("../Image/background.jpg") center/cover no-repeat;
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    justify-content: flex-end; 
-    align-items: center;
-    padding-right: 10%; 
-    box-sizing: border-box;
-}
-
-.right-card {
-    background-color: white;
-    width: 600px; /* Lebar card, sesuaikan jika perlu */
-    padding: 40px;
-    border-radius: 10px; /* Sudut sedikit membulat */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Bayangan halus */
-    box-sizing: border-box;
-}
-
-/* --- Form Styling (form-login) --- */
-.form-login h3 {
-    font-size: 35px;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 20px;
-    text-align: left; 
->>>>>>> 20d5ff05a1f9e699a9981dbfdd9005726f642223
 }
 
 .form-login label {
     display: block;
-<<<<<<< HEAD
-    font-size: 14px; /* Dikecilkan */
+    font-size: 14px; 
     color: #495057; 
-    margin-bottom: 4px; /* Dikurangi */
+    margin-bottom: 4px; 
     font-weight: 600; 
-=======
-    font-size: 18px;
-    color: #444444;
-    margin-bottom: 5px;
-    font-weight: 500;
->>>>>>> 20d5ff05a1f9e699a9981dbfdd9005726f642223
 }
 
 .form-login input[type="text"],
 .form-login input[type="email"],
 .form-login input[type="tel"],
-<<<<<<< HEAD
 .form-login input[type="password"],
 .form-login select {
     width: 100%;
-    padding: 10px 15px; /* Dikecilkan */
-    margin-bottom: 15px; /* Dikurangi */
+    padding: 10px 15px; 
+    margin-bottom: 15px; 
     border: 1px solid #ced4da; 
     border-radius: 6px;
     box-sizing: border-box;
@@ -147,14 +90,11 @@ body {
     background-size: 14px;
 }
 
-/* =========================================
-   4. CHECKBOX STYLING (KUSTOM)
-   ========================================= */
 .form-login .checkbox-row {
     display: flex;
     align-items: center;
     margin-top: 10px;
-    margin-bottom: 20px; /* Dikurangi */
+    margin-bottom: 20px;
     position: relative;
     padding-left: 25px; 
     min-height: 18px; 
@@ -208,40 +148,12 @@ body {
     transform: rotate(45deg);
 }
 
-/* =========================================
-   5. BUTTON STYLING
-   ========================================= */
 .form-login button[type="submit"] {
     width: 100%;
     background-color: #007bff; 
     color: white;
-    padding: 12px 20px; /* Dikecilkan */
-    margin-top: 15px; /* Dikurangi */
-=======
-.form-login input[type="password"] {
-    width: 100%;
-    padding: 12px 15px;
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-    font-size: 16px;
-    transition: border-color 0.3s;
-}
-
-.form-login input:focus {
-    border-color: #0099ff; /* Warna Blibli saat fokus */
-    outline: none;
-}
-
-/* --- Tombol Log in (Gaya Mirip Blibli) --- */
-.form-login button[type="submit"] {
-    width: 100%;
-    background-color: #0099ff; /* Biru khas Blibli */
-    color: white;
-    padding: 14px 20px;
-    margin-top: 10px;
->>>>>>> 20d5ff05a1f9e699a9981dbfdd9005726f642223
+    padding: 12px 20px;
+    margin-top: 15px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
@@ -251,17 +163,13 @@ body {
 }
 
 .form-login button[type="submit"]:hover {
-<<<<<<< HEAD
     background-color: #0056b3; 
 }
 
-/* =========================================
-   6. FOOTER/MISC TEXT STYLING
-   ========================================= */
 .register {
     text-align: center;
-    margin-top: 20px; /* Dikurangi */
-    font-size: 14px; /* Dikecilkan */
+    margin-top: 20px;
+    font-size: 14px;
     color: #6c757d;
 }
 
@@ -272,40 +180,19 @@ body {
 }
 
 .register a:hover, .terms a:hover {
-=======
-    background-color: #007acc; /* Biru lebih gelap saat hover */
-}
-
-/* --- Bagian Teks Tambahan --- */
-.register {
-    text-align: center;
-    margin-top: 25px;
-    font-size: 16px;
-    color: #666;
-}
-
-.register a {
-    color: #0099ff;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-.register a:hover {
->>>>>>> 20d5ff05a1f9e699a9981dbfdd9005726f642223
     text-decoration: underline;
 }
 
 .terms, .copyright {
     text-align: center;
-<<<<<<< HEAD
-    font-size: 11px; /* Dikecilkan */
+    font-size: 11px;
     color: #6c757d;
-    margin-top: 10px; /* Dikurangi */
+    margin-top: 10px;
     line-height: 1.6;
 }
 
 .copyright {
-    margin-top: 20px; /* Dikurangi */
+    margin-top: 20px;
 }
 
 .copyright strong {
@@ -313,13 +200,6 @@ body {
     font-weight: 700;
 }
 
-/* =========================================
-   7. RESPONSIVENESS (MOBILE & TABLET)
-   ========================================= */
-
-/* --- A. TABLET PORTRAIT & MOBILE (Max Width 768px) --- 
-   (Form di Tengah dengan Margin)
-*/
 @media (max-width: 768px) {
     body {
         align-items: flex-start;
@@ -327,24 +207,23 @@ body {
     }
     
     .login-container {
-        justify-content: center; /* PUSATKAN FORM */
+        justify-content: center;
         padding: 20px 0; 
         background-position: top center; 
         background-attachment: scroll; 
     }
 
     .right-card {
-        width: 90%; /* Memberikan ruang di samping */
+        width: 90%;
         max-width: 400px; 
         padding: 20px; 
         box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15); 
         border-radius: 8px; 
-        margin-top: 50px; /* Jarak dari atas layar */
-        margin-bottom: 50px; /* Jarak dari bawah layar */
+        margin-top: 50px;
+        margin-bottom: 50px;
         min-height: auto;
     }
 
-    /* Penyesuaian jarak elemen di mobile */
     .form-login h3 { margin-bottom: 15px; }
     .form-login input[type="text"], .form-login input[type="email"], 
     .form-login input[type="tel"], .form-login input[type="password"], 
@@ -353,9 +232,6 @@ body {
     .form-login button[type="submit"] { margin-top: 10px; }
 }
 
-/* --- B. TABLET LANDSCAPE (iPad Tidur) (Min 769px dan Max 1024px) ---
-   (Mode Split: Form di Kanan)
-*/
 @media (min-width: 769px) and (max-width: 1024px) {
     .login-container {
         padding-right: 5%; 
@@ -365,106 +241,6 @@ body {
     .right-card {
         max-width: 380px; 
         padding: 25px;
-        margin: auto 0; /* Membantu sentrasi vertikal di area container */
-=======
-    font-size: 13px;
-    color: #5d5c5c;
-    margin-top: 15px;
-    line-height: 1.5;
-}
-
-.terms a {
-    color: #0099ff;
-    text-decoration: none;
-}
-
-.copyright {
-    margin-top: 40px;
-}
-
-.copyright strong {
-    font-weight: 12px;
-    color: #000000; /* Warna yang lebih tegas untuk nama perusahaan */
-}
-
-.form-login .checkbox-row {
-    display: flex;
-    align-items: center; 
-    margin-top: 10px;
-    margin-bottom: 25px; 
-    position: relative; /* Penting untuk penempatan kustom */
-    padding-left: 25px; /* Memberi ruang untuk kotak centang kustom */
-    height: 18px; /* Tinggi baris untuk alignment yang bagus */
-}
-
-.form-login .checkbox-row input[type="checkbox"] {
-    /* 2. Sembunyikan Checkbox Bawaan */
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 18px;
-    width: 18px;
-    left: 0;
-    z-index: 10;
-}
-
-.form-login .checkbox-row label {
-    font-size: 16px;
-    color: #333;
-    font-weight: normal; 
-    cursor: pointer;
-    margin: 0;
-}
-
-/* 4. Elemen Visual Kustom (Kotak Centang) */
-/* Gunakan pseudo-element :before pada label untuk membuat kotak */
-.form-login .checkbox-row label:before {
-    content: "";
-    position: absolute;
-    top: 0; 
-    left: 0;
-    height: 18px;
-    width: 18px;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    transition: background-color 0.2s, border-color 0.2s;
-}
-
-/* 5. Tampilan Kotak Saat DICENTANG */
-/* Ketika input dicentang, ubah tampilan elemen kustom (kotak) */
-.form-login .checkbox-row input[type="checkbox"]:checked + label:before {
-    background-color: #0099ff; /* Biru Khas Blibli */
-    border-color: #0099ff;
-}
-
-/* 6. Tanda Centang (Checkmark) */
-/* Gunakan pseudo-element :after pada label untuk membuat tanda centang */
-.form-login .checkbox-row input[type="checkbox"]:checked + label:after {
-    content: "";
-    position: absolute;
-    left: 6px; /* Posisi X tanda centang */
-    top: 3px; /* Posisi Y tanda centang */
-    width: 4px;
-    height: 9px;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-}
-
-/* Penyesuaian untuk tampilan mobile */
-@media (max-width: 768px) {
-    .login-container {
-        padding-right: 0;
-        justify-content: center;
-        align-items: flex-start;
-        background-position: top center; /* Sesuaikan posisi background di mobile */
-    }
-
-    .right-card {
-        width: 90%;
-        margin-top: 50px;
-        box-shadow: none; /* Hilangkan bayangan di mobile agar lebih bersih */
->>>>>>> 20d5ff05a1f9e699a9981dbfdd9005726f642223
+        margin: auto 0;
     }
 }
