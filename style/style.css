@@ -1,0 +1,276 @@
+/* =========================================
+   1. GLOBAL & BODY STYLING (DIKUNCI KE TINGGI LAYAR)
+   ========================================= */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%; /* KUNCI: Mengunci tinggi ke 100% layar */
+    overflow-y: auto; /* IZINKAN SCROLL Y JIKA MEMANG ADA KELEBIHAN */
+    overflow-x: hidden; /* Kunci: Menghilangkan scroll bar horizontal */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    background-color: #e9ecef; 
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+    min-height: 100vh;
+}
+
+.login-container {
+    /* DEFAULT (Desktop/iPad Landscape) - Mode Split */
+    background: url("../Image/newbg.png") center center/cover no-repeat;
+    background-size: cover; 
+    background-attachment: fixed; 
+    width: 100%;
+    min-height: 100vh; /* Pastikan background setidaknya setinggi layar */
+    display: flex;
+    justify-content: flex-end; /* Form berada di kanan */
+    align-items: center;
+    padding-right: 8%; 
+    box-sizing: border-box;
+    max-width: 1400px;
+}
+
+/* =========================================
+   2. CARD (FORM CONTAINER) STYLING (DIBUAT RINGKAS)
+   ========================================= */
+.right-card {
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 480px; 
+    padding: 25px 40px; /* Padding vertikal lebih kecil */
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); 
+    box-sizing: border-box;
+    height: auto; 
+    max-height: 95vh; /* BATAS TINGGI MAX CARD (agar tidak menempel tepi) */
+    margin: 0; 
+    overflow-y: auto; /* JIKA KONTEN PANJANG, SCROLL HANYA TERJADI DI DALAM CARD */
+}
+
+/* =========================================
+   3. FORM ELEMENTS & TYPOGRAPHY (JARAK DIPERCEPAT/DIKURANGI)
+   ========================================= */
+.form-login h3 {
+    font-size: 24px; 
+    font-weight: 700;
+    color: #343a40; 
+    margin-bottom: 20px; 
+}
+
+.form-login label {
+    display: block;
+    font-size: 14px; /* Dikecilkan */
+    color: #495057; 
+    margin-bottom: 4px; /* Dikurangi */
+    font-weight: 600; 
+}
+
+.form-login input[type="text"],
+.form-login input[type="email"],
+.form-login input[type="tel"],
+.form-login input[type="password"],
+.form-login select {
+    width: 100%;
+    padding: 10px 15px; /* Dikecilkan */
+    margin-bottom: 15px; /* Dikurangi */
+    border: 1px solid #ced4da; 
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+
+.form-login input:focus,
+.form-login select:focus {
+    border-color: #007bff; 
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); 
+}
+
+.form-login select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23495057' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 14px;
+}
+
+/* =========================================
+   4. CHECKBOX STYLING (KUSTOM)
+   ========================================= */
+.form-login .checkbox-row {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+    margin-bottom: 20px; /* Dikurangi */
+    position: relative;
+    padding-left: 25px; 
+    min-height: 18px; 
+}
+
+.form-login .checkbox-row input[type="checkbox"] {
+    position: absolute;
+    opacity: 0; 
+    cursor: pointer;
+    height: 18px;
+    width: 18px;
+    left: 0;
+    z-index: 10;
+}
+
+.form-login .checkbox-row label {
+    font-size: 15px;
+    color: #343a40;
+    font-weight: normal; 
+    cursor: pointer;
+    margin: 0;
+}
+
+.form-login .checkbox-row label:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 18px;
+    width: 18px;
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.form-login .checkbox-row input[type="checkbox"]:checked + label:before {
+    background-color: #007bff; 
+    border-color: #007bff;
+}
+
+.form-login .checkbox-row input[type="checkbox"]:checked + label:after {
+    content: "";
+    position: absolute;
+    left: 6px;
+    top: 3px;
+    width: 4px;
+    height: 9px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* =========================================
+   5. BUTTON STYLING
+   ========================================= */
+.form-login button[type="submit"] {
+    width: 100%;
+    background-color: #007bff; 
+    color: white;
+    padding: 12px 20px; /* Dikecilkan */
+    margin-top: 15px; /* Dikurangi */
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.form-login button[type="submit"]:hover {
+    background-color: #0056b3; 
+}
+
+/* =========================================
+   6. FOOTER/MISC TEXT STYLING
+   ========================================= */
+.register {
+    text-align: center;
+    margin-top: 20px; /* Dikurangi */
+    font-size: 14px; /* Dikecilkan */
+    color: #6c757d;
+}
+
+.register a, .terms a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.register a:hover, .terms a:hover {
+    text-decoration: underline;
+}
+
+.terms, .copyright {
+    text-align: center;
+    font-size: 11px; /* Dikecilkan */
+    color: #6c757d;
+    margin-top: 10px; /* Dikurangi */
+    line-height: 1.6;
+}
+
+.copyright {
+    margin-top: 20px; /* Dikurangi */
+}
+
+.copyright strong {
+    color: #343a40; 
+    font-weight: 700;
+}
+
+/* =========================================
+   7. RESPONSIVENESS (MOBILE & TABLET)
+   ========================================= */
+
+/* --- A. TABLET PORTRAIT & MOBILE (Max Width 768px) --- 
+   (Form di Tengah dengan Margin)
+*/
+@media (max-width: 768px) {
+    body {
+        align-items: flex-start;
+        padding: 0;
+    }
+    
+    .login-container {
+        justify-content: center; /* PUSATKAN FORM */
+        padding: 20px 0; 
+        background-position: top center; 
+        background-attachment: scroll; 
+    }
+
+    .right-card {
+        width: 90%; /* Memberikan ruang di samping */
+        max-width: 400px; 
+        padding: 20px; 
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15); 
+        border-radius: 8px; 
+        margin-top: 50px; /* Jarak dari atas layar */
+        margin-bottom: 50px; /* Jarak dari bawah layar */
+        min-height: auto;
+    }
+
+    /* Penyesuaian jarak elemen di mobile */
+    .form-login h3 { margin-bottom: 15px; }
+    .form-login input[type="text"], .form-login input[type="email"], 
+    .form-login input[type="tel"], .form-login input[type="password"], 
+    .form-login select { margin-bottom: 10px; }
+    .form-login .checkbox-row { margin-bottom: 15px; }
+    .form-login button[type="submit"] { margin-top: 10px; }
+}
+
+/* --- B. TABLET LANDSCAPE (iPad Tidur) (Min 769px dan Max 1024px) ---
+   (Mode Split: Form di Kanan)
+*/
+@media (min-width: 769px) and (max-width: 1024px) {
+    .login-container {
+        padding-right: 5%; 
+        justify-content: flex-end; 
+    }
+
+    .right-card {
+        max-width: 380px; 
+        padding: 25px;
+        margin: auto 0; /* Membantu sentrasi vertikal di area container */
+    }
+}
