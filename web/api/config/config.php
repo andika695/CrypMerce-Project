@@ -1,8 +1,8 @@
 <?php
-$host = 'db'; 
-$db   = 'TopanRG_DB';
-$user = 'appuser';
-$pass = 'secret123';
+$host = 'db';
+$db = 'crypmerce_database';
+$user = 'root';
+$pass = 'rootpass123';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";

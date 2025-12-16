@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Produk</title>
+    <link rel="stylesheet" href="../../assets/css/seller/product.css">
+</head>
+<body>
+
+<div class="form-container">
+    <h2>Tambah Produk</h2>
+
+    <form action="../../api/seller/add-product.php"
+      method="POST"
+      enctype="multipart/form-data">
+
+    <!-- sementara hardcode, nanti pakai session -->
+    <input type="hidden" name="seller_id" value="1">
+
+    <label>Nama Produk</label>
+    <input type="text" name="name" required>
+
+    <label>Harga</label>
+    <input type="number" name="price" required>
+
+    <label>Stok</label>
+    <input type="number" name="stock" required>
+
+    <label>Kategori</label>
+    <select name="category_id" required>
+        <option value="1">Fashion Pria</option>
+        <option value="2">Fashion Wanita</option>
+        <option value="3">Handphone</option>
+        <option value="4">Komputer</option>
+    </select>
+
+    <label>Deskripsi</label>
+    <textarea name="description"></textarea>
+
+    <label>Gambar</label>
+    <input type="file" name="image">
+
+    <button type="submit">Simpan Produk</button>
+</form>
+
+</div>
+
+</body>
+</html>
