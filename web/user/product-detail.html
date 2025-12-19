@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Produk - CrypMerce</title>
+    <link rel="stylesheet" href="../assets/css/user/header-dashboard.css">
+    <link rel="stylesheet" href="../assets/css/user/product-detail.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Header / Navbar (Reused) -->
+    <header class="header">
+        <div class="main-container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="dashboard.html">
+                        <img src="../assets/images/logotesk.png" alt="Logo">
+                    </a>
+                </div>
+                <!-- Simplified Header for Detail Page -->
+                <div class="search-wrapper">
+                     <div class="search-bar">
+                        <input type="search" placeholder="Cari di CrypMerce">
+                        <button class="search-btn">
+                            <img src="../assets/images/search.png" alt="Search">
+                        </button>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="icon-btn"><img src="../assets/images/bag.png" alt="Bag"></button>
+                    <button class="akun-btn icon-btn"><img src="../assets/images/person.png" alt="User"></button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container main-content">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="dashboard.html">Home</a> &gt; <span>Detail Produk</span>
+        </div>
+
+        <div class="product-detail-grid">
+            <!-- Left Column: Images & Seller -->
+            <div class="product-left-column">
+                <div class="product-gallery">
+                    <div class="main-image">
+                        <img id="main-img" src="../assets/images/no-image.png" alt="Product Image">
+                    </div>
+                </div>
+
+                <!-- Seller Info Widget (Moved Here) -->
+                <div class="seller-widget">
+                    <div class="seller-header">
+                        <img id="seller-photo" src="../assets/images/default-avatar.png" alt="Seller">
+                        <div class="seller-details">
+                            <h3 id="seller-name">Nama Toko</h3>
+                            <p class="seller-location">📍 <span id="seller-location">Jakarta</span></p>
+                        </div>
+                        <button class="btn-follow">Follow</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Info & Variants -->
+            <div class="product-info-section">
+                <h1 id="product-name" class="product-title">Memuat Nama Produk...</h1>
+                
+                <div class="price-section">
+                    <h2 id="product-price">Rp 0</h2>
+                </div>
+
+                <!-- Variants -->
+                <div class="variant-section">
+                    <h3>Ukuran</h3>
+                    <div class="variant-options" id="size-options">
+                        <span class="no-variant">-</span>
+                    </div>
+                </div>
+
+                <div class="variant-section">
+                    <h3>Warna</h3>
+                    <div class="variant-options" id="color-options">
+                        <span class="no-variant">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Section: Description & Reviews -->
+        <div class="product-content-bottom">
+            <div class="description-section">
+                <h3>Deskripsi Produk</h3>
+                <div id="product-description" class="description-content">
+                    Memuat deskripsi...
+                </div>
+            </div>
+            
+            <div class="reviews-section">
+                <h3>Ulasan (0)</h3>
+                <p>Belum ada ulasan untuk produk ini.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- STICKY BOTTOM BAR -->
+    <div class="sticky-footer">
+        <div class="footer-container">
+            <div class="footer-product-summary">
+                <img id="footer-img" src="../assets/images/no-image.png" alt="Mini Product">
+                <div class="footer-info">
+                    <span id="footer-name">Product Name</span>
+                    <span id="footer-price">Rp 0</span>
+                </div>
+            </div>
+            
+            <div class="footer-actions">
+                <div class="quantity-control">
+                    <button onclick="decreaseQty()">-</button>
+                    <input type="number" id="qty" value="1" min="1" readonly>
+                    <button onclick="increaseQty()">+</button>
+                </div>
+                
+                <div class="total-price-label">
+                    Total: <strong id="total-price">Rp 0</strong>
+                </div>
+
+                <button class="btn-buy-now">Beli Sekarang</button>
+                <button class="btn-add-cart">+ Keranjang</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Toast/Notification -->
+    <div id="toast" class="toast">Berhasil ditambahkan ke keranjang</div>
+
+    <script src="../assets/js/user/product-detail.js"></script>
+</body>
+</html>

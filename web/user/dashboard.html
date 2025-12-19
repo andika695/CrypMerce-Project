@@ -10,55 +10,59 @@
 <body>
 
 <header class="header">
+    <div class="main-container">
+        <div class="header-content">
+            <div class="logo">
+                <img src="../assets/images/logotesk.png" alt="Logo">
+            </div>
 
-    <div class="logo">
-        <img src="../assets/Images/logotesk.png" alt="Logo">
+            <button class="menu-btn" id="menuBtn">☰</button>
+
+            <!-- Desktop Category & Search Wrapper -->
+            <div class="search-wrapper">
+                 <div class="search-bar">
+                    <div class="kategori-wrapper">
+                        <button class="kategori-btn">
+                            Kategori <span>▼</span>
+                        </button>
+                        <ul class="kategori-dropdown">
+                            <li data-value="fashion-pria">Fashion Pria</li>
+                            <li data-value="fashion-wanita">Fashion Wanita</li>
+                            <li data-value="handphone">Handphone</li>
+                            <li data-value="kecantikan">Kecantikan</li>
+                            <li data-value="kesehatan">Kesehatan</li>
+                            <li data-value="komputer">Komputer</li>
+                            <li data-value="otomotif">Otomotif</li>
+                            <li data-value="makanan">Makanan</li>
+                        </ul>
+                    </div>
+
+                    <input type="search" placeholder="Cari di CrypMerce">
+                    <button class="search-btn">
+                        <img src="../assets/images/search.png" alt="Search">
+                    </button>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <button class="icon-btn">
+                    <img src="../assets/images/bag.png" alt="Keranjang">
+                </button>
+
+                <button class="icon-btn">
+                    <img src="../assets/images/bell.png" alt="Notif">
+                </button>
+
+                <button class="akun-btn icon-btn">
+                    <img src="../assets/images/person.png" alt="Akun">
+                </button>
+            </div>
+        </div>
     </div>
-
-    <button class="menu-btn" id="menuBtn">☰</button>
-
-    <div class="kategori-wrapper">
-        <button class="kategori-btn">Kategori</button>
-
-        <ul class="kategori-dropdown">
-            <li data-value="fashion-pria">Fashion Pria</li>
-            <li data-value="fashion-wanita">Fashion Wanita</li>
-            <li data-value="handphone">Handphone</li>
-            <li data-value="kecantikan">Kecantikan</li>
-            <li data-value="kesehatan">Kesehatan</li>
-            <li data-value="komputer">Komputer</li>
-            <li data-value="otomotif">Otomotif</li>
-        </ul>
-    </div>
-
-
-    <div class="search-bar">
-        <input type="search" placeholder="Cari Produk">
-        <button class="search-btn">
-            <img src="../assets/Images/search.png" alt="Search">
-        </button>
-    </div>
-
-    <div class="header-right">
-
-        <button class="icon-btn">
-            <img src="../assets/Images/bag.png" alt="Keranjang">
-        </button>
-
-        <button class="icon-btn">
-            <img src="../assets/Images/bell.png" alt="Notif">
-        </button>
-
-        <button class="akun-btn icon-btn">
-            <img src="../assets/Images/person.png" alt="Akun">
-        </button>
-
-    </div>
-
 </header>
 
 <div class="mobile-kategori" id="mobileKategori">
-    <h3>Kategori</h3>
+    <h3>Kategori Belanja</h3>
     <ul class="kategori-list">
         <li data-value="fashion-pria">Fashion Pria</li>
         <li data-value="fashion-wanita">Fashion Wanita</li>
@@ -67,40 +71,44 @@
         <li data-value="kesehatan">Kesehatan</li>
         <li data-value="komputer">Komputer</li>
         <li data-value="otomotif">Otomotif</li>
+        <li data-value="makanan">Makanan</li>
     </ul>
 </div>
 
-<!-- SLIDER IKLAN -->
-<section class="banner-slider">
-    <button class="nav prev" id="prevBtn">&#10094;</button>
+<div class="main-container">
+    <!-- SLIDER IKLAN -->
+    <section class="banner-section">
+        <div class="banner-slider">
+            <button class="nav prev" id="prevBtn">&#10094;</button>
 
-    <div class="slides" id="slides">
-        <div class="slide active">
-            <img src="../assets/Images/banner1.jpeg" alt="Promo 1">
+            <div class="slides" id="slides">
+                <div class="slide active">
+                    <img src="../assets/images/banner1.jpeg" alt="Promo 1">
+                </div>
+                <div class="slide">
+                    <img src="../assets/images/banner2.jpeg" alt="Promo 2">
+                </div>
+                <div class="slide">
+                    <img src="../assets/images/banner3.jpeg" alt="Promo 3">
+                </div>
+            </div>
+
+            <button class="nav next" id="nextBtn">&#10095;</button>
+
+            <div class="indicators" id="indicators"></div>
         </div>
-        <div class="slide">
-            <img src="../assets/Images/banner2.jpeg" alt="Promo 2">
+    </section>
+
+    <section class="product-section">
+        <div class="section-title">Produk Terbaru</div>
+
+        <div class="product-grid" id="productGrid">
+            <!-- produk akan muncul di sini via JS -->
         </div>
-        <div class="slide">
-            <img src="../assets/Images/banner3.jpeg" alt="Promo 3">
-        </div>
-    </div>
+    </section>
+</div>
 
-    <button class="nav next" id="nextBtn">&#10095;</button>
-
-    <div class="indicators" id="indicators"></div>
-
-</section>
-
-<section class="product-section">
-    <h2>Produk Terbaru</h2>
-
-    <div class="product-grid" id="productGrid">
-        <!-- produk akan muncul di sini -->
-    </div>
-</section>
-
-<script src="../../assets/js/user/products.js"></script>
+<script src="../assets/js/user/products.js"></script>
 <script src="../assets/js/user/dashboard.js"></script>
 <script src="../assets/js/user/banner.js"></script>
 </body>
