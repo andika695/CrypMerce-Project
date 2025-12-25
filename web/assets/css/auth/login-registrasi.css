@@ -30,17 +30,18 @@ body {
 }
 
 .right-card {
-  background-color: #ffffff;
-  width: 100%;
-  max-width: 480px;
-  padding: 25px 40px;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  box-sizing: border-box;
-  height: auto;
-  max-height: 95vh;
-  margin: 0;
-  overflow-y: auto;
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 480px; 
+    padding: 25px 40px; 
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); 
+    box-sizing: border-box;
+    height: auto; 
+    max-height: 95vh; 
+    margin: 0; 
+    overflow-y: auto; 
+    margin-right: 10%;
 }
 
 .form-login h3 {
@@ -376,12 +377,17 @@ body {
     padding: 0;
   }
 
-  .login-container {
-    justify-content: center;
-    padding: 20px 0;
-    background-position: top center;
-    background-attachment: scroll;
-  }
+    .right-card {
+        width: 90%;
+        max-width: 400px; 
+        padding: 20px; 
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15); 
+        border-radius: 8px; 
+        margin-top: 50px;
+        margin-bottom: 50px;
+        min-height: auto;
+        margin-right: 0; 
+    }
 
   .right-card {
     width: 90%;
@@ -422,9 +428,10 @@ body {
     justify-content: flex-end;
   }
 
-  .right-card {
-    max-width: 380px;
-    padding: 25px;
-    margin: auto 0;
-  }
+    .right-card {
+        max-width: 380px; 
+        padding: 25px;
+        margin: auto 0;
+        margin-right: 5%;
+    }
 }
