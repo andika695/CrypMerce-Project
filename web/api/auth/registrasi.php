@@ -38,11 +38,20 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
-if (!in_array($role, ['user', 'seller'])) {
+if (!in_array($role, ['user', 'seller'], true)) {
     http_response_code(400);
     echo json_encode([
         'success' => false,
-        'message' => 'Role tidak valid'
+        'message' => 'Role tidak valid. Hanya user atau seller yang diperbolehkan'
+    ]);
+    exit;
+}
+
+if (strlen($password) < 8) {
+    http_response_code(400);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Password minimal 8 karakter'
     ]);
     exit;
 }
@@ -90,6 +99,6 @@ try {
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'message' => 'Kesalahan server'
+        'message' => 'Kesalahan server: ' . $e->getMessage()
     ]);
 }

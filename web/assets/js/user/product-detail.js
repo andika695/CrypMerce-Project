@@ -1,0 +1,167 @@
+document.addEventListener('DOMContentLoaded', () => {
+    // Get Product ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+
+    if (!productId) {
+        alert('Produk tidak ditemukan!');
+        window.location.href = 'dashboard.html';
+        return;
+    }
+
+    loadProductDetail(productId);
+});
+
+let currentPrice = 0;
+let currentStock = 0;
+
+async function loadProductDetail(id) {
+    try {
+        const response = await fetch(`../api/user/get-product-detail.php?id=${id}`);
+        const result = await response.json();
+
+        if (result.success) {
+            renderProduct(result.data);
+        } else {
+            document.querySelector('.product-detail-grid').innerHTML = 
+                `<p style="padding:40px; text-align:center;">${result.message}</p>`;
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+function renderProduct(data) {
+    // 1. Basic Info
+    document.title = `${data.name} - CrypMerce`;
+    document.getElementById('product-name').textContent = data.name;
+    document.getElementById('footer-name').textContent = data.name;
+    
+    // Price formatting
+    currentPrice = Number(data.price);
+    const formattedPrice = formatRupiah(currentPrice);
+    document.getElementById('product-price').textContent = formattedPrice;
+    document.getElementById('footer-price').textContent = formattedPrice;
+    updateTotalPrice();
+
+    // Stock
+    currentStock = Number(data.stock);
+
+    // Image
+    if (data.image) {
+        const imgPath = `../assets/images/products/${data.image}`;
+        document.getElementById('main-img').src = imgPath;
+        document.getElementById('footer-img').src = imgPath;
+    }
+
+    // Description
+    if (data.description) {
+        // Convert newlines to <br> for simple HTML rendering
+        document.getElementById('product-description').innerHTML = 
+            data.description.replace(/\n/g, '<br>');
+    } else {
+        document.getElementById('product-description').textContent = 'Tidak ada deskripsi.';
+    }
+
+    // 2. Seller Info
+    if (data.seller) {
+        document.getElementById('seller-name').textContent = data.seller.store_name;
+        document.getElementById('seller-location').textContent = data.seller.location || 'Indonesia';
+        
+        if (data.seller.photo) {
+            document.getElementById('seller-photo').src = `../${data.seller.photo}`;
+        }
+    }
+
+    // 3. Variants (Mock logic if JSON is null, or parse JSON)
+    // Assuming variants structure: { "sizes": ["S","M"], "colors": ["Red"] }
+    // Or null.
+    
+    const variants = data.variants || {};
+    
+    renderVariants('size-options', variants.sizes || []); // If DB has sizes
+    renderVariants('color-options', variants.colors || []); // If DB has colors
+
+    // If stock is 0, disable buttons
+    if (currentStock <= 0) {
+        const buyBtn = document.querySelector('.btn-buy-now');
+        const cartBtn = document.querySelector('.btn-add-cart');
+        buyBtn.disabled = true;
+        buyBtn.textContent = 'Stok Habis';
+        cartBtn.disabled = true;
+        
+        // Add overlay visual
+        document.getElementById('main-img').style.opacity = '0.5';
+    }
+}
+
+function renderVariants(containerId, options) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = '';
+
+    if (!options || options.length === 0) {
+        container.innerHTML = '<span class="no-variant">-</span>';
+        return;
+    }
+
+    options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'variant-btn';
+        btn.textContent = opt;
+        btn.onclick = () => {
+            // Remove active from siblings
+            container.querySelectorAll('.variant-btn').forEach(b => b.classList.remove('active'));
+            // Add active to self
+            btn.classList.add('active');
+        };
+        container.appendChild(btn);
+    });
+}
+
+function formatRupiah(amount) {
+    return 'Rp ' + Number(amount).toLocaleString('id-ID');
+}
+
+// ===== QUANTITY & FOOTER LOGIC =====
+const qtyInput = document.getElementById('qty');
+
+function increaseQty() {
+    let val = parseInt(qtyInput.value);
+    if (val < currentStock) {
+        qtyInput.value = val + 1;
+        updateTotalPrice();
+    } else {
+        alert('Stok maksimum tercapai');
+    }
+}
+
+function decreaseQty() {
+    let val = parseInt(qtyInput.value);
+    if (val > 1) {
+        qtyInput.value = val - 1;
+        updateTotalPrice();
+    }
+}
+
+function updateTotalPrice() {
+    const qty = parseInt(qtyInput.value);
+    const total = currentPrice * qty;
+    document.getElementById('total-price').textContent = formatRupiah(total);
+}
+
+// Add to Cart Interaction
+document.querySelector('.btn-add-cart').addEventListener('click', () => {
+    // Validate variants selection if needed
+    // ...
+    
+    // Show Toast
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
+});
+
+// Update global scope for onclick handlers
+window.increaseQty = increaseQty;
+window.decreaseQty = decreaseQty;

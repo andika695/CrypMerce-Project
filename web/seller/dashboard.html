@@ -1,67 +1,235 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../../assets/css/seller/dashboard.css">
-    <title>Seller</title>
+    <link rel="stylesheet" href="../assets/css/seller/dashboard.css?v=3">
+    <link rel="stylesheet" href="../assets/css/seller/product.css?v=3">
+    <title>Seller Dashboard - CrypMerce</title>
 </head>
 <body>
     <div class="seller-layout">
-    <aside class="sidebar">
-        <h2 class="logo">Seller Panel</h2>
-        <ul>
-            <li class="active">Dashboard</li>
-            <li><a href="add-product.html">Tambah Produk</a></li>
-            <li>Produk Saya</li>
-            <li>Pesanan</li>
-            <li>Logout</li>
-        </ul>
-    </aside>
-    <main class="content">
-        <h1>Dashboard Seller</h1>
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <h2 class="logo">CrypMerce Seller</h2>
+            <ul>
+                <li class="menu-item" data-page="profile">
+                    <span>👤</span> Profil
+                </li>
+                <li class="menu-item active" data-page="dashboard">
+                    <span>📊</span> Dashboard
+                </li>
+                <li class="menu-item" data-page="add-product">
+                    <span>➕</span> Tambah Produk
+                </li>
+                <li class="menu-item" data-page="my-products">
+                    <span>📦</span> Produk Saya
+                </li>
+                <li class="menu-item" data-page="orders">
+                    <span>🛒</span> Pesanan
+                </li>
+                <li class="menu-item" data-page="logout">
+                    <span>🚪</span> Logout
+                </li>
+            </ul>
+        </aside>
 
-        <div class="stats">
-            <div class="card">
-                <h3>Produk</h3>
-                <p>0</p>
+        <!-- MAIN CONTENT -->
+        <main class="content">
+            <!-- DASHBOARD VIEW -->
+            <div id="dashboard-view" class="view active">
+                <h1>Dashboard Seller</h1>
+
+                <div class="stats">
+                    <div class="card">
+                        <h3>Total Produk</h3>
+                        <p id="total-products">0</p>
+                    </div>
+                    <div class="card">
+                        <h3>Total Stok</h3>
+                        <p id="total-stock">0</p>
+                    </div>
+                    <div class="card">
+                        <h3>Pesanan</h3>
+                        <p id="total-orders">0</p>
+                    </div>
+                </div>
+
+                <section class="product-table">
+                    <h2>Produk Terbaru</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nama</th>
+                                <th>Harga</th>
+                                <th>Stok</th>
+                                <th>Kategori</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="product-list">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: #9ca3af;">
+                                    Belum ada produk
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
             </div>
-            <div class="card">
-                <h3>Stok</h3>
-                <p>0</p>
+
+            <!-- ADD PRODUCT VIEW -->
+            <div id="add-product-view" class="view">
+                <h1>Tambah Produk Baru</h1>
+                
+                <div class="form-container">
+                    <form id="add-product-form" enctype="multipart/form-data">
+                        <!-- Hidden seller_id -->
+                        <!-- Hidden seller_id dihapus karena diambil otomatis dari session -->
+
+                        <div class="form-group">
+                            <label for="name">Nama Produk <span class="required">*</span></label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="price">Harga <span class="required">*</span></label>
+                                <input type="number" id="price" name="price" min="0" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="stock">Stok <span class="required">*</span></label>
+                                <input type="number" id="stock" name="stock" min="0" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="category_id">Kategori <span class="required">*</span></label>
+                            <select id="category_id" name="category_id" required>
+                                <option value="">Loading...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description">Deskripsi</label>
+                            <textarea id="description" name="description" rows="4"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="image">Gambar Produk</label>
+                            <input type="file" id="image" name="image" accept="image/*">
+                            <div id="image-preview" class="image-preview"></div>
+                        </div>
+
+                        <button type="submit" id="submit-btn" class="btn-primary" disabled>
+                            Simpan Produk
+                        </button>
+                    </form>
+                </div>
             </div>
-            <div class="card">
-                <h3>Pesanan</h3>
-                <p>0</p>
+
+            <!-- MY PRODUCTS VIEW -->
+            <div id="my-products-view" class="view">
+                <h1>Produk Saya</h1>
+                <p style="color: #fff; opacity: 0.8;">Fitur ini akan segera hadir...</p>
             </div>
-        </div>
-        <section class="product-table">
-            <h2>Produk Terbaru</h2>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Nama</th>
-                        <th>Harga</th>
-                        <th>Stok</th>
-                        <th>Kategori</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>Edit | Hapus</td>
-                    </tr>
-                </tbody>
-            </table>
-        </section>
+            <!-- ORDERS VIEW -->
+            <div id="orders-view" class="view">
+                <h1>Pesanan</h1>
+                <p style="color: #3533cd; opacity: 0.8;">Fitur ini akan segera hadir...</p>
+            </div>
 
-    </main>
+            <!-- PROFILE VIEW -->
+            <div id="profile-view" class="view">
+                <h1>Profil Seller</h1>
+                
+                <div class="profile-container">
+                    <div class="profile-card">
+                        <div class="profile-header">
+                            <div class="profile-avatar">
+                                <span>👤</span>
+                            </div>
+                            <h2 id="seller-name">Nama Seller</h2>
+                            <p id="seller-email">email@example.com</p>
+                        </div>
+                        
+                        <div class="profile-info">
+                            <div class="info-item">
+                                <label>Nama Toko</label>
+                                <p id="store-name">CrypMerce Store</p>
+                            </div>
+                            <div class="info-item">
+                                <label>Bergabung Sejak</label>
+                                <p id="join-date">19 Desember 2024</p>
+                            </div>
+                            <div class="info-item">
+                                <label>Total Produk</label>
+                                <p id="profile-total-products">0</p>
+                            </div>
+                        </div>
+                        
+                        <button class="btn-edit-profile">Edit Profil</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- EDIT PRODUCT MODAL -->
+            <div id="edit-product-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close-modal" onclick="closeEditProductModal()">&times;</span>
+                    <h2>Edit Produk</h2>
+                    
+                    <form id="edit-product-form" enctype="multipart/form-data">
+                        <input type="hidden" id="edit-product-id" name="product_id">
+                        
+                        <div class="form-group">
+                            <label for="edit-name">Nama Produk</label>
+                            <input type="text" id="edit-name" name="name" required>
+                        </div>
 
-</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit-price">Harga</label>
+                                <input type="number" id="edit-price" name="price" min="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-stock">Stok</label>
+                                <input type="number" id="edit-stock" name="stock" min="0" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit-category">Kategori</label>
+                            <select id="edit-category" name="category_id" required>
+                                <option value="">Loading...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit-description">Deskripsi</label>
+                            <textarea id="edit-description" name="description" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="edit-image">Ganti Gambar (Opsional)</label>
+                            <input type="file" id="edit-image" name="image" accept="image/*">
+                            <div id="edit-product-preview" class="image-preview"></div>
+                        </div>
+
+                        <div class="modal-buttons">
+                            <button type="submit" class="btn-save">Simpan Perubahan</button>
+                            <button type="button" class="btn-cancel" onclick="closeEditProductModal()">Batal</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+
+    <script src="../assets/js/seller/seller-data.js?v=5"></script>
+    <script src="../assets/js/seller/dashboard.js?v=3"></script>
 </body>
 </html>

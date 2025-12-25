@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("Registrasi JS Loaded - Version Check: Min 8 chars"); // Cek console browser Anda!
     const form = document.querySelector('.form-login');
 
     if (!form) {
@@ -27,6 +28,26 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        if (password.length < 8) {
+            alert("Password minimal 8 karakter");
+            return;
+        }
+
+        // Jika Role adalah Seller, simpan data sementara dan redirect
+        if (role === 'seller') {
+            const tempUserData = {
+                username,
+                phone,
+                email,
+                password,
+                role
+            };
+            sessionStorage.setItem('temp_register_data', JSON.stringify(tempUserData));
+            window.location.href = "registrasiSeller.html";
+            return;
+        }
+
+        // Jika Role adalah User, proses seperti biasa
         try {
             const response = await fetch("../../../api/auth/registrasi.php", {
                 method: "POST",
