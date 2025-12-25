@@ -5,7 +5,7 @@ services:
     ports:
       - "8800:80"
     volumes:
-      - ./web:/var/www/html
+      - ./:/var/www/html
     depends_on:
       - db
     restart: unless-stopped

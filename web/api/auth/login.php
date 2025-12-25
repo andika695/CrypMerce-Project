@@ -41,6 +41,17 @@ try {
         $_SESSION['username'] = $user['username'];
         $_SESSION['role']     = $user['role'];
 
+        // If seller, fetch seller_id
+        if ($user['role'] === 'seller') {
+            $sellerStmt = $pdo->prepare("SELECT id, store_name FROM sellers WHERE user_id = :uid");
+            $sellerStmt->execute([':uid' => $user['id']]);
+            $sellerData = $sellerStmt->fetch(PDO::FETCH_ASSOC);
+            if ($sellerData) {
+                $_SESSION['seller_id'] = $sellerData['id'];
+                $_SESSION['store_name'] = $sellerData['store_name'];
+            }
+        }
+
         http_response_code(200);
         echo json_encode([
             'success' => true,

@@ -3,16 +3,32 @@ require '../config/config.php';
 
 header('Content-Type: application/json');
 
+$category = $_GET['category'] ?? null;
+$search = $_GET['search'] ?? null;
+
 try {
     $sql = "
-        SELECT id, name, price, stock, image, created_at
-        FROM products
-        WHERE stock > 0
-        ORDER BY created_at DESC
-        LIMIT 8
+        SELECT p.id, p.name, p.price, p.stock, p.image, p.created_at, c.name as category_name
+        FROM products p
+        LEFT JOIN categories c ON p.category_id = c.id
+        WHERE p.stock > 0
     ";
+    
+    $params = [];
+    if ($category) {
+        $sql .= " AND LOWER(REPLACE(c.name, ' ', '-')) = :category";
+        $params['category'] = strtolower($category);
+    }
+    
+    if ($search) {
+        $sql .= " AND p.name LIKE :search";
+        $params['search'] = '%' . $search . '%';
+    }
 
-    $stmt = $pdo->query($sql);
+    $sql .= " ORDER BY p.created_at DESC LIMIT 20";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
     $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Format data produk

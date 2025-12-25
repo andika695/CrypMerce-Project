@@ -17,22 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Clicked menu:', page);
             
             if (page === 'logout') {
-                if (confirm('Apakah Anda yakin ingin logout?')) {
-                    // Call logout API
-                    fetch('../api/auth/logout.php')
-                        .then(() => {
-                            // Clear session storage
-                            sessionStorage.clear();
-                            localStorage.clear();
-                            // Redirect
-                            window.location.href = '../pages/auth/loginSeller.html';
-                        })
-                        .catch(err => {
-                            console.error('Logout failed:', err);
-                            // Force redirect anyway
-                            window.location.href = '../pages/auth/loginSeller.html';
-                        });
-                }
+                const modal = document.getElementById('logout-modal');
+                if (modal) modal.style.display = 'block';
                 return;
             }
 
@@ -56,6 +42,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Load dashboard data when dashboard view is shown
                 if (page === 'dashboard' && typeof loadDashboardData === 'function') {
                     loadDashboardData();
+                }
+
+                if (page === 'my-store' && typeof loadMyStoreData === 'function') {
+                    loadMyStoreData();
                 }
             } else {
                 console.error('View not found:', `${page}-view`);

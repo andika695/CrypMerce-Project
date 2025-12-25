@@ -16,6 +16,10 @@ async function loadDashboardData() {
             updateProductTable(result.products);
         } else {
             console.error('Failed to load dashboard data:', result.message);
+            // Only alert if it's a real failure, not just session timeout which redirects anyway
+            if (response.status !== 401) {
+                alert('Gagal memuat data dashboard: ' + result.message);
+            }
         }
     } catch (error) {
         console.error('Error loading dashboard data:', error);
@@ -26,6 +30,10 @@ function updateStats(stats) {
     document.getElementById('total-products').textContent = stats.total_products;
     document.getElementById('total-stock').textContent = stats.total_stock;
     document.getElementById('total-orders').textContent = stats.total_orders;
+    
+    // Add follower count to stats if element exists
+    const followerStat = document.getElementById('follower-count');
+    if (followerStat) followerStat.textContent = stats.follower_count;
 }
 
 function updateProductTable(products) {
@@ -49,7 +57,9 @@ function updateProductTable(products) {
         row.innerHTML = `
             <td>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    ${product.image ? `<img src="../assets/images/products/${product.image}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">` : ''}
+                    <img src="${product.image ? '../assets/images/products/' + product.image : '../assets/images/bag.png'}" 
+                         onerror="this.src='../assets/images/bag.png'"
+                         style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
                     ${product.name}
                 </div>
             </td>
@@ -112,7 +122,7 @@ async function editProduct(id) {
             // Show image preview if exists
             const preview = document.getElementById('edit-product-preview');
             if (p.image) {
-                preview.innerHTML = `<img src="../assets/images/products/${p.image}" alt="Preview">`;
+                preview.innerHTML = `<img src="../assets/images/products/${p.image}" alt="Preview" onerror="this.src='../assets/images/bag.png'">`;
                 preview.classList.add('show');
             } else {
                 preview.innerHTML = '';
@@ -203,12 +213,14 @@ async function loadSellerProfile() {
         console.log('Profile data:', result);
         
         if (result.success) {
-            console.log("DEBUG PROFILE DATA:", result.data); // Cek console untuk lihat nilai email!
-            console.log("Email value:", result.data.email);
+            console.log("DEBUG PROFILE DATA:", result.data);
             updateProfileView(result.data);
             updateSidebarProfile(result.data);
         } else {
             console.error('Failed to load profile:', result.message);
+            if (response.status !== 401) {
+                alert('Gagal memuat profil seller: ' + result.message);
+            }
         }
     } catch (error) {
         console.error('Error loading profile:', error);
@@ -216,19 +228,33 @@ async function loadSellerProfile() {
 }
 
 function updateProfileView(data) {
-    // Update profile view
-    document.getElementById('seller-name').textContent = data.username;
-    document.getElementById('seller-email').textContent = data.email || 'Email belum diatur';
-    document.getElementById('store-name').textContent = data.store_name;
-    document.getElementById('join-date').textContent = data.join_date;
-    document.getElementById('profile-total-products').textContent = data.total_products;
-    
-    // Update profile avatar
-    const avatarDiv = document.querySelector('.profile-avatar');
-    if (data.profile_photo) {
-        avatarDiv.innerHTML = `<img src="../${data.profile_photo}" alt="Profile Photo">`;
-    } else {
-        avatarDiv.innerHTML = '<span>👤</span>';
+    try {
+        // Update profile view with safe checks
+        const setEl = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = val;
+            else console.warn(`Element #${id} not found in DOM`);
+        };
+
+        setEl('seller-name', data.username);
+        setEl('seller-email', data.email || 'Email belum diatur');
+        setEl('store-name', data.store_name);
+        setEl('join-date', data.join_date);
+        setEl('profile-total-products', data.total_products);
+        
+        const profileFollowers = document.getElementById('profile-followers');
+        if (profileFollowers) profileFollowers.textContent = data.follower_count || 0;
+        
+        const avatarDiv = document.querySelector('.profile-avatar');
+        if (avatarDiv) {
+            if (data.profile_photo) {
+                avatarDiv.innerHTML = `<img src="../${data.profile_photo}" alt="Profile Photo">`;
+            } else {
+                avatarDiv.innerHTML = '<span>👤</span>';
+            }
+        }
+    } catch (error) {
+        console.error('Error in updateProfileView:', error);
     }
 }
 
@@ -250,131 +276,31 @@ function updateSidebarProfile(data) {
     }
 }
 
-// ===== EDIT PROFILE =====
-function setupEditProfile() {
-    const editBtn = document.querySelector('.btn-edit-profile');
+// ===== EDIT PROFILE (MODAL LOGIC) =====
+function openEditProfileModal() {
+    const modal = document.getElementById('edit-profile-modal');
+    if (!modal) return;
+
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+
+    // Fill current data
+    const storeName = document.getElementById('store-name')?.textContent || '';
     
-    if (editBtn) {
-        editBtn.addEventListener('click', () => {
-            showEditProfileModal();
-        });
+    const inputStoreName = document.getElementById('profile_store_name');
+    
+    if (inputStoreName) inputStoreName.value = storeName;
+}
+
+function closeEditProfileModal() {
+    const modal = document.getElementById('edit-profile-modal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
     }
 }
 
-function showEditProfileModal() {
-    // Create modal HTML
-    const modalHTML = `
-        <div id="edit-profile-modal" class="modal" style="display: block;">
-            <div class="modal-content">
-                <span class="close-modal">&times;</span>
-                <h2>Edit Profil Seller</h2>
-                
-                <form id="edit-profile-form" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label for="edit-storeName">Nama Toko</label>
-                        <input type="text" id="edit-storeName" name="storeName" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="edit-profilePhoto">Foto Profil Baru (Opsional)</label>
-                        <input type="file" id="edit-profilePhoto" name="profilePhoto" accept="image/*">
-                        <div id="edit-image-preview" class="image-preview"></div>
-                    </div>
-                    
-                    <div class="modal-buttons">
-                        <button type="submit" class="btn-save">Simpan</button>
-                        <button type="button" class="btn-cancel">Batal</button>
-                    </div>
-                    
-                    <div id="edit-message" class="message"></div>
-                </form>
-            </div>
-        </div>
-    `;
-    
-    // Add modal to body
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-    
-    // Get current store name
-    const currentStoreName = document.getElementById('store-name').textContent;
-    document.getElementById('edit-storeName').value = currentStoreName;
-    
-    // Setup modal events
-    const modal = document.getElementById('edit-profile-modal');
-    const closeBtn = modal.querySelector('.close-modal');
-    const cancelBtn = modal.querySelector('.btn-cancel');
-    const form = document.getElementById('edit-profile-form');
-    const photoInput = document.getElementById('edit-profilePhoto');
-    const preview = document.getElementById('edit-image-preview');
-    
-    // Close modal events
-    closeBtn.onclick = () => modal.remove();
-    cancelBtn.onclick = () => modal.remove();
-    window.onclick = (e) => { if (e.target === modal) modal.remove(); };
-    
-    // Image preview
-    photoInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-                preview.classList.add('show');
-            };
-            reader.readAsDataURL(file);
-        } else {
-            preview.innerHTML = '';
-            preview.classList.remove('show');
-        }
-    });
-    
-    // Form submission
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const submitBtn = form.querySelector('.btn-save');
-        const messageDiv = document.getElementById('edit-message');
-        
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Menyimpan...';
-        
-        try {
-            const formData = new FormData(form);
-            
-            const response = await fetch('../api/seller/update-seller-profile.php', {
-                method: 'POST',
-                body: formData
-            });
-            
-            const result = await response.json();
-            
-            if (result.success) {
-                messageDiv.textContent = result.message;
-                messageDiv.className = 'message success';
-                messageDiv.style.display = 'block';
-                
-                // Reload profile data
-                setTimeout(() => {
-                    loadSellerProfile();
-                    modal.remove();
-                }, 1500);
-            } else {
-                messageDiv.textContent = result.message;
-                messageDiv.className = 'message error';
-                messageDiv.style.display = 'block';
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Simpan';
-            }
-        } catch (error) {
-            console.error('Error:', error);
-            messageDiv.textContent = 'Terjadi kesalahan. Silakan coba lagi.';
-            messageDiv.className = 'message error';
-            messageDiv.style.display = 'block';
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Simpan';
-        }
-    });
-}
+// This redundant showEditProfileModal was removed in favor of the static one in modals.php
 
 // ===== CATEGORIES =====
 async function loadCategories() {
@@ -401,13 +327,250 @@ async function loadCategories() {
 }
 
 // Export functions
+// ===== MY STORE PAGE =====
+let currentStoreProducts = [];
+
+async function loadMyStoreData() {
+    console.log("Loading My Store data...");
+    const grid = document.getElementById('storeProductGrid');
+    if (!grid) return;
+
+    grid.innerHTML = '<p style="text-align: center; padding: 40px; color: #666;">Memuat produk...</p>';
+
+    try {
+        const profileResponse = await fetch('../api/seller/get-seller-profile.php');
+        const profResult = await profileResponse.json();
+        
+        if (profResult.success) {
+            const data = profResult.data;
+            document.getElementById('store-page-name').textContent = data.store_name || 'Nama Toko';
+            document.getElementById('store-location').textContent = data.location || 'Gudang Blibli';
+            document.getElementById('store-followers').textContent = data.follower_count || '0';
+            document.getElementById('store-rating').textContent = '⭐ -';
+            document.getElementById('store-reviews').textContent = '0';
+            
+            const profileImg = document.getElementById('store-profile-img');
+            if (data.profile_photo) {
+                profileImg.src = '../' + data.profile_photo;
+            }
+        }
+
+        const dashResponse = await fetch('../api/seller/get-dashboard-data.php');
+        const dashResult = await dashResponse.json();
+
+        if (dashResult.success) {
+            currentStoreProducts = dashResult.products || [];
+            updateStoreProductGrid(currentStoreProducts);
+        } else {
+            grid.innerHTML = `<p style="text-align: center; padding: 40px; color: #e74c3c;">Gagal memuat produk: ${dashResult.message}</p>`;
+        }
+    } catch (error) {
+        console.error('Error loading store data:', error);
+        grid.innerHTML = '<p style="text-align: center; padding: 40px; color: #e74c3c;">Terjadi kesalahan server</p>';
+    }
+}
+
+function filterStoreProducts(query) {
+    const filtered = currentStoreProducts.filter(p => 
+        p.name.toLowerCase().includes(query.toLowerCase())
+    );
+    updateStoreProductGrid(filtered);
+}
+
+function updateStoreProductGrid(products) {
+    const grid = document.getElementById('storeProductGrid');
+    if (!grid) return;
+
+    if (!products || products.length === 0) {
+        grid.innerHTML = '<p style="text-align: center; padding: 40px; color: #666;">Belum ada produk untuk ditampilkan.</p>';
+        return;
+    }
+
+    grid.innerHTML = '';
+
+    products.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.onclick = () => viewStoreProductDetail(p.id);
+        
+        const imgSrc = p.image ? `../assets/images/products/${p.image}` : `../assets/images/bag.png`;
+        
+        card.innerHTML = `
+            <div class="image-wrapper">
+                <img src="${imgSrc}" alt="${p.name}" onerror="this.src='../assets/images/bag.png'">
+            </div>
+            <div class="product-info">
+                <h3>${p.name}</h3>
+                <p class="price">Rp ${Number(p.price).toLocaleString('id-ID')}</p>
+                <div class="product-stats">
+                    <span>Stok: ${p.stock}</span>
+                    <span>Terjual 0</span>
+                </div>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
+
+function viewStoreProductDetail(productId) {
+    const product = currentStoreProducts.find(p => p.id == productId);
+    if (!product) return;
+
+    const modal = document.getElementById('product-preview-modal');
+    
+    // Set content
+    document.getElementById('preview-name').textContent = product.name;
+    document.getElementById('preview-price').textContent = `Rp ${Number(product.price).toLocaleString('id-ID')}`;
+    document.getElementById('preview-category').textContent = product.category_name || '-';
+    document.getElementById('preview-stock').textContent = product.stock;
+    document.getElementById('preview-description').textContent = product.description || 'Tidak ada deskripsi.';
+    
+    const previewImg = document.getElementById('preview-img');
+    const imgSrc = product.image ? `../assets/images/products/${product.image}` : `../assets/images/bag.png`;
+    previewImg.src = imgSrc;
+    previewImg.onerror = () => previewImg.src = '../assets/images/bag.png';
+
+    // Show modal
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden'; 
+}
+
+function closeProductPreviewModal() {
+    const modal = document.getElementById('product-preview-modal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto'; // Restore scroll
+}
+
 window.loadDashboardData = loadDashboardData;
 window.loadSellerProfile = loadSellerProfile;
 window.loadCategories = loadCategories;
-window.setupEditProfile = setupEditProfile;
+window.editProduct = editProduct;
 window.editProduct = editProduct;
 window.deleteProduct = deleteProduct;
 window.closeEditProductModal = closeEditProductModal;
+window.loadMyStoreData = loadMyStoreData;
+window.filterStoreProducts = filterStoreProducts;
+window.closeProductPreviewModal = closeProductPreviewModal;
+window.viewStoreProductDetail = viewStoreProductDetail;
+
+// ===== ORDERS SYSTEM =====
+async function loadOrders() {
+    const list = document.getElementById('order-list');
+    if (!list) return;
+
+    try {
+        const response = await fetch('../api/seller/get-orders.php');
+        const result = await response.json();
+
+        if (result.success) {
+            if (result.data.length === 0) {
+                list.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Belum ada pesanan masuk.</td></tr>';
+                return;
+            }
+
+            list.innerHTML = result.data.map(order => `
+                <tr>
+                    <td>#ORD-${order.id}</td>
+                    <td>${order.buyer_name}</td>
+                    <td>${new Date(order.created_at).toLocaleDateString('id-ID')}</td>
+                    <td>Rp ${Number(order.total_amount).toLocaleString('id-ID')}</td>
+                    <td><span class="status-badge ${order.status}">${order.status}</span></td>
+                    <td>
+                        ${order.status === 'pending' ? `
+                            <button class="btn-sm btn-approve" onclick="updateOrderStatus(${order.id}, 'processing')">Terima</button>
+                            <button class="btn-sm btn-cancel" onclick="updateOrderStatus(${order.id}, 'cancelled')">Tolak</button>
+                        ` : '-'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+    } catch (error) {
+        console.error('Error loading orders:', error);
+    }
+}
+
+async function updateOrderStatus(orderId, status) {
+    if (!confirm(`Yakin ingin mengubah status pesanan ke ${status}?`)) return;
+
+    try {
+        const response = await fetch('../api/seller/update-order-status.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order_id: orderId, status: status })
+        });
+        const result = await response.json();
+        if (result.success) {
+            loadOrders();
+            loadDashboardData(); // Refresh stats
+        } else {
+            alert(result.message);
+        }
+    } catch (error) {
+        console.error('Error updating status:', error);
+    }
+}
+
+
+// Handle Profile Update Form
+document.getElementById('edit-profile-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const saveBtn = e.target.querySelector('.btn-save');
+    
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Menyimpan...';
+
+    try {
+        const response = await fetch('../api/seller/update-profile.php', {
+            method: 'POST',
+            body: formData
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('Profil berhasil diperbaharui!');
+            location.reload(); // Hard refresh to update everything
+        } else {
+            alert(result.message);
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Simpan Perubahan';
+        }
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Simpan Perubahan';
+    }
+});
+
+// Initialize orders on view switch
+document.querySelectorAll('.menu-item').forEach(item => {
+    item.addEventListener('click', () => {
+        if (item.dataset.page === 'orders') {
+            loadOrders();
+        }
+    });
+});
+
+window.updateOrderStatus = updateOrderStatus;
+window.openEditProfileModal = openEditProfileModal;
+window.closeEditProfileModal = closeEditProfileModal;
+
+window.closeLogoutModal = function() {
+    const modal = document.getElementById('logout-modal');
+    if (modal) modal.style.display = 'none';
+};
+
+window.processLogout = async function(redirectUrl) {
+    try {
+        await fetch('../api/auth/logout.php');
+        sessionStorage.clear();
+        localStorage.clear();
+        window.location.href = redirectUrl;
+    } catch (err) {
+        console.error('Logout failed:', err);
+        window.location.href = redirectUrl;
+    }
+};
 
 // Initialize Categories on Load
 if (document.readyState === 'loading') {

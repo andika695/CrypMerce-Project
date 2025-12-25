@@ -4,21 +4,32 @@ require '../config/config.php';
 
 header('Content-Type: application/json');
 
-// Check if user is logged in as seller
-if (!isset($_SESSION['seller_id'])) {
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Unauthorized'
-    ]);
+    echo json_encode(['success' => false, 'message' => 'Sesi berakhir, silakan login kembali']);
     exit;
 }
 
-// Get seller_id from session
+// 1. Recover seller_id if missing
+if (!isset($_SESSION['seller_id'])) {
+    $stmt = $pdo->prepare("SELECT id FROM sellers WHERE user_id = :uid");
+    $stmt->execute([':uid' => $_SESSION['user_id']]);
+    $recoveredId = $stmt->fetchColumn();
+    if ($recoveredId) {
+        $_SESSION['seller_id'] = $recoveredId;
+        $_SESSION['role'] = 'seller'; // Ensure role is synced
+    } else {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'message' => 'Anda belum terdaftar sebagai seller']);
+        exit;
+    }
+}
+
 $seller_id = $_SESSION['seller_id'];
 
 try {
-    // Get stats
+    // 1. Get stats
     $statsQuery = "
         SELECT 
             COUNT(*) as total_products,
@@ -30,21 +41,41 @@ try {
     $stmt = $pdo->prepare($statsQuery);
     $stmt->execute(['seller_id' => $seller_id]);
     $stats = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // 2. Get order count (handle case where orders table might not exist yet)
+    $total_orders = 0;
+    try {
+        $orderCountStmt = $pdo->prepare("SELECT COUNT(*) FROM orders WHERE seller_id = :seller_id");
+        $orderCountStmt->execute(['seller_id' => $seller_id]);
+        $total_orders = (int)$orderCountStmt->fetchColumn();
+    } catch (PDOException $e) {
+        $total_orders = 0;
+    }
+
+    // 3. Get follower count (handle case where follows table might not exist yet)
+    $follower_count = 0;
+    try {
+        $followerCountStmt = $pdo->prepare("SELECT COUNT(*) FROM follows WHERE seller_id = :seller_id");
+        $followerCountStmt->execute(['seller_id' => $seller_id]);
+        $follower_count = (int)$followerCountStmt->fetchColumn();
+    } catch (PDOException $e) {
+        $follower_count = 0; // Silent fail if table doesn't exist
+    }
     
-    // Get recent products
+    // 4. Get recent products
     $productsQuery = "
         SELECT 
             p.id,
             p.name,
             p.price,
             p.stock,
+            p.image,
             c.name as category_name,
             p.created_at
         FROM products p
         LEFT JOIN categories c ON p.category_id = c.id
         WHERE p.seller_id = :seller_id
         ORDER BY p.created_at DESC
-        LIMIT 10
     ";
     
     $stmt = $pdo->prepare($productsQuery);
@@ -62,16 +93,16 @@ try {
         'stats' => [
             'total_products' => (int) $stats['total_products'],
             'total_stock' => (int) $stats['total_stock'],
-            'total_orders' => 0 // Placeholder untuk pesanan
+            'total_orders' => $total_orders,
+            'follower_count' => $follower_count
         ],
         'products' => $products
     ]);
     
-} catch (PDOException $e) {
+} catch (Exception $e) {
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'message' => 'Gagal mengambil data',
-        'error' => $e->getMessage()
+        'message' => 'Error: ' . $e->getMessage()
     ]);
 }

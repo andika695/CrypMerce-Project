@@ -4,63 +4,84 @@ require __DIR__ . '/../config/config.php';
 
 header('Content-Type: application/json');
 
-// Check if user is logged in as seller
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'seller') {
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Unauthorized'
-    ]);
+    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
+}
+
+// Robust seller_id recovery
+if (!isset($_SESSION['seller_id'])) {
+    $recoveryStmt = $pdo->prepare("SELECT id FROM sellers WHERE user_id = :uid");
+    $recoveryStmt->execute([':uid' => $_SESSION['user_id']]);
+    $recoveredId = $recoveryStmt->fetchColumn();
+    if ($recoveredId) {
+        $_SESSION['seller_id'] = $recoveredId;
+        $_SESSION['role'] = 'seller';
+    } else {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'message' => 'Profil seller tidak ditemukan']);
+        exit;
+    }
 }
 
 try {
     $userId = $_SESSION['user_id'];
     
-    // Get seller profile with product count
-    $stmt = $pdo->prepare(
-        "SELECT 
-            u.username,
-            s.id as seller_id,
-            s.store_name,
-            s.profile_photo,
-            s.created_at,
-            u.email,
-            COUNT(p.id) as total_products
-         FROM users u
-         INNER JOIN sellers s ON u.id = s.user_id
-         LEFT JOIN products p ON s.id = p.seller_id
-         WHERE u.id = :user_id
-         GROUP BY u.id, u.username, u.email, s.id, s.store_name, s.profile_photo, s.created_at"
-    );
-    $stmt->execute([':user_id' => $userId]);
-    $profile = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    if (!$profile) {
-        http_response_code(404);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Profil tidak ditemukan'
-        ]);
-        exit;
+    // 1. Get seller profile (with fallback for missing location column)
+    try {
+        $stmt = $pdo->prepare(
+            "SELECT 
+                u.username, s.id as seller_id, s.store_name, s.profile_photo, s.location, s.created_at, u.email,
+                (SELECT COUNT(*) FROM products WHERE seller_id = s.id) as total_products
+             FROM users u
+             INNER JOIN sellers s ON u.id = s.user_id
+             WHERE u.id = :user_id"
+        );
+        $stmt->execute([':user_id' => $userId]);
+        $profile = $stmt->fetch(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        // Fallback: Try without location column
+        $stmt = $pdo->prepare(
+            "SELECT 
+                u.username, s.id as seller_id, s.store_name, s.profile_photo, s.created_at, u.email,
+                (SELECT COUNT(*) FROM products WHERE seller_id = s.id) as total_products
+             FROM users u
+             INNER JOIN sellers s ON u.id = s.user_id
+             WHERE u.id = :user_id"
+        );
+        $stmt->execute([':user_id' => $userId]);
+        $profile = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($profile) $profile['location'] = 'Gudang Blibli'; // Default
     }
     
-    // Format join date
-    $joinDate = date('d F Y', strtotime($profile['created_at']));
+    if (!$profile) {
+        throw new Exception('Profil tidak ditemukan');
+    }
+
+    // 2. Get follower count (handle case where follows table might not exist yet)
+    $follower_count = 0;
+    try {
+        $followStmt = $pdo->prepare("SELECT COUNT(*) FROM follows WHERE seller_id = :seller_id");
+        $followStmt->execute(['seller_id' => $profile['seller_id']]);
+        $follower_count = (int)$followStmt->fetchColumn();
+    } catch (PDOException $e) {
+        $follower_count = 0;
+    }
     
-    // Translate month to Indonesian
+    // 3. Format join date
+    $joinDate = date('d F Y', strtotime($profile['created_at']));
     $months = [
         'January' => 'Januari', 'February' => 'Februari', 'March' => 'Maret',
         'April' => 'April', 'May' => 'Mei', 'June' => 'Juni',
         'July' => 'Juli', 'August' => 'Agustus', 'September' => 'September',
         'October' => 'Oktober', 'November' => 'November', 'December' => 'Desember'
     ];
-    
     foreach ($months as $en => $id) {
         $joinDate = str_replace($en, $id, $joinDate);
     }
     
-    http_response_code(200);
     echo json_encode([
         'success' => true,
         'data' => [
@@ -69,16 +90,18 @@ try {
             'seller_id' => $profile['seller_id'],
             'store_name' => $profile['store_name'],
             'profile_photo' => $profile['profile_photo'],
+            'location' => $profile['location'] ?? 'Gudang Blibli',
             'join_date' => $joinDate,
-            'total_products' => (int)$profile['total_products']
+            'total_products' => (int)$profile['total_products'],
+            'follower_count' => $follower_count
         ]
     ]);
     
-} catch (PDOException $e) {
+} catch (Exception $e) {
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'message' => 'Kesalahan server'
+        'message' => 'Error: ' . $e->getMessage()
     ]);
 }
 ?>

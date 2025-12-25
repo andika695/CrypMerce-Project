@@ -37,15 +37,18 @@
                         </ul>
                     </div>
 
-                    <input type="search" placeholder="Cari di CrypMerce">
-                    <button class="search-btn">
-                        <img src="../assets/images/search.png" alt="Search">
+                    <input type="search" id="searchInput" placeholder="Cari di CrypMerce">
+                    <button class="search-btn" id="searchBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
                     </button>
                 </div>
             </div>
 
             <div class="header-right">
-                <button class="icon-btn">
+                <button class="icon-btn" onclick="window.location.href='cart.html'">
                     <img src="../assets/images/bag.png" alt="Keranjang">
                 </button>
 
@@ -66,7 +69,7 @@
     <ul class="kategori-list">
         <li data-value="fashion-pria">Fashion Pria</li>
         <li data-value="fashion-wanita">Fashion Wanita</li>
-        <li data-value="hp">Handphone</li>
+        <li data-value="handphone">Handphone</li>
         <li data-value="kecantikan">Kecantikan</li>
         <li data-value="kesehatan">Kesehatan</li>
         <li data-value="komputer">Komputer</li>
@@ -108,8 +111,8 @@
     </section>
 </div>
 
-<script src="../assets/js/user/products.js"></script>
-<script src="../assets/js/user/dashboard.js"></script>
-<script src="../assets/js/user/banner.js"></script>
+<script src="../assets/js/user/products.js?v=1.1"></script>
+<script src="../assets/js/user/dashboard.js?v=1.1"></script>
+<script src="../assets/js/user/banner.js?v=1.1"></script>
 </body>
 </html>

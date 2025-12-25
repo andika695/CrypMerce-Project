@@ -68,8 +68,28 @@ function renderProduct(data) {
         document.getElementById('seller-name').textContent = data.seller.store_name;
         document.getElementById('seller-location').textContent = data.seller.location || 'Indonesia';
         
+        const sellerLink = document.getElementById('seller-link');
+        if (sellerLink) {
+            const shopUrl = `shop.html?id=${data.seller.id}`;
+            sellerLink.href = shopUrl;
+            sellerLink.onclick = (e) => {
+                // Force navigation if necessary
+                window.location.href = shopUrl;
+            };
+            console.log("Seller link set to:", shopUrl);
+        }
+        
         if (data.seller.photo) {
             document.getElementById('seller-photo').src = `../${data.seller.photo}`;
+        }
+
+        // Initialize Follow Status
+        checkFollowStatus(data.seller.id);
+
+        // Setup Follow Button Click
+        const followBtn = document.querySelector('.btn-follow');
+        if (followBtn) {
+            followBtn.onclick = () => toggleFollow(data.seller.id);
         }
     }
 
@@ -150,18 +170,124 @@ function updateTotalPrice() {
 }
 
 // Add to Cart Interaction
-document.querySelector('.btn-add-cart').addEventListener('click', () => {
-    // Validate variants selection if needed
-    // ...
+document.querySelector('.btn-add-cart').addEventListener('click', async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+    const quantity = parseInt(qtyInput.value);
     
-    // Show Toast
+    // Get selected variants if any
+    const selectedSize = document.querySelector('#size-options .variant-btn.active')?.textContent || null;
+    const selectedColor = document.querySelector('#color-options .variant-btn.active')?.textContent || null;
+    
+    // Validate stock
+    if (currentStock <= 0) {
+        showToast('Produk tidak tersedia', 'error');
+        return;
+    }
+    
+    if (quantity > currentStock) {
+        showToast('Jumlah melebihi stok tersedia', 'error');
+        return;
+    }
+    
+    try {
+        const formData = new FormData();
+        formData.append('product_id', productId);
+        formData.append('quantity', quantity);
+        if (selectedSize) formData.append('selected_size', selectedSize);
+        if (selectedColor) formData.append('selected_color', selectedColor);
+        
+        const response = await fetch('../api/user/add-to-cart.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showToast('Berhasil ditambahkan ke keranjang');
+        } else {
+            showToast(result.message || 'Gagal menambahkan ke keranjang', 'error');
+        }
+    } catch (error) {
+        console.error('Error adding to cart:', error);
+        showToast('Terjadi kesalahan, silakan coba lagi', 'error');
+    }
+});
+
+// Toast notification function
+function showToast(message, type = 'success') {
     const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast';
+    if (type === 'error') {
+        toast.style.background = '#ef4444';
+    } else {
+        toast.style.background = '#10b981';
+    }
     toast.classList.add('show');
     setTimeout(() => {
         toast.classList.remove('show');
     }, 3000);
-});
+}
+
+// ===== FOLLOW SYSTEM =====
+async function checkFollowStatus(sellerId) {
+    try {
+        const response = await fetch(`../api/user/check-follow.php?seller_id=${sellerId}&v=1.1`);
+        const result = await response.json();
+        
+        if (result.success) {
+            updateFollowButton(result.following);
+        }
+    } catch (error) {
+        console.error('Error checking follow status:', error);
+    }
+}
+
+async function toggleFollow(sellerId) {
+    const followBtn = document.querySelector('.btn-follow');
+    if (followBtn.disabled) return;
+    
+    followBtn.disabled = true;
+    
+    try {
+        const response = await fetch('../api/user/toggle-follow.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ seller_id: sellerId })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            updateFollowButton(result.following);
+            // Optional: show toast with result.message
+        } else {
+            alert(result.message || 'Gagal mengubah status mengikuti');
+        }
+    } catch (error) {
+        console.error('Error toggling follow:', error);
+        alert('Terjadi kesalahan. Silakan coba lagi.');
+    } finally {
+        followBtn.disabled = false;
+    }
+}
+
+function updateFollowButton(isFollowing) {
+    const followBtn = document.querySelector('.btn-follow');
+    if (!followBtn) return;
+    
+    if (isFollowing) {
+        followBtn.textContent = 'Unfollow';
+        followBtn.classList.add('following');
+    } else {
+        followBtn.textContent = 'Follow';
+        followBtn.classList.remove('following');
+    }
+}
 
 // Update global scope for onclick handlers
 window.increaseQty = increaseQty;
 window.decreaseQty = decreaseQty;
+window.toggleFollow = toggleFollow;

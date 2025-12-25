@@ -98,17 +98,31 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
 .search-btn:hover {
   background: #2a28a3;
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(53, 51, 205, 0.3);
+}
+
+.search-btn:active {
+  transform: scale(0.95);
+}
+
+.search-btn svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
 }
 
 .search-btn img {
-  width: 18px;
-  height: 18px;
-  filter: brightness(0) invert(1); /* Putihkan icon search */
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 /* CATEGORY DROPDOWN (Desktop) */

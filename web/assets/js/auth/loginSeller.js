@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Redirect to dashboard
                 setTimeout(() => {
-                    window.location.href = '../../seller/dashboard.html';
+                    window.location.href = '../../seller/dashboard.php';
                 }, 1000);
             } else {
                 showMessage(result.message, 'error');

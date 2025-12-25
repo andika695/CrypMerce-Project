@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toko - CrypMerce</title>
+    <link rel="stylesheet" href="../assets/css/user/header-dashboard.css?v=1.2">
+    <link rel="stylesheet" href="../assets/css/user/shop.css?v=1.2">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Standard User Header -->
+    <header class="header">
+        <div class="main-container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="dashboard.html">
+                        <img src="../assets/images/logotesk.png" alt="Logo">
+                    </a>
+                </div>
+                <div class="search-wrapper">
+                     <div class="search-bar">
+                        <input type="search" placeholder="Cari di CrypMerce">
+                        <button class="search-btn">
+                            <img src="../assets/images/search.png" alt="Search">
+                        </button>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="icon-btn"><img src="../assets/images/bag.png" alt="Bag"></button>
+                    <button class="akun-btn icon-btn"><img src="../assets/images/person.png" alt="User"></button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="shop-container">
+        <div class="breadcrumb">
+            <a href="javascript:history.back()" style="text-decoration: none; color: #4b5563; display: flex; align-items: center; gap: 5px;">
+                <i class="fas fa-arrow-left"></i> Kembali
+            </a>
+        </div>
+
+        <!-- Store Header -->
+        <div class="store-new-header">
+            <div class="store-main-info" style="flex: 1; min-width: 0;">
+                <div class="store-avatar-circle">
+                    <img id="store-profile-img" src="../assets/images/person.png" alt="Store Profile">
+                </div>
+                <div class="store-details" style="min-width: 0; flex: 1;">
+                    <div class="name-row">
+                        <h1 id="store-page-name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Memuat Toko...</h1>
+                    </div>
+                    <div class="store-stats-mini">
+                        <span class="followers-count">👥 <strong id="store-followers">0</strong> pengikut</span>
+                    </div>
+                    <div class="location-box">
+                        <span class="loc-icon">📍</span> 
+                        <span id="store-location" class="loc-text">Memuat lokasi...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="action-buttons" style="margin: 0 24px; flex-shrink: 0;">
+                <button id="follow-btn" class="btn-follow-shop">
+                    <i class="fas fa-plus"></i> Follow
+                </button>
+            </div>
+
+            <div class="store-stats-grid" style="flex-shrink: 0;">
+                <div class="stat-item">
+                    <span class="stat-label">Rating & ulasan</span>
+                    <span class="stat-value"><span id="store-rating">⭐ -</span> <small>(0 ulasan)</small></span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Total Produk</span>
+                    <span id="store-total-products" class="stat-value">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="store-info-bar">
+            <div class="section-title">📦 Semua Produk</div>
+            <div class="store-search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="store-inner-search" placeholder="Cari di toko ini...">
+            </div>
+        </div>
+
+        <section class="product-section">
+            <div class="product-grid" id="storeProductGrid">
+                <p style="text-align: center; padding: 40px; color: #666;">Memuat produk...</p>
+            </div>
+        </section>
+    </div>
+
+    <script src="../assets/js/user/shop.js?v=1.2"></script>
+</body>
+</html>

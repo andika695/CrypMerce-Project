@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.success) {
                 // Redirect berdasarkan role
                 if (data.role === "seller") {
-                    window.location.href = "../../seller/dashboard.html";
+                    window.location.href = "../../seller/dashboard.php";
                 } else {
                     window.location.href = "../../user/dashboard.html";
                 }
