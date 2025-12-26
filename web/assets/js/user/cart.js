@@ -335,14 +335,60 @@ function updateSummary() {
 }
 
 // Handle Checkout
-function handleCheckout() {
+async function handleCheckout() {
     if (selectedItems.size === 0) {
         showToast('Pilih produk terlebih dahulu', 'error');
         return;
     }
 
-    // TODO: Implement checkout flow
-    showToast('Fitur checkout akan segera hadir', 'error');
+    // Ambil item yang dipilih
+    const items = cartItems
+        .filter(item => selectedItems.has(item.cart_item_id))
+        .map(item => ({
+            id: item.product_id,
+            name: item.product_name,
+            price: item.product_price,
+            quantity: item.quantity
+        }));
+
+    // Hitung total harga
+    const total_price = items.reduce(
+        (sum, item) => sum + (item.price * item.quantity),
+        0
+    );
+
+    const data = {
+        total_price,
+        items
+    };
+
+    try {
+        const response = await fetch('../checkout/PlaceOrder.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        const snapToken = await response.text();
+
+        window.snap.pay(snapToken, {
+            onSuccess: function (result) {
+                console.log('Payment success:', result);
+            },
+            onPending: function (result) {
+                console.log('Payment pending:', result);
+            },
+            onError: function (result) {
+                console.log('Payment error:', result);
+            }
+        });
+
+    } catch (error) {
+        console.error('Checkout error:', error);
+        showToast('Gagal memproses checkout', 'error');
+    }
 }
 
 // Show Empty Cart

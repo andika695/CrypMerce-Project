@@ -1,5 +1,5 @@
 <?php
-$host = 'DB';
+$host = 'crypmerce_db';
 $db = 'crypmerce_database';
 $user = 'root';
 $pass = 'rootpass123';

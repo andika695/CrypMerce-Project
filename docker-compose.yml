@@ -5,7 +5,9 @@ services:
     ports:
       - "8800:80"
     volumes:
-      - ./:/var/www/html
+      - ./web:/var/www/html
+    env_file:
+      - .env
     depends_on:
       - db
     restart: unless-stopped
