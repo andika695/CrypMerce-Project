@@ -374,9 +374,7 @@ async function handleCheckout() {
         const snapToken = await response.text();
 
         window.snap.pay(snapToken, {
-            onSuccess: function (result) {
-                console.log('Payment success:', result);
-            },
+            onSuccess: () => window.location.href = '../user/success.html',
             onPending: function (result) {
                 console.log('Payment pending:', result);
             },

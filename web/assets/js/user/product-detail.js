@@ -54,7 +54,7 @@ document.querySelector('.btn-buy-now').addEventListener('click', async () => {
         const snapToken = await response.text();
 
         window.snap.pay(snapToken, {
-            onSuccess: () => window.location.href = 'orders.html',
+            onSuccess: () => window.location.href = '../user/success.html',
             onPending: () => alert('Selesaikan pembayaran Anda'),
             onError: () => showToast('Pembayaran gagal', 'error'),
             onClose: () => {
