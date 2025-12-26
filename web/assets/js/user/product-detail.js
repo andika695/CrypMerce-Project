@@ -1,3 +1,92 @@
+// PINDAHKAN DEKLARASI KE ATAS AGAR JADI GLOBAL
+let currentPrice = 0;
+let currentStock = 0;
+let productId = null; 
+const qtyInput = document.getElementById('qty'); 
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Get Product ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    productId = urlParams.get('id'); // Isi variabel global
+
+    if (!productId) {
+        alert('Produk tidak ditemukan!');
+        window.location.href = 'dashboard.html';
+        return;
+    }
+
+    loadProductDetail(productId);
+});
+
+
+document.querySelector('.btn-buy-now').addEventListener('click', async () => {
+    if (currentStock <= 0) return showToast('Stok habis!', 'error');
+
+    // Menggunakan qtyInput global dan productId global
+    const quantity = parseInt(qtyInput.value); 
+    const productName = document.getElementById('product-name').textContent;
+    const selectedSize = document.querySelector('#size-options .variant-btn.active')?.textContent || null;
+    const selectedColor = document.querySelector('#color-options .variant-btn.active')?.textContent || null;
+
+    const itemData = {
+        total_price: currentPrice * quantity,
+        items: [{
+            id: productId, 
+            name: productName,
+            price: currentPrice,
+            quantity: quantity,
+            size: selectedSize,
+            color: selectedColor
+        }]
+    };
+
+    try {
+        const buyBtn = document.querySelector('.btn-buy-now');
+        buyBtn.disabled = true;
+        buyBtn.textContent = 'Processing...';
+
+        const response = await fetch('../checkout/PlaceOrder.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(itemData)
+        });
+
+        const snapToken = await response.text();
+
+        window.snap.pay(snapToken, {
+            onSuccess: () => window.location.href = 'orders.html',
+            onPending: () => alert('Selesaikan pembayaran Anda'),
+            onError: () => showToast('Pembayaran gagal', 'error'),
+            onClose: () => {
+                buyBtn.disabled = false;
+                buyBtn.textContent = 'Beli Sekarang';
+            }
+        });
+    } catch (error) {
+        console.error('Checkout error:', error);
+        showToast('Gagal memproses pembelian', 'error');
+        document.querySelector('.btn-buy-now').disabled = false;
+    }
+});
+
+
+
+async function loadProductDetail(id) {
+    try {
+        const response = await fetch(`../api/user/get-product-detail.php?id=${id}`);
+        const result = await response.json();
+
+        if (result.success) {
+            renderProduct(result.data);
+        } else {
+            document.querySelector('.product-detail-grid').innerHTML = 
+                `<p style="padding:40px; text-align:center;">${result.message}</p>`;
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // Get Product ID from URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -12,8 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadProductDetail(productId);
 });
 
-let currentPrice = 0;
-let currentStock = 0;
+
 
 async function loadProductDetail(id) {
     try {
@@ -141,9 +229,6 @@ function renderVariants(containerId, options) {
 function formatRupiah(amount) {
     return 'Rp ' + Number(amount).toLocaleString('id-ID');
 }
-
-// ===== QUANTITY & FOOTER LOGIC =====
-const qtyInput = document.getElementById('qty');
 
 function increaseQty() {
     let val = parseInt(qtyInput.value);
@@ -287,7 +372,13 @@ function updateFollowButton(isFollowing) {
     }
 }
 
+
 // Update global scope for onclick handlers
 window.increaseQty = increaseQty;
 window.decreaseQty = decreaseQty;
 window.toggleFollow = toggleFollow;
+
+
+
+
+
