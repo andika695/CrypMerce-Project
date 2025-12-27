@@ -9,11 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- midtrans -->
-     <script type="text/javascript"
-      src="https://app.sandbox.midtrans.com/snap/snap.js"
-      data-client-key="Mid-client-3WZHPNbDA-naskBI">
-    </script>
+    <!-- Midtrans Snap JS akan dimuat secara dinamis di cart.js -->
 
 </head>
 <body>
@@ -63,7 +59,7 @@
                     <button class="icon-btn" onclick="window.location.href='cart.html'">
                         <img src="../assets/images/bag.png" alt="Keranjang">
                     </button>
-                    <button class="akun-btn icon-btn">
+                    <button class="akun-btn icon-btn" onclick="window.location.href='profile.php'">
                         <img src="../assets/images/person.png" alt="Akun">
                     </button>
                 </div>
@@ -128,6 +124,6 @@
     <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
 
-    <script src="../assets/js/user/cart.js?v=1.0"></script>
+    <script src="../assets/js/user/cart.js?v=1.1"></script>
 </body>
 </html>

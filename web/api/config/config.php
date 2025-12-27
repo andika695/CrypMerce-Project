@@ -17,4 +17,3 @@ try {
 } catch (PDOException $e) {
     die(json_encode(['success' => false, 'message' => 'Koneksi gagal: ' . $e->getMessage()]));
 }
-?>

@@ -44,39 +44,34 @@ try {
         exit;
     }
 
-    $imageName = $currentProduct['image']; // Default pakai gambar lama
+    $imagePath = $currentProduct['image']; // Default pakai gambar lama
 
-    // 2. Handle Upload Gambar Baru (Jika ada)
+    // 2. Handle Upload Gambar Baru (Jika ada) ke Cloudinary
     if (!empty($_FILES['image']['name'])) {
-        $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-        $maxSize = 5 * 1024 * 1024; // 5MB
-
-        if (!in_array($_FILES['image']['type'], $allowedTypes)) {
-            echo json_encode(['success' => false, 'message' => 'Format gambar salah (JPG/PNG/GIF Only)']);
-            exit;
-        }
-
-        if ($_FILES['image']['size'] > $maxSize) {
-            echo json_encode(['success' => false, 'message' => 'Ukuran gambar maksimal 5MB']);
-            exit;
-        }
-
-        // Hapus gambar lama
-        if ($currentProduct['image']) {
-            $oldPath = __DIR__ . '/../../assets/images/products/' . $currentProduct['image'];
-            if (file_exists($oldPath)) {
-                unlink($oldPath);
-            }
-        }
-
-        // Simpan gambar baru
-        $uploadDir = __DIR__ . '/../../assets/images/products/';
-        if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
-
-        $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-        $imageName = time() . '_' . uniqid() . '.' . $ext;
+        require_once __DIR__ . '/../config/cloudinary.php';
         
-        move_uploaded_file($_FILES['image']['tmp_name'], $uploadDir . $imageName);
+        try {
+            $upload = uploadToCloudinary($_FILES['image'], 'crypmerce/products');
+            if (!$upload['success']) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => $upload['message']]);
+                exit;
+            }
+
+            // Hapus gambar lama JIKA itu adalah file lokal
+            if ($currentProduct['image'] && strpos($currentProduct['image'], 'http') === false) {
+                $oldPath = __DIR__ . '/../../assets/images/products/' . $currentProduct['image'];
+                if (file_exists($oldPath)) {
+                    unlink($oldPath);
+                }
+            }
+
+            $imagePath = $upload['url'];
+        } catch (Exception $e) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Upload Error: ' . $e->getMessage()]);
+            exit;
+        }
     }
 
     // 3. Update Database
@@ -96,7 +91,7 @@ try {
         ':price' => $price,
         ':stock' => $stock,
         ':desc'  => $description,
-        ':img'   => $imageName,
+        ':img'   => $imagePath,
         ':id'    => $productId,
         ':sid'   => $sellerId
     ]);

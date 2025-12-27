@@ -20,7 +20,8 @@ if (!isset($_SESSION['user_id'])) {
    KONFIGURASI MIDTRANS
 ===================== */
 Config::$serverKey = getenv('MIDTRANS_SERVER_KEY');
-Config::$isProduction = false;
+Config::$clientKey = getenv('MIDTRANS_CLIENT_KEY');
+Config::$isProduction = (getenv('MIDTRANS_IS_PRODUCTION') === 'true');
 Config::$isSanitized = true;
 Config::$is3ds = true;
 
@@ -76,5 +77,15 @@ $params = [
 /* =====================
    REQUEST SNAP TOKEN
 ===================== */
-$snapToken = Snap::getSnapToken($params);
-echo $snapToken;
+try {
+    $snapToken = Snap::getSnapToken($params);
+    header('Content-Type: application/json');
+    echo json_encode(['success' => true, 'token' => $snapToken]);
+} catch (Exception $e) {
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode([
+        'success' => false, 
+        'message' => $e->getMessage()
+    ]);
+}

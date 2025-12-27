@@ -51,9 +51,10 @@ document.querySelector('.btn-buy-now').addEventListener('click', async () => {
             body: JSON.stringify(itemData)
         });
 
-        const snapToken = await response.text();
+        const result = await response.json();
 
-        window.snap.pay(snapToken, {
+        if (result.success) {
+            window.snap.pay(result.token, {
             onSuccess: () => window.location.href = '../user/success.html',
             onPending: () => alert('Selesaikan pembayaran Anda'),
             onError: () => showToast('Pembayaran gagal', 'error'),
@@ -61,7 +62,13 @@ document.querySelector('.btn-buy-now').addEventListener('click', async () => {
                 buyBtn.disabled = false;
                 buyBtn.textContent = 'Beli Sekarang';
             }
-        });
+            });
+        } else {
+            console.error('Checkout API error:', result.message);
+            showToast(result.message || 'Gagal memproses pembelian', 'error');
+            buyBtn.disabled = false;
+            buyBtn.textContent = 'Beli Sekarang';
+        }
     } catch (error) {
         console.error('Checkout error:', error);
         showToast('Gagal memproses pembelian', 'error');
@@ -137,7 +144,7 @@ function renderProduct(data) {
 
     // Image
     if (data.image) {
-        const imgPath = `../assets/images/products/${data.image}`;
+        const imgPath = data.image.startsWith('http') ? data.image : `../assets/images/products/${data.image}`;
         document.getElementById('main-img').src = imgPath;
         document.getElementById('footer-img').src = imgPath;
     }
@@ -168,7 +175,8 @@ function renderProduct(data) {
         }
         
         if (data.seller.photo) {
-            document.getElementById('seller-photo').src = `../${data.seller.photo}`;
+            const imgSrc = data.seller.photo.startsWith('http') ? data.seller.photo : `../${data.seller.photo}`;
+            document.getElementById('seller-photo').src = imgSrc;
         }
 
         // Initialize Follow Status

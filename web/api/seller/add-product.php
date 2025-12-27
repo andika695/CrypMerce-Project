@@ -63,40 +63,23 @@ try {
         exit;
     }
 
-    $imageName = null;
+    $imagePath = null;
 
-    // Handle upload gambar
+    // Handle upload gambar ke Cloudinary
     if (!empty($_FILES['image']['name'])) {
-        // Validasi file
-        $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-        $maxSize = 5 * 1024 * 1024; // 5MB
-
-        if (!in_array($_FILES['image']['type'], $allowedTypes)) {
+        require_once __DIR__ . '/../config/cloudinary.php';
+        
+        try {
+            $upload = uploadToCloudinary($_FILES['image'], 'crypmerce/products');
+            if (!$upload['success']) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => $upload['message']]);
+                exit;
+            }
+            $imagePath = $upload['url'];
+        } catch (Exception $e) {
             http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Format gambar tidak didukung. Gunakan JPG, PNG, atau GIF']);
-            exit;
-        }
-
-        if ($_FILES['image']['size'] > $maxSize) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Ukuran gambar maksimal 5MB']);
-            exit;
-        }
-
-        // Buat folder jika belum ada
-        $uploadDir = __DIR__ . '/../../assets/images/products/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
-
-        // Generate nama file unik
-        $extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-        $imageName = time() . '_' . uniqid() . '.' . $extension;
-        $uploadPath = $uploadDir . $imageName;
-
-        if (!move_uploaded_file($_FILES['image']['tmp_name'], $uploadPath)) {
-            http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Gagal upload gambar']);
+            echo json_encode(['success' => false, 'message' => 'Upload Error: ' . $e->getMessage()]);
             exit;
         }
     }
@@ -115,7 +98,7 @@ try {
         'price'       => $price,
         'stock'       => $stock,
         'description' => $description,
-        'image'       => $imageName
+        'image'       => $imagePath
     ]);
 
     echo json_encode([

@@ -35,8 +35,13 @@ try {
     foreach ($products as &$product) {
         // Handle path gambar
         if ($product['image']) {
-            $filename = basename(str_replace('\\', '/', $product['image']));
-            $product['image'] = '../assets/images/products/' . $filename;
+            if (strpos($product['image'], 'http') === 0) {
+                // Gambar Cloudinary (sudah URL penuh)
+                $product['image'] = $product['image'];
+            } else {
+                // Gambar lokal lama
+                $product['image'] = '../assets/images/products/' . $product['image'];
+            }
         } else {
             // Default image jika tidak ada gambar
             $product['image'] = '../assets/images/no-image.png';

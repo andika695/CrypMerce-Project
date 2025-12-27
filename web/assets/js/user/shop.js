@@ -41,7 +41,8 @@ async function loadShopProfile(id) {
             document.getElementById('store-total-products').textContent = data.total_products;
             
             if (data.profile_photo) {
-                document.getElementById('store-profile-img').src = `../${data.profile_photo}`;
+                const imgSrc = data.profile_photo.startsWith('http') ? data.profile_photo : `../${data.profile_photo}`;
+                document.getElementById('store-profile-img').src = imgSrc;
             }
         }
     } catch (error) {
@@ -72,10 +73,12 @@ function renderProducts(products) {
         return;
     }
 
-    grid.innerHTML = products.map(p => `
+    grid.innerHTML = products.map(p => {
+        const imgSrc = p.image ? (p.image.startsWith('http') ? p.image : `../assets/images/products/${p.image}`) : '../assets/images/bag.png';
+        return `
         <div class="product-card" onclick="window.location.href='product-detail.html?id=${p.id}'">
             <div class="product-image">
-                <img src="${p.image ? `../assets/images/products/${p.image}` : '../assets/images/bag.png'}" alt="${p.name}">
+                <img src="${imgSrc}" alt="${p.name}">
             </div>
             <div class="product-info">
                 <h3>${p.name}</h3>
@@ -85,8 +88,8 @@ function renderProducts(products) {
                     <span class="category-tag">${p.category_name}</span>
                 </div>
             </div>
-        </div>
-    `).join('');
+        </div>`;
+    }).join('');
 }
 
 function filterProducts(query) {

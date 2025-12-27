@@ -54,10 +54,11 @@ function updateProductTable(products) {
     
     products.forEach(product => {
         const row = document.createElement('tr');
+        const imgSrc = product.image ? (product.image.startsWith('http') ? product.image : '../assets/images/products/' + product.image) : '../assets/images/bag.png';
         row.innerHTML = `
             <td>
                 <div style="display: flex; align-items: center; gap: 10px;">
-                    <img src="${product.image ? '../assets/images/products/' + product.image : '../assets/images/bag.png'}" 
+                    <img src="${imgSrc}" 
                          onerror="this.src='../assets/images/bag.png'"
                          style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
                     ${product.name}
@@ -122,7 +123,8 @@ async function editProduct(id) {
             // Show image preview if exists
             const preview = document.getElementById('edit-product-preview');
             if (p.image) {
-                preview.innerHTML = `<img src="../assets/images/products/${p.image}" alt="Preview" onerror="this.src='../assets/images/bag.png'">`;
+                const imgSrc = p.image.startsWith('http') ? p.image : `../assets/images/products/${p.image}`;
+                preview.innerHTML = `<img src="${imgSrc}" alt="Preview" onerror="this.src='../assets/images/bag.png'">`;
                 preview.classList.add('show');
             } else {
                 preview.innerHTML = '';
@@ -248,7 +250,8 @@ function updateProfileView(data) {
         const avatarDiv = document.querySelector('.profile-avatar');
         if (avatarDiv) {
             if (data.profile_photo) {
-                avatarDiv.innerHTML = `<img src="../${data.profile_photo}" alt="Profile Photo">`;
+                const imgSrc = data.profile_photo.startsWith('http') ? data.profile_photo : `../${data.profile_photo}`;
+                avatarDiv.innerHTML = `<img src="${imgSrc}" alt="Profile Photo">`;
             } else {
                 avatarDiv.innerHTML = '<span>👤</span>';
             }
@@ -262,10 +265,11 @@ function updateSidebarProfile(data) {
     // Update sidebar with store name
     const logo = document.querySelector('.logo');
     if (logo) {
+        const imgSrc = data.profile_photo ? (data.profile_photo.startsWith('http') ? data.profile_photo : `../${data.profile_photo}`) : null;
         logo.innerHTML = `
             <div class="sidebar-profile">
                 <div class="sidebar-avatar">
-                    ${data.profile_photo ? `<img src="../${data.profile_photo}" alt="Profile">` : '👤'}
+                    ${imgSrc ? `<img src="${imgSrc}" alt="Profile">` : '👤'}
                 </div>
                 <div class="sidebar-info">
                     <strong>${data.store_name}</strong>
@@ -393,7 +397,7 @@ function updateStoreProductGrid(products) {
         card.className = 'product-card';
         card.onclick = () => viewStoreProductDetail(p.id);
         
-        const imgSrc = p.image ? `../assets/images/products/${p.image}` : `../assets/images/bag.png`;
+        const imgSrc = p.image ? (p.image.startsWith('http') ? p.image : `../assets/images/products/${p.image}`) : `../assets/images/bag.png`;
         
         card.innerHTML = `
             <div class="image-wrapper">
@@ -426,7 +430,7 @@ function viewStoreProductDetail(productId) {
     document.getElementById('preview-description').textContent = product.description || 'Tidak ada deskripsi.';
     
     const previewImg = document.getElementById('preview-img');
-    const imgSrc = product.image ? `../assets/images/products/${product.image}` : `../assets/images/bag.png`;
+    const imgSrc = product.image ? (product.image.startsWith('http') ? product.image : `../assets/images/products/${product.image}`) : `../assets/images/bag.png`;
     previewImg.src = imgSrc;
     previewImg.onerror = () => previewImg.src = '../assets/images/bag.png';
 

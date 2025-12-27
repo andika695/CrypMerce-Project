@@ -1,29 +1,62 @@
 <?php
+session_start();
 header('Content-Type: application/json');
 require_once '../config/config.php';
-session_start();
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'seller') {
+// Check authentication
+if (!isset($_SESSION['user_id'])) {
+    http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
+}
+
+// Robust session recovery for sellers
+if (!isset($_SESSION['seller_id']) || $_SESSION['role'] !== 'seller') {
+    $stmt = $pdo->prepare("SELECT id FROM sellers WHERE user_id = ?");
+    $stmt->execute([$_SESSION['user_id']]);
+    $seller_id = $stmt->fetchColumn();
+    
+    if ($seller_id) {
+        $_SESSION['seller_id'] = $seller_id;
+        $_SESSION['role'] = 'seller';
+    } else {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'message' => 'Forbidden: Seller profile not found']);
+        exit;
+    }
 }
 
 $seller_id = $_SESSION['seller_id'];
 $user_id = $_SESSION['user_id'];
 
-// Handle profile photo upload if exists
+// Handle profile photo upload if exists to Cloudinary
 $photo_path = null;
 if (isset($_FILES['profile_photo']) && $_FILES['profile_photo']['error'] === 0) {
-    $upload_dir = '../../assets/images/seller-profiles/';
-    if (!is_dir($upload_dir)) {
-        mkdir($upload_dir, 0777, true);
+    require_once __DIR__ . '/../config/cloudinary.php';
+    
+    try {
+        $upload = uploadToCloudinary($_FILES['profile_photo'], 'crypmerce/seller-profiles');
+        if ($upload['success']) {
+            $uploadedUrl = $upload['url'];
+            // Ambil info foto lama untuk dihapus jika lokal
+            $stmt = $pdo->prepare("SELECT profile_photo FROM sellers WHERE id = ?");
+            $stmt->execute([$seller_id]);
+            $old_photo = $stmt->fetchColumn();
+
+            if ($old_photo && strpos($old_photo, 'http') === false) {
+                $absolute_old_path = __DIR__ . '/../../' . $old_photo;
+                if (file_exists($absolute_old_path)) unlink($absolute_old_path);
+            }
+
+            $photo_path = $uploadedUrl;
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Upload Error: ' . $upload['message']]);
+            exit;
+        }
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
+        exit;
     }
-    
-    $file_ext = pathinfo($_FILES['profile_photo']['name'], PATHINFO_EXTENSION);
-    $file_name = 'seller_' . $seller_id . '_' . time() . '.' . $file_ext;
-    $photo_path = 'assets/images/seller-profiles/' . $file_name;
-    
-    move_uploaded_file($_FILES['profile_photo']['tmp_name'], $upload_dir . $file_name);
 }
 
 // Get other data
