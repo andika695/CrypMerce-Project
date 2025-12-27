@@ -386,63 +386,137 @@ function updateSummary() {
 
 // Handle Checkout
 async function handleCheckout() {
-  if (selectedItems.size === 0) {
-    showToast("Pilih produk terlebih dahulu", "error");
-    return;
-  }
-
-  // Ambil item yang dipilih
-  const items = cartItems
-    .filter((item) => selectedItems.has(item.cart_item_id))
-    .map((item) => ({
-      id: item.product_id,
-      name: item.product_name,
-      price: item.product_price,
-      quantity: item.quantity,
-    }));
-
-  // Hitung total harga
-  const total_price = items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-
-  const data = {
-    total_price,
-    items,
-  };
-
-  try {
-    const response = await fetch("../checkout/PlaceOrder.php", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-
-    const result = await response.json();
-
-    if (result.success) {
-      window.snap.pay(result.token, {
-        onSuccess: () => (window.location.href = "../user/success.html"),
-        onPending: function (result) {
-          console.log("Payment pending:", result);
-        },
-        onError: function (result) {
-          console.log("Payment error:", result);
-          showToast("Terjadi kesalahan saat pembayaran", "error");
-        },
-      });
-    } else {
-      console.error("Checkout API error:", result.message);
-      showToast(result.message || "Gagal memproses checkout", "error");
+    if (selectedItems.size === 0) {
+        showToast('Pilih produk terlebih dahulu', 'error');
+        return;
     }
-  } catch (error) {
-    console.error("Checkout error:", error);
-    showToast("Terjadi kesalahan teknis saat checkout", "error");
-  }
+
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    
+    // 1. Ambil item yang dipilih dari array cartItems
+    const selectedProductList = cartItems
+        .filter(item => selectedItems.has(item.cart_item_id))
+        .map(item => ({
+            id: item.product_id,
+            name: item.product_name,
+            price: item.product_price,
+            quantity: item.quantity,
+            seller_id: item.seller_id
+        }));
+
+    // 2. Hitung total harga
+    const total_price = selectedProductList.reduce(
+        (sum, item) => sum + (item.price * item.quantity),
+        0
+    );
+
+    // 3. Bungkus dalam objek payload (Inilah variabel 'data' yang tadinya missing)
+    const payload = {
+        total_price: total_price,
+        items: selectedProductList
+    };
+
+    try {
+        checkoutBtn.disabled = true;
+        checkoutBtn.textContent = 'Memproses...';
+
+        // 4. Kirim ke PlaceOrder.php (Di sini data akan masuk ke DB & Midtrans)
+        const response = await fetch('../checkout/PlaceOrder.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload) // Menggunakan payload yang sudah didefinisikan
+        });
+
+        if (!response.ok) throw new Error('Gagal menghubungi server');
+
+        const snapToken = await response.text();
+
+        // 5. Jalankan Midtrans Snap
+        window.snap.pay(snapToken, {
+            onSuccess: function (result) {
+                // Opsional: Panggil API untuk hapus item dari keranjang setelah sukses
+                window.location.href = '../user/success.html';
+            },
+            // onPending: function (result) {
+            //     // Jika pembayaran tertunda, arahkan ke histori agar bisa dibayar nanti
+            //     window.location.href = 'order-history.html';
+            // },
+            onError: function (result) {
+                showToast('Pembayaran gagal', 'error');
+                checkoutBtn.disabled = false;
+                checkoutBtn.innerHTML = `Checkout (<span id="checkoutCount">${selectedItems.size}</span>)`;
+            },
+            onClose: function () {
+                checkoutBtn.disabled = false;
+                checkoutBtn.innerHTML = `Checkout (<span id="checkoutCount">${selectedItems.size}</span>)`;
+            }
+        });
+
+    } catch (error) {
+        console.error('Checkout error:', error);
+        showToast('Terjadi kesalahan saat memproses pesanan', 'error');
+        checkoutBtn.disabled = false;
+        checkoutBtn.innerHTML = `Checkout (<span id="checkoutCount">${selectedItems.size}</span>)`;
+    }
 }
+// async function handleCheckout() {
+//   if (selectedItems.size === 0) {
+//     showToast("Pilih produk terlebih dahulu", "error");
+//     return;
+//   }
+
+//   // Ambil item yang dipilih
+//   const items = cartItems
+//     .filter((item) => selectedItems.has(item.cart_item_id))
+//     .map((item) => ({
+//       id: item.product_id,
+//       name: item.product_name,
+//       price: item.product_price,
+//       quantity: item.quantity,
+//     }));
+
+//   // Hitung total harga
+//   const total_price = items.reduce(
+//     (sum, item) => sum + item.price * item.quantity,
+//     0
+//   );
+
+//   const data = {
+//     total_price,
+//     items,
+//   };
+
+//   try {
+//     const response = await fetch("../checkout/PlaceOrder.php", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify(data),
+//     });
+
+//     const result = await response.json();
+
+//     if (result.success) {
+//       window.snap.pay(result.token, {
+//         onSuccess: () => (window.location.href = "../user/success.html"),
+//         onPending: function (result) {
+//           console.log("Payment pending:", result);
+//         },
+//         onError: function (result) {
+//           console.log("Payment error:", result);
+//           showToast("Terjadi kesalahan saat pembayaran", "error");
+//         },
+//       });
+//     } else {
+//       console.error("Checkout API error:", result.message);
+//       showToast(result.message || "Gagal memproses checkout", "error");
+//     }
+//   } catch (error) {
+//     console.error("Checkout error:", error);
+//     showToast("Terjadi kesalahan teknis saat checkout", "error");
+//   }
+// }
 
 // Show Empty Cart
 function showEmptyCart() {
