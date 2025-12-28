@@ -11,24 +11,55 @@
 <body>
     <!-- Standard User Header -->
     <header class="header">
-        <div class="main-container">
-            <div class="header-content">
-                <div class="logo">
-                    <a href="dashboard.html">
-                        <img src="../assets/images/logotesk.png" alt="Logo">
-                    </a>
-                </div>
-                <div class="search-wrapper">
-                     <div class="search-bar">
-                        <input type="search" placeholder="Cari di CrypMerce">
-                        <button class="search-btn">
-                            <img src="../assets/images/search.png" alt="Search">
+    <div class="main-container">
+        <div class="header-content">
+            <div class="logo">
+                <img src="../assets/images/logotesk.png" alt="Logo">
+            </div>
+
+            <button class="menu-btn" id="menuBtn">☰</button>
+
+            <!-- Desktop Category & Search Wrapper -->
+            <div class="search-wrapper">
+                 <div class="search-bar">
+                    <div class="kategori-wrapper">
+                        <button class="kategori-btn">
+                            Kategori <span>▼</span>
                         </button>
+                        <ul class="kategori-dropdown">
+                            <li data-value="fashion-pria">Fashion Pria</li>
+                            <li data-value="fashion-wanita">Fashion Wanita</li>
+                            <li data-value="handphone">Handphone</li>
+                            <li data-value="kecantikan">Kecantikan</li>
+                            <li data-value="kesehatan">Kesehatan</li>
+                            <li data-value="komputer">Komputer</li>
+                            <li data-value="otomotif">Otomotif</li>
+                            <li data-value="makanan">Makanan</li>
+                        </ul>
                     </div>
+
+                    <input type="search" id="searchInput" placeholder="Cari di CrypMerce">
+                    <button class="search-btn" id="searchBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                    </button>
                 </div>
+            </div>
+
                 <div class="header-right">
-                    <button class="icon-btn"><img src="../assets/images/bag.png" alt="Bag"></button>
-                    <button class="akun-btn icon-btn" onclick="window.location.href='profile.php'"><img src="../assets/images/person.png" alt="User"></button>
+                    <button class="icon-btn" onclick="window.location.href='cart.html'">
+                        <img src="../assets/images/bag.png" alt="Keranjang">
+                    </button>
+
+                    <button class="icon-btn">
+                        <img src="../assets/images/bell.png" alt="Notif">
+                    </button>
+
+                    <button class="akun-btn icon-btn" onclick="window.location.href='profile.php'">
+                        <img src="../assets/images/person.png" alt="User">
+                    </button>
                 </div>
             </div>
         </div>

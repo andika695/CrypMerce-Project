@@ -35,10 +35,7 @@ try {
     foreach ($products as &$product) {
         // Handle path gambar
         if ($product['image']) {
-            if (strpos($product['image'], 'http') === 0) {
-                // Gambar Cloudinary (sudah URL penuh)
-                $product['image'] = $product['image'];
-            } else {
+            if (strpos($product['image'], 'http') !== 0) {
                 // Gambar lokal lama
                 $product['image'] = '../assets/images/products/' . $product['image'];
             }

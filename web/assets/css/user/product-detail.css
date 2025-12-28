@@ -16,10 +16,6 @@ body {
 /* MAIN CONTENT */
 .main-content {
   margin-top: 24px;
-  padding: 20px;
-  max-width: 1000px; /* More compact container */
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .breadcrumb {

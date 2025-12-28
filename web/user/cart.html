@@ -59,6 +59,11 @@
                     <button class="icon-btn" onclick="window.location.href='cart.html'">
                         <img src="../assets/images/bag.png" alt="Keranjang">
                     </button>
+
+                    <button class="icon-btn">
+                        <img src="../assets/images/bell.png" alt="Notif">
+                    </button>
+
                     <button class="akun-btn icon-btn" onclick="window.location.href='profile.php'">
                         <img src="../assets/images/person.png" alt="Akun">
                     </button>
@@ -69,10 +74,17 @@
 
     <!-- Main Content -->
     <div class="main-container cart-container">
-        <!-- Tabs -->
-        <div class="cart-tabs">
-            <button class="tab-btn active" data-tab="cart">Keranjang</button>
-            <button class="tab-btn" data-tab="langganan">Langganan (0)</button>
+        <div class="breadcrumb">
+            <a href="javascript:history.back()" style="text-decoration: none; color: #4b5563; display: flex; align-items: center; gap: 5px;">
+                <i class="fas fa-arrow-left"></i> Kembali
+            </a>
+        </div>
+        <!-- Cart Title -->
+        <div class="cart-header">
+            <h2 class="cart-title">
+                <i class="fas fa-shopping-cart"></i>
+                Keranjang Belanja
+            </h2>
         </div>
 
         <!-- Cart Content -->
