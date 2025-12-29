@@ -5,9 +5,21 @@ require '../config/config.php';
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['seller_id'])) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
-    exit;
+    // Try to recover seller_id from database
+    if (isset($_SESSION['user_id']) && isset($_SESSION['role']) && $_SESSION['role'] === 'seller') {
+        $recoveryStmt = $pdo->prepare("SELECT id FROM sellers WHERE user_id = :uid");
+        $recoveryStmt->execute([':uid' => $_SESSION['user_id']]);
+        $recoveredId = $recoveryStmt->fetchColumn();
+        if ($recoveredId) {
+            $_SESSION['seller_id'] = $recoveredId;
+        }
+    }
+    
+    if (!isset($_SESSION['seller_id'])) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+        exit;
+    }
 }
 
 $productId = filter_var($_GET['id'] ?? null, FILTER_VALIDATE_INT);

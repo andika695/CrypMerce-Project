@@ -60,35 +60,34 @@ body {
 }
 
 .menu-item {
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 0.5rem;
+  padding: 16px 20px;
+  border-radius: 12px;
+  margin-bottom: 8px;
   cursor: pointer;
-  transition: 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.menu-item span {
-  margin-right: 12px;
-  font-size: 1.2rem;
-}
-
-.menu-item:hover,
-.menu-item.active {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: var(--white);
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.9);
   font-weight: 500;
 }
 
+.menu-item span {
+  font-size: 1.2rem;
+  /* margin-right removed in favor of gap in flex container */
+}
+
+.menu-item:hover {
+  background-color: rgba(250, 248, 243, 0.2);
+  transform: translateX(8px);
+}
+
 .menu-item.active {
-  border-left: 4px solid var(--primary-yellow);
-  background: linear-gradient(
-    90deg,
-    rgba(245, 196, 68, 0.1) 0%,
-    transparent 100%
-  );
+  background: #f5c444;
+  color: #3533cd;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(245, 196, 68, 0.3);
+  border-left: none; /* Remove old border */
 }
 
 /* --- MAIN CONTENT & VIEWS --- */

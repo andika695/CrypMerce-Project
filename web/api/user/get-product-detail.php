@@ -17,6 +17,8 @@ try {
             p.*, 
             s.store_name, 
             s.profile_photo as seller_photo,
+            s.city as seller_city,
+            s.address as seller_address,
             u.username as seller_username
         FROM products p
         JOIN sellers s ON p.seller_id = s.id
@@ -48,7 +50,7 @@ try {
                     'store_name' => $product['store_name'],
                     'username' => $product['seller_username'],
                     'photo' => $product['seller_photo'],
-                    'location' => 'Jakarta Barat' // Mock location for now
+                    'location' => $product['seller_city'] ?? $product['seller_address'] ?? 'Indonesia'
                 ]
             ]
         ];

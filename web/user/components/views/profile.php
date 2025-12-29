@@ -43,7 +43,17 @@
 
             <div class="info-item">
                 <label>Lokasi Saya</label>
-                <p class="coming-soon">📍 Segera Hadir</p>
+                <p id="profile-location-display">
+                    <?php 
+                    if (!empty($userProfile['address'])) {
+                        echo "📍 " . htmlspecialchars($userProfile['address']);
+                    } elseif (!empty($userProfile['city'])) {
+                        echo "📍 " . htmlspecialchars($userProfile['city']);
+                    } else {
+                        echo '<span style="color: #888; font-style: italic;">Belum diatur</span>';
+                    }
+                    ?>
+                </p>
             </div>
 
             <button class="btn-edit-profile" onclick="openEditProfileModal()">

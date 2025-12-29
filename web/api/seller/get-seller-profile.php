@@ -30,31 +30,19 @@ try {
     $userId = $_SESSION['user_id'];
     
     // 1. Get seller profile (with fallback for missing location column)
-    try {
-        $stmt = $pdo->prepare(
-            "SELECT 
-                u.username, s.id as seller_id, s.store_name, s.profile_photo, s.location, s.created_at, u.email,
-                (SELECT COUNT(*) FROM products WHERE seller_id = s.id) as total_products
-             FROM users u
-             INNER JOIN sellers s ON u.id = s.user_id
-             WHERE u.id = :user_id"
-        );
-        $stmt->execute([':user_id' => $userId]);
-        $profile = $stmt->fetch(PDO::FETCH_ASSOC);
-    } catch (PDOException $e) {
-        // Fallback: Try without location column
-        $stmt = $pdo->prepare(
-            "SELECT 
-                u.username, s.id as seller_id, s.store_name, s.profile_photo, s.created_at, u.email,
-                (SELECT COUNT(*) FROM products WHERE seller_id = s.id) as total_products
-             FROM users u
-             INNER JOIN sellers s ON u.id = s.user_id
-             WHERE u.id = :user_id"
-        );
-        $stmt->execute([':user_id' => $userId]);
-        $profile = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($profile) $profile['location'] = 'Gudang Blibli'; // Default
-    }
+    // 1. Get seller profile
+    $stmt = $pdo->prepare(
+        "SELECT 
+            u.username, s.id as seller_id, s.store_name, s.profile_photo, 
+            s.location, s.created_at, u.email,
+            s.latitude, s.longitude, s.address, s.city, s.province, s.address_detail,
+            (SELECT COUNT(*) FROM products WHERE seller_id = s.id) as total_products
+         FROM users u
+         INNER JOIN sellers s ON u.id = s.user_id
+         WHERE u.id = :user_id"
+    );
+    $stmt->execute([':user_id' => $userId]);
+    $profile = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if (!$profile) {
         throw new Exception('Profil tidak ditemukan');
@@ -90,10 +78,17 @@ try {
             'seller_id' => $profile['seller_id'],
             'store_name' => $profile['store_name'],
             'profile_photo' => $profile['profile_photo'],
-            'location' => $profile['location'] ?? 'Gudang Blibli',
+            'location' => $profile['location'] ?? $profile['city'] ?? 'Belum diatur',
             'join_date' => $joinDate,
             'total_products' => (int)$profile['total_products'],
-            'follower_count' => $follower_count
+            'follower_count' => $follower_count,
+            // New Location Fields
+            'latitude' => $profile['latitude'],
+            'longitude' => $profile['longitude'],
+            'address' => $profile['address'],
+            'city' => $profile['city'],
+            'province' => $profile['province'],
+            'address_detail' => $profile['address_detail']
         ]
     ]);
     

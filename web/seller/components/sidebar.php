@@ -16,6 +16,9 @@
                 <li class="menu-item" data-page="orders">
                     <span>🛒</span> Pesanan
                 </li>
+                <li class="menu-item" data-page="location-settings">
+                    <span>📍</span> Lokasi Toko
+                </li>
                 <li class="menu-item" data-page="logout">
                     <span>🚪</span> Logout
                 </li>

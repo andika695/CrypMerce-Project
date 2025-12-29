@@ -8,6 +8,19 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'seller') {
     exit;
 }
 
+// Robust seller_id recovery
+if (!isset($_SESSION['seller_id'])) {
+    $recoveryStmt = $pdo->prepare("SELECT id FROM sellers WHERE user_id = :uid");
+    $recoveryStmt->execute([':uid' => $_SESSION['user_id']]);
+    $recoveredId = $recoveryStmt->fetchColumn();
+    if ($recoveredId) {
+        $_SESSION['seller_id'] = $recoveredId;
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Seller ID not found']);
+        exit;
+    }
+}
+
 $seller_id = $_SESSION['seller_id'];
 
 try {

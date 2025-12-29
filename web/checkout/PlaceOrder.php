@@ -45,11 +45,65 @@ try {
         throw new Exception('Data penjual tidak ditemukan untuk produk ini');
     }
 
+    require_once dirname(__FILE__) . '/../api/utils/distance-calculator.php';
+    
+    // --- SHIPPING CALCULATION ---
+    $shipping_cost = 0;
+    $distance = 0;
+    $shipping_address = '';
+    $seller_info = null;
+    $buyer_info = null;
+
+    if ($seller_id) {
+        $stmtSellerLoc = $pdo->prepare("SELECT city, latitude, longitude, address FROM sellers WHERE id = ?");
+        $stmtSellerLoc->execute([$seller_id]);
+        $seller_info = $stmtSellerLoc->fetch();
+        
+        $stmtBuyerLoc = $pdo->prepare("SELECT city, latitude, longitude, address FROM users WHERE id = ?");
+        $stmtBuyerLoc->execute([$user_id]);
+        $buyer_info = $stmtBuyerLoc->fetch();
+        
+        if ($seller_info && $buyer_info && $seller_info['latitude'] && $buyer_info['latitude']) {
+            $distance = DistanceCalculator::calculateDistance(
+                $seller_info['latitude'], $seller_info['longitude'],
+                $buyer_info['latitude'], $buyer_info['longitude']
+            );
+            
+            $shipDetails = DistanceCalculator::calculateShippingCost(
+                $seller_info['city'] ?? '',
+                $buyer_info['city'] ?? '',
+                $distance
+            );
+            
+            $shipping_cost = $shipDetails['shipping_cost'];
+            $shipping_address = $buyer_info['address'];
+        }
+    }
+    
+    // Recalculate Total
+    $subtotal = 0;
+    foreach ($items as $item) {
+        $subtotal += ($item['price'] * $item['quantity']);
+    }
+    $total_price = $subtotal + $shipping_cost;
+    // --- END SHIPPING CALCULATION ---
+
     $pdo->beginTransaction();
 
-    $sqlOrder = "INSERT INTO orders (buyer_id, seller_id, total_amount, status) VALUES (?, ?, ?, 'pending')";
+    $sqlOrder = "INSERT INTO orders (buyer_id, seller_id, total_amount, status, shipping_cost, distance_km, shipping_address, buyer_latitude, buyer_longitude, buyer_city, seller_city) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?)";
     $stmtOrder = $pdo->prepare($sqlOrder);
-    $stmtOrder->execute([$user_id, $seller_id, $total_price]);
+    $stmtOrder->execute([
+        $user_id, 
+        $seller_id, 
+        $total_price,
+        $shipping_cost,
+        $distance,
+        $shipping_address,
+        $buyer_info['latitude'] ?? null,
+        $buyer_info['longitude'] ?? null,
+        $buyer_info['city'] ?? null,
+        $seller_info['city'] ?? null
+    ]);
 
     $order_db_id = $pdo->lastInsertId();
 
@@ -92,6 +146,25 @@ try {
         $user_email = $userData['email'] ?? 'customer@example.com';
     }
 
+    // Prepare Items for Midtrans
+    $item_details = array_map(function($item) {
+        return [
+            'id' => (string)$item['id'],
+            'price' => (int)$item['price'],
+            'quantity' => (int)$item['quantity'],
+            'name' => substr($item['name'], 0, 50)
+        ];
+    }, $items);
+
+    if ($shipping_cost > 0) {
+        $item_details[] = [
+            'id' => 'SHIPPING',
+            'price' => (int)$shipping_cost,
+            'quantity' => 1,
+            'name' => 'Ongkir (' . ($distance > 0 ? $distance . ' km' : 'Flat') . ')'
+        ];
+    }
+
     $params = [
         'transaction_details' => [
             'order_id' => $order_id_string,
@@ -100,15 +173,30 @@ try {
         'customer_details' => [
             'first_name' => $username,
             'email' => $user_email,
+            'shipping_address' => [
+                'address' => $shipping_address,
+                'city' => $buyer_info['city'] ?? ''
+            ]
         ],
-        'item_details' => array_map(function($item) {
-            return [
-                'id' => (string)$item['id'],
-                'price' => (int)$item['price'],
-                'quantity' => (int)$item['quantity'],
-                'name' => substr($item['name'], 0, 50)
-            ];
-        }, $items)
+        'item_details' => $item_details
+    ];
+
+
+    
+    $params = [
+        'transaction_details' => [
+            'order_id' => $order_id_string,
+            'gross_amount' => (int)$total_price,
+        ],
+        'customer_details' => [
+            'first_name' => $username,
+            'email' => $user_email,
+            'shipping_address' => [
+                'address' => $shipping_address,
+                'city' => $buyer_info['city'] ?? ''
+            ]
+        ],
+        'item_details' => $item_details
     ];
 
     $snapToken = \Midtrans\Snap::getSnapToken($params);

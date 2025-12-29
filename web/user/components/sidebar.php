@@ -19,6 +19,9 @@
         <li class="menu-item" data-page="pesanan">
             <span>📦</span> Pesanan Saya
         </li>
+        <li class="menu-item" data-page="alamat">
+            <span>📍</span> Alamat Pengiriman
+        </li>
         <li class="menu-item" data-page="logout">
             <span>🚪</span> Logout
         </li>

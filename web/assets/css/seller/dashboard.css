@@ -75,7 +75,8 @@ body {
   transform: translateX(8px);
 }
 
-.sidebar .active {
+.sidebar li.active,
+.sidebar li.active:hover {
   background: #f5c444;
   color: #3533cd;
   font-weight: 600;

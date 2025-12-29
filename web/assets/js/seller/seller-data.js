@@ -355,7 +355,14 @@ async function loadMyStoreData() {
             
             const profileImg = document.getElementById('store-profile-img');
             if (data.profile_photo) {
-                profileImg.src = '../' + data.profile_photo;
+                // Check if it's a URL (Cloudinary) or local path
+                const imgSrc = data.profile_photo.startsWith('http') 
+                    ? data.profile_photo 
+                    : '../' + data.profile_photo;
+                profileImg.src = imgSrc;
+                profileImg.onerror = () => profileImg.src = '../assets/images/person.png';
+            } else {
+                profileImg.src = '../assets/images/person.png';
             }
         }
 
