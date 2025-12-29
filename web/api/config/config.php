@@ -2,7 +2,7 @@
 // Load .env file
 function loadEnv($path) {
     if (!file_exists($path)) {
-        return;
+        return false;
     }
     
     $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
@@ -24,13 +24,28 @@ function loadEnv($path) {
             // Set as environment variable
             putenv("$key=$value");
             $_ENV[$key] = $value;
+            $_SERVER[$key] = $value; // Add to SERVER as well
         }
     }
+    return true;
 }
 
-// Load .env from project root
-$envPath = __DIR__ . '/../../../.env';
-loadEnv($envPath);
+// Try to find .env in multiple possible locations
+$possiblePaths = [
+    __DIR__ . '/../../../.env',       // Project root (from api/config)
+    __DIR__ . '/../../.env',          // Web root (from api/config)
+    __DIR__ . '/../../../../.env',    // One level up
+    $_SERVER['DOCUMENT_ROOT'] . '/.env',
+    $_SERVER['DOCUMENT_ROOT'] . '/../.env' 
+];
+
+$envLoaded = false;
+foreach ($possiblePaths as $path) {
+    if (loadEnv(realpath($path))) {
+        $envLoaded = true;
+        break;
+    }
+}
 
 // Database configuration
 $host = 'crypmerce_db';

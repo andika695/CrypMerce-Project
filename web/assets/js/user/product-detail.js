@@ -294,9 +294,61 @@ function updateFollowButton(isFollowing) {
     isFollowing ? followBtn.classList.add('following') : followBtn.classList.remove('following');
 }
 
-// Tambahkan handleAddToCart secara manual jika belum ada
 async function handleAddToCart() {
-    // ... logic add to cart (sesuaikan dengan kode asli kamu)
+    if (currentStock <= 0) return showToast('Stok habis!', 'error');
+
+    const quantity = parseInt(qtyInput.value); 
+    const selectedSize = document.querySelector('#size-options .variant-btn.active')?.textContent || null;
+    const selectedColor = document.querySelector('#color-options .variant-btn.active')?.textContent || null;
+
+    if (!productId) {
+        return showToast('Produk tidak valid', 'error');
+    }
+
+    const cartBtn = document.querySelector('.btn-add-cart');
+    const originalText = cartBtn.textContent;
+
+    try {
+        cartBtn.disabled = true;
+        cartBtn.textContent = 'Adding...';
+
+        const formData = new FormData();
+        formData.append('product_id', productId);
+        formData.append('quantity', quantity);
+        if (selectedSize) formData.append('selected_size', selectedSize);
+        if (selectedColor) formData.append('selected_color', selectedColor);
+
+        const response = await fetch('../api/user/add-to-cart.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        // Debugging raw response
+        const rawText = await response.text();
+        console.log('Cart Response:', rawText);
+
+        let result;
+        try {
+            result = JSON.parse(rawText);
+        } catch (e) {
+            console.error('JSON Parse Error:', e);
+            showToast('Terjadi kesalahan server', 'error');
+            return;
+        }
+
+        if (result.success) {
+            showToast('Berhasil masuk keranjang!', 'success');
+        } else {
+            showToast(result.message || 'Gagal menambahkan ke keranjang', 'error');
+        }
+
+    } catch (error) {
+        console.error('Cart Error:', error);
+        showToast('Gagal terhubung ke server', 'error');
+    } finally {
+        cartBtn.disabled = false;
+        cartBtn.textContent = originalText;
+    }
 }
 
 // Global scope expose

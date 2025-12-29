@@ -8,48 +8,6 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Fungsi untuk membaca file .env sederhana
-function loadEnv($path) {
-    if (!file_exists($path)) return;
-    
-    $content = file_get_contents($path);
-    if ($content === false) return;
-
-    // Handle UTF-8 BOM
-    if (substr($content, 0, 3) === "\xEF\xBB\xBF") {
-        $content = substr($content, 3);
-    }
-    
-    // Handle UTF-16 (NULL characters)
-    $content = str_replace("\0", "", $content);
-
-    $lines = preg_split('/\r\n|\r|\n/', $content);
-    
-    foreach ($lines as $line) {
-        $line = trim($line);
-        if (empty($line) || strpos($line, '#') === 0) continue;
-        
-        $parts = explode('=', $line, 2);
-        if (count($parts) !== 2) continue;
-        
-        $name = trim($parts[0]);
-        $value = trim($parts[1]);
-        
-        // Remove quotes and trailing comments
-        $value = preg_replace('/\s#.*$/', '', $value);
-        $value = trim($value, "\"' \t\n\r\0\x0B");
-        
-        if (!empty($name)) {
-            $_SESSION[$name] = $value; // Simpan di session sebagai cadangan jika perlu
-            $_ENV[$name] = $value;
-            $_SERVER[$name] = $value;
-            putenv("$name=$value");
-        }
-    }
-}
-
-// Panggil loadEnv
-loadEnv(__DIR__ . '/../../.env');
 
 /**
  * Upload file ke Cloudinary

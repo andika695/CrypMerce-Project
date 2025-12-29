@@ -1,10 +1,16 @@
 <?php
+// Prevent any output before JSON
+ob_start();
+ini_set('display_errors', '0');
+error_reporting(E_ALL);
+
 session_start();
 require '../config/config.php';
 
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    ob_clean();
     http_response_code(405);
     echo json_encode(['success' => false, 'message' => 'Method tidak diizinkan']);
     exit;
@@ -12,6 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Cek apakah user login sebagai seller
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'seller') {
+    ob_clean();
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized: Hanya seller yang dapat menambah produk']);
     exit;
@@ -26,6 +33,7 @@ if (!isset($_SESSION['seller_id'])) {
     $seller = $stmt->fetch();
     
     if (!$seller) {
+        ob_clean();
         http_response_code(403);
         echo json_encode(['success' => false, 'message' => 'Profil seller tidak ditemukan']);
         exit;
@@ -37,6 +45,7 @@ try {
     // Validasi input
     if (empty($_POST['category_id']) || empty($_POST['name']) || 
         empty($_POST['price']) || empty($_POST['stock'])) {
+        ob_clean();
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Data tidak lengkap']);
         exit;
@@ -51,6 +60,7 @@ try {
 
     // Validasi tipe data
     if ($category_id === false || $price === false || $stock === false) {
+        ob_clean();
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Format data tidak valid']);
         exit;
@@ -58,6 +68,7 @@ try {
 
     // Validasi nilai
     if ($price < 0 || $stock < 0) {
+        ob_clean();
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Harga dan stok tidak boleh negatif']);
         exit;
@@ -69,19 +80,14 @@ try {
     if (!empty($_FILES['image']['name'])) {
         require_once __DIR__ . '/../config/cloudinary.php';
         
-        try {
-            $upload = uploadToCloudinary($_FILES['image'], 'crypmerce/products');
-            if (!$upload['success']) {
-                http_response_code(400);
-                echo json_encode(['success' => false, 'message' => $upload['message']]);
-                exit;
-            }
-            $imagePath = $upload['url'];
-        } catch (Exception $e) {
+        $upload = uploadToCloudinary($_FILES['image'], 'crypmerce/products');
+        if (!$upload['success']) {
+            ob_clean();
             http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Upload Error: ' . $e->getMessage()]);
+            echo json_encode(['success' => false, 'message' => $upload['message']]);
             exit;
         }
+        $imagePath = $upload['url'];
     }
 
     // Insert ke database
@@ -101,6 +107,7 @@ try {
         'image'       => $imagePath
     ]);
 
+    ob_clean(); // Clear any warnings/notices
     echo json_encode([
         'success' => true,
         'message' => 'Produk berhasil ditambahkan',
@@ -108,9 +115,13 @@ try {
     ]);
 
 } catch (PDOException $e) {
+    error_log('Database error in add-product.php: ' . $e->getMessage());
+    ob_clean();
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Gagal menyimpan produk: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'Database Error: ' . $e->getMessage()]);
 } catch (Exception $e) {
+    error_log('Error in add-product.php: ' . $e->getMessage());
+    ob_clean();
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
 }

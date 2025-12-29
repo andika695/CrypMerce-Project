@@ -1,4 +1,9 @@
 <?php
+// Prevent any output before JSON
+ob_start();
+ini_set('display_errors', '0');
+error_reporting(E_ALL);
+
 session_start();
 require '../config/config.php';
 
@@ -14,6 +19,7 @@ error_log("POST data: " . json_encode($_POST));
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
+    ob_clean();
     echo json_encode(['success' => false, 'message' => 'User not logged in', 'debug' => 'no_session']);
     exit;
 }
@@ -24,6 +30,7 @@ error_log("User ID: " . $user_id);
 
 // Validate input
 if (!isset($_POST['product_id']) || !isset($_POST['quantity'])) {
+    ob_clean();
     echo json_encode(['success' => false, 'message' => 'Missing required fields: ' . (!isset($_POST['product_id']) ? 'product_id ' : '') . (!isset($_POST['quantity']) ? 'quantity' : '')]);
     exit;
 }
@@ -37,6 +44,7 @@ error_log("Product ID: $product_id, Quantity: $quantity, Size: $selected_size, C
 
 // Validate quantity
 if ($quantity <= 0) {
+    ob_clean();
     echo json_encode(['success' => false, 'message' => 'Invalid quantity: ' . $quantity]);
     exit;
 }
@@ -50,11 +58,13 @@ try {
     error_log("Product query result: " . json_encode($product));
     
     if (!$product) {
+        ob_clean();
         echo json_encode(['success' => false, 'message' => 'Product not found with ID: ' . $product_id]);
         exit;
     }
     
     if ($product['stock'] < $quantity) {
+        ob_clean();
         echo json_encode(['success' => false, 'message' => 'Insufficient stock. Available: ' . $product['stock'] . ', Requested: ' . $quantity]);
         exit;
     }
@@ -77,6 +87,7 @@ try {
         
         // Check stock again for new quantity
         if ($product['stock'] < $new_quantity) {
+            ob_clean();
             echo json_encode(['success' => false, 'message' => 'Insufficient stock for total quantity. Available: ' . $product['stock'] . ', Total requested: ' . $new_quantity]);
             exit;
         }
@@ -86,6 +97,7 @@ try {
         
         error_log("Update result: " . ($result ? 'success' : 'failed'));
         
+        ob_clean();
         echo json_encode([
             'success' => true, 
             'message' => 'Cart updated successfully',
@@ -105,6 +117,7 @@ try {
         error_log("Rows affected: " . $stmt->rowCount());
         
         if ($result && $stmt->rowCount() > 0) {
+            ob_clean();
             echo json_encode([
                 'success' => true, 
                 'message' => 'Item added to cart successfully',
@@ -112,6 +125,7 @@ try {
                 'action' => 'inserted'
             ]);
         } else {
+            ob_clean();
             echo json_encode([
                 'success' => false, 
                 'message' => 'Failed to insert into cart. No rows affected.',
@@ -123,6 +137,7 @@ try {
 } catch (PDOException $e) {
     error_log("PDO Exception: " . $e->getMessage());
     error_log("Stack trace: " . $e->getTraceAsString());
+    ob_clean();
     echo json_encode([
         'success' => false, 
         'message' => 'Database error: ' . $e->getMessage(),
