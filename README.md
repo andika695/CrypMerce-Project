@@ -38,7 +38,7 @@ Repository ini bersifat **public** dan terbuka untuk dipelajari, diuji, serta di
 ## 🧱 Teknologi yang Digunakan
 
 * **Backend**: PHP
-* **Frontend**: HTML, CSS, JavaScript
+* **Frontend**: HTML, CSS, JavaScript, PHP
 * **Database**: MySQL
 * **Payment Gateway**: Midtrans
 * **Containerization**: Docker & Docker Compose
