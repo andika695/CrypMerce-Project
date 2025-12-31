@@ -1,5 +1,5 @@
 <div class="view active" id="profile-view">
-    <h1>Profile User</h1>
+    <h1>Profile Saya</h1>
     <div class="profile-container">
         <div class="profile-card">
             <div class="profile-header">

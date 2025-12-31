@@ -25,8 +25,15 @@
         <li class="menu-item" data-page="logout">
             <span>🚪</span> Logout
         </li>
-        <li class="menu-item" onclick="window.history.back()">
+        <li class="menu-item mobile-only" onclick="window.history.back()">
             <span>⬅️</span> Kembali
+        </li>
+        <!-- Tombol tutup sidebar untuk mobile -->
+        <li class="menu-item close-sidebar-btn mobile-only" style="display: none;">
+            <span>✕</span> Tutup Menu
         </li>
     </ul>
 </aside>
+
+<!-- Overlay untuk mobile -->
+<div class="sidebar-overlay"></div>
