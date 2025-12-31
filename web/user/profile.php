@@ -28,8 +28,18 @@ try {
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <link rel="stylesheet" href="../assets/css/components/location-picker.css?v=1">
     <link rel="icon" type="image/png" href="../../../assets/images/logo.png">
+    <!-- Tambahkan Font Awesome untuk ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <button class="hamburger-btn" id="hamburgerBtn">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="page-title" id="pageTitle">Profil Saya</div>
+    </div>
+    
     <div class="seller-layout">
         <?php include 'components/sidebar.php'; ?>
         <main class="content">
