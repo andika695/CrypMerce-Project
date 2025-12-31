@@ -16,11 +16,17 @@
                     <input type="number" id="stock" name="stock" min="0" required>
                 </div>
             </div>
+            <div class="form-row">
             <div class="form-group">
                 <label for="category_id">Kategori <span class="required">*</span></label>
                 <select id="category_id" name="category_id" required>
                     <option value="">Loading...</option>
                 </select>
+            </div>
+            <div class="form-group">
+                <label for="weight">Berat Barang (gram) <span class="required">*</span></label>
+                <input type="number" id="weight" name="weight" min="0" required>
+            </div>
             </div>
             <div class="form-group">
                 <label for="description">Deskripsi</label>

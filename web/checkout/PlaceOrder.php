@@ -45,40 +45,45 @@ try {
         throw new Exception('Data penjual tidak ditemukan untuk produk ini');
     }
 
-    require_once dirname(__FILE__) . '/../api/utils/distance-calculator.php';
-    
-    // --- SHIPPING CALCULATION ---
+    $total_weight_gram = 0;
     $shipping_cost = 0;
-    $distance = 0;
-    $shipping_address = '';
-    $seller_info = null;
-    $buyer_info = null;
+    
+    // 1. Hitung total berat semua item
+    $stmtweight = $pdo->prepare("SELECT weight FROM products WHERE id = ?");
 
-    if ($seller_id) {
-        $stmtSellerLoc = $pdo->prepare("SELECT city, latitude, longitude, address FROM sellers WHERE id = ?");
-        $stmtSellerLoc->execute([$seller_id]);
-        $seller_info = $stmtSellerLoc->fetch();
-        
-        $stmtBuyerLoc = $pdo->prepare("SELECT city, latitude, longitude, address FROM users WHERE id = ?");
-        $stmtBuyerLoc->execute([$user_id]);
-        $buyer_info = $stmtBuyerLoc->fetch();
-        
-        if ($seller_info && $buyer_info && $seller_info['latitude'] && $buyer_info['latitude']) {
-            $distance = DistanceCalculator::calculateDistance(
-                $seller_info['latitude'], $seller_info['longitude'],
-                $buyer_info['latitude'], $buyer_info['longitude']
-            );
-            
-            $shipDetails = DistanceCalculator::calculateShippingCost(
-                $seller_info['city'] ?? '',
-                $buyer_info['city'] ?? '',
-                $distance
-            );
-            
-            $shipping_cost = $shipDetails['shipping_cost'];
-            $shipping_address = $buyer_info['address'];
+    foreach ($items as $item) {
+        $stmtweight->execute([$item['id']]);
+        $prod = $stmtweight->fetch();
+        if ($prod) {
+            $weightPerItem = (int)$prod['weight'];
+            $total_weight_gram += ($weightPerItem * $item['quantity']);
         }
     }
+
+    
+    // 2. Hitung Biaya Ongkir
+    // Aturan: < 1kg = 7.000, Pas 1kg = 10.000
+    // Lebih dari 1kg: Kelipatan 1kg = 10.000, Sisa pecahan = 7.000
+    if ($total_weight_gram) {
+        $kg_count = floor($total_weight_gram / 1000);
+        $remainder = $total_weight_gram % 1000;
+
+        $shipping_cost = $kg_count * 10000;
+
+        if ($remainder) {
+            $shipping_cost += 7000;
+        } 
+    } else {
+        $shipping_cost = 7000;
+    }
+
+    $distance = 0; // Set jarak 0 karena tidak dipakai lagi
+    
+    // Ambil alamat buyer untuk disimpan di database
+    $stmtBuyerAddr = $pdo->prepare("SELECT address FROM users WHERE id = ?");
+    $stmtBuyerAddr->execute([$user_id]);
+    $buyerData = $stmtBuyerAddr->fetch();
+    $shipping_address = $buyerData['address'] ?? '-';
     
     // Recalculate Total
     $subtotal = 0;
@@ -161,7 +166,7 @@ try {
             'id' => 'SHIPPING',
             'price' => (int)$shipping_cost,
             'quantity' => 1,
-            'name' => 'Ongkir (' . ($distance > 0 ? $distance . ' km' : 'Flat') . ')'
+            'name' => 'Ongkir (Total Berat: ' . $total_weight_gram . ' gram)'
         ];
     }
 

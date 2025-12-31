@@ -27,13 +27,14 @@
                     <th>Nama</th>
                     <th>Harga</th>
                     <th>Stok</th>
+                    <th>Berat</th>
                     <th>Kategori</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
             <tbody id="product-list">
                 <tr>
-                    <td colspan="5" style="text-align: center; color: #9ca3af;">
+                    <td colspan="6" style="text-align: center; color: #9ca3af;">
                         Belum ada produk
                     </td>
                 </tr>

@@ -44,7 +44,7 @@ if (!isset($_SESSION['seller_id'])) {
 try {
     // Validasi input
     if (empty($_POST['category_id']) || empty($_POST['name']) || 
-        empty($_POST['price']) || empty($_POST['stock'])) {
+        empty($_POST['price']) || empty($_POST['stock']) || empty($_POST['weight'])) {
         ob_clean();
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Data tidak lengkap']);
@@ -56,10 +56,11 @@ try {
     $name        = trim($_POST['name']);
     $price       = filter_var($_POST['price'], FILTER_VALIDATE_FLOAT);
     $stock       = filter_var($_POST['stock'], FILTER_VALIDATE_INT);
+    $weight      = filter_var($_POST['weight'], FILTER_VALIDATE_INT);
     $description = isset($_POST['description']) ? trim($_POST['description']) : null;
 
     // Validasi tipe data
-    if ($category_id === false || $price === false || $stock === false) {
+    if ($category_id === false || $price === false || $stock === false || $weight === false) {
         ob_clean();
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Format data tidak valid']);
@@ -92,9 +93,9 @@ try {
 
     // Insert ke database
     $sql = "INSERT INTO products
-            (seller_id, category_id, name, price, stock, description, image)
+            (seller_id, category_id, name, price, stock, weight, description, image)
             VALUES
-            (:seller_id, :category_id, :name, :price, :stock, :description, :image)";
+            (:seller_id, :category_id, :name, :price, :stock, :weight, :description, :image)";
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
@@ -103,6 +104,7 @@ try {
         'name'        => $name,
         'price'       => $price,
         'stock'       => $stock,
+        'weight'      => $weight,
         'description' => $description,
         'image'       => $imagePath
     ]);

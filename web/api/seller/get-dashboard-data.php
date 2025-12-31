@@ -69,6 +69,7 @@ try {
             p.name,
             p.price,
             p.stock,
+            p.weight,
             p.image,
             c.name as category_name,
             p.created_at
@@ -86,6 +87,7 @@ try {
     foreach ($products as &$product) {
         $product['price'] = (float) $product['price'];
         $product['stock'] = (int) $product['stock'];
+        $product['weight'] = (int) $product['weight'];
     }
     
     echo json_encode([

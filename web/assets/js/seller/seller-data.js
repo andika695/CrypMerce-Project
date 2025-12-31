@@ -66,6 +66,7 @@ function updateProductTable(products) {
             </td>
             <td>Rp ${Number(product.price).toLocaleString('id-ID')}</td>
             <td>${product.stock}</td>
+            <td>${product.weight} (gram)</td>
             <td>${product.category_name || '-'}</td>
             <td>
                 <button class="btn-edit" onclick="editProduct(${product.id})">Edit</button>
@@ -117,6 +118,7 @@ async function editProduct(id) {
             document.getElementById('edit-name').value = p.name;
             document.getElementById('edit-price').value = p.price;
             document.getElementById('edit-stock').value = p.stock;
+            document.getElementById('edit-weight').value = p.weight;
             document.getElementById('edit-category').value = p.category_id;
             document.getElementById('edit-description').value = p.description || '';
             

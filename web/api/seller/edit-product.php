@@ -24,9 +24,10 @@ $categoryId  = filter_var($_POST['category_id'] ?? null, FILTER_VALIDATE_INT);
 $name        = trim($_POST['name'] ?? '');
 $price       = filter_var($_POST['price'] ?? null, FILTER_VALIDATE_FLOAT);
 $stock       = filter_var($_POST['stock'] ?? null, FILTER_VALIDATE_INT);
+$weight      = filter_var($_POST['weight'] ?? null, FILTER_VALIDATE_INT);
 $description = trim($_POST['description'] ?? '');
 
-if (!$productId || !$categoryId || !$name || $price === false || $stock === false) {
+if (!$productId || !$categoryId || !$name || $price === false || $stock === false || $weight === false) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Data tidak lengkap atau format salah']);
     exit;
@@ -79,7 +80,8 @@ try {
             category_id = :cat, 
             name = :name, 
             price = :price, 
-            stock = :stock, 
+            stock = :stock,
+            weight = :weight,
             description = :desc, 
             image = :img 
             WHERE id = :id AND seller_id = :sid";
@@ -90,6 +92,7 @@ try {
         ':name'  => $name,
         ':price' => $price,
         ':stock' => $stock,
+        ':weight'=> $weight,
         ':desc'  => $description,
         ':img'   => $imagePath,
         ':id'    => $productId,

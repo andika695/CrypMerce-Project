@@ -96,6 +96,21 @@ function renderProduct(data) {
         if (followBtn) followBtn.onclick = () => toggleFollow(data.seller.id);
     }
 
+    if (data.weight) {
+        let weightDisplay = '';
+        const weight = parseInt(data.weight);
+        
+        if (weight >= 1000) {
+            const weightInKg = weight / 1000;
+            weightDisplay = parseFloat(weightInKg.toFixed(2)) + ' kg';
+        } else {
+            weightDisplay = weight + ' gr';
+        }
+
+        const weightEl = document.getElementById('product-weight');
+        if (weightEl) weightEl.textContent = weightDisplay;
+    }
+
     // Variants
     const variants = data.variants || {};
     renderVariants('size-options', variants.sizes || []);

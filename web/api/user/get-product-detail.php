@@ -41,6 +41,7 @@ try {
                 'name' => $product['name'],
                 'price' => $product['price'],
                 'stock' => $product['stock'],
+                'weight' => $product['weight'],
                 'description' => $product['description'],
                 'image' => $product['image'],
                 'category_id' => $product['category_id'],

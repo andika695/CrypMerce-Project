@@ -48,11 +48,17 @@
                     <input type="number" id="edit-stock" name="stock" min="0" required>
                 </div>
             </div>
-            <div class="form-group">
-                <label for="edit-category">Kategori</label>
-                <select id="edit-category" name="category_id" required>
-                    <option value="">Loading...</option>
-                </select>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="edit-category">Kategori</label>
+                    <select id="edit-category" name="category_id" required>
+                        <option value="">Loading...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-weight">Berat Barang (gram)</label>
+                    <input type="number" id="edit-weight" name="weight" min="0" required>
+                </div>
             </div>
             <div class="form-group">
                 <label for="edit-description">Deskripsi</label>
