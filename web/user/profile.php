@@ -27,6 +27,7 @@ try {
     <!-- Leaflet & Location CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <link rel="stylesheet" href="../assets/css/components/location-picker.css?v=1">
+    <link rel="icon" type="image/png" href="../../../assets/images/logo.png">
 </head>
 <body>
     <div class="seller-layout">
