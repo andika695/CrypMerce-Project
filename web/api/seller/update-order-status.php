@@ -52,17 +52,45 @@ $status = $data['status'];
 $seller_id = $_SESSION['seller_id'];
 
 try {
-    // Verify order belongs to seller
-    $checkStmt = $pdo->prepare("SELECT id FROM orders WHERE id = :order_id AND seller_id = :seller_id");
+    // Verify order belongs to seller AND fetch buyer_id for notification
+    $checkStmt = $pdo->prepare("SELECT id, buyer_id FROM orders WHERE id = :order_id AND seller_id = :seller_id");
     $checkStmt->execute(['order_id' => $order_id, 'seller_id' => $seller_id]);
     
-    if (!$checkStmt->fetch()) {
+    $orderData = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$orderData) {
         echo json_encode(['success' => false, 'message' => 'Order not found or access denied']);
         exit;
     }
 
     $stmt = $pdo->prepare("UPDATE orders SET status = :status WHERE id = :order_id");
     $stmt->execute(['status' => $status, 'order_id' => $order_id]);
+
+    // Send Notification
+    require_once '../helpers/notification_helper.php';
+    
+    $title = "Update Pesanan";
+    $message = "Status pesanan Anda telah diperbarui.";
+    $type = "info";
+
+    if ($status === 'processing') {
+        $title = "Pesanan Diterima";
+        $message = "Penjual telah menerima pesanan Anda.";
+    } else if ($status === 'confirmed') {
+        $title = "Pesanan Dikonfirmasi";
+        $message = "Pesanan sedang dikemas oleh penjual.";
+        $type = "success";
+    } else if ($status === 'shipped') {
+        $title = "Pesanan Dikirim";
+        $message = "Pesanan Anda sedang dalam perjalanan.";
+        $type = "success";
+    } else if ($status === 'cancelled') {
+        $title = "Pesanan Ditolak";
+        $message = "Maaf, pesanan Anda ditolak oleh penjual.";
+        $type = "error";
+    }
+
+    createNotification($pdo, $orderData['buyer_id'], $title, $message, $order_id, $type);
 
     echo json_encode(['success' => true, 'message' => 'Order status updated successfully']);
 } catch (PDOException $e) {

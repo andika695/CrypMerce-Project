@@ -95,7 +95,9 @@ try {
 
     $pdo->beginTransaction();
 
-    $sqlOrder = "INSERT INTO orders (buyer_id, seller_id, total_amount, status, shipping_cost, distance_km, shipping_address, buyer_latitude, buyer_longitude, buyer_city, seller_city) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?)";
+    // Modifikasi INSERT untuk menyimpan midtrans_order_uuid
+    // Status awal 'pending' (belum dibayar), stok BELUM dikurangi
+    $sqlOrder = "INSERT INTO orders (buyer_id, seller_id, total_amount, status, shipping_cost, distance_km, shipping_address, buyer_latitude, buyer_longitude, buyer_city, seller_city, midtrans_order_uuid) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmtOrder = $pdo->prepare($sqlOrder);
     $stmtOrder->execute([
         $user_id, 
@@ -107,7 +109,8 @@ try {
         $buyer_info['latitude'] ?? null,
         $buyer_info['longitude'] ?? null,
         $buyer_info['city'] ?? null,
-        $seller_info['city'] ?? null
+        $seller_info['city'] ?? null,
+        $order_id_string // UUID Midtrans
     ]);
 
     $order_db_id = $pdo->lastInsertId();
@@ -115,9 +118,12 @@ try {
     $sqlItem = "INSERT INTO order_items (order_id, product_id, quantity, price_at_purchase) VALUES (?, ?, ?, ?)";
     $stmtItem = $pdo->prepare($sqlItem);
 
-    // --- PERUBAHAN DI SINI: Menghapus bagian 'terjual' ---
+    // KITA MATIKAN PENGURANGAN STOK DI SINI
+    // Stok akan dikurangi nanti di notification-handler.php saat pembayaran sukses
+    /* 
     $sqlUpdateProduct = "UPDATE `products` SET `stock` = `stock` - ? WHERE `id` = ? AND `stock` >= ?";
     $stmtUpdate = $pdo->prepare($sqlUpdateProduct);
+    */
 
     foreach ($items as $item) {
         $stmtItem->execute([
@@ -127,7 +133,7 @@ try {
             $item['price']
         ]);
 
-        // Eksekusi update stok saja
+        /* 
         $stmtUpdate->execute([
             (int)$item['quantity'], 
             (int)$item['id'],
@@ -137,6 +143,7 @@ try {
         if ($stmtUpdate->rowCount() === 0) {
             throw new Exception("Stok untuk produk " . $item['name'] . " tidak mencukupi.");
         }
+        */
     }
 
     $pdo->commit();

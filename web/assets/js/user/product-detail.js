@@ -182,7 +182,10 @@ async function handleBuyNow() {
         if (snapToken && snapToken.length > 10) {
             if (typeof window.snap !== 'undefined') {
                 window.snap.pay(snapToken, {
-                    onSuccess: () => window.location.href = '../user/success.html',
+                    onSuccess: function(result) {
+                        // Pass order_id to success page for verification
+                        window.location.href = `../user/success.html?order_id=${result.order_id}`;
+                    },
                     onPending: () => alert('Selesaikan pembayaran Anda'),
                     onError: () => {
                         showToast('Pembayaran gagal', 'error');
@@ -369,3 +372,209 @@ async function handleAddToCart() {
 // Global scope expose
 window.increaseQty = increaseQty;
 window.decreaseQty = decreaseQty;
+
+// ================= MOBILE PURCHASE MODAL =================
+
+// Modal Elements - initialized after DOM loads
+let purchaseModal = null;
+let modalQtyInput = null;
+let modalTotalPrice = null;
+
+// Mobile Button Handlers
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize modal elements
+    purchaseModal = document.getElementById('purchaseModal');
+    modalQtyInput = document.getElementById('modalQty');
+    modalTotalPrice = document.getElementById('modal-total-price');
+
+    // Open Modal: Buy Button (Mobile)
+    const btnBuyMobile = document.getElementById('btnBuyMobile');
+    if (btnBuyMobile) {
+        btnBuyMobile.addEventListener('click', openPurchaseModal);
+        console.log('Buy mobile button attached');
+    } else {
+        console.log('Buy mobile button NOT found');
+    }
+
+    // Add to Cart: Mobile
+    const btnCartMobile = document.getElementById('btnCartMobile');
+    if (btnCartMobile) {
+        btnCartMobile.addEventListener('click', handleAddToCart);
+        console.log('Cart mobile button attached');
+    } else {
+        console.log('Cart mobile button NOT found');
+    }
+
+    // Close Modal
+    const closeModal = document.getElementById('closeModal');
+    if (closeModal) {
+        closeModal.addEventListener('click', closePurchaseModal);
+    }
+
+    // Close on overlay click
+    if (purchaseModal) {
+        purchaseModal.addEventListener('click', (e) => {
+            if (e.target === purchaseModal) {
+                closePurchaseModal();
+            }
+        });
+    }
+
+    // Modal Quantity Controls
+    const modalDecreaseQty = document.getElementById('modalDecreaseQty');
+    const modalIncreaseQty = document.getElementById('modalIncreaseQty');
+    
+    if (modalDecreaseQty) {
+        modalDecreaseQty.addEventListener('click', decreaseModalQty);
+    }
+    if (modalIncreaseQty) {
+        modalIncreaseQty.addEventListener('click', increaseModalQty);
+    }
+
+    // Confirm Purchase Button
+    const btnConfirmPurchase = document.getElementById('btnConfirmPurchase');
+    if (btnConfirmPurchase) {
+        btnConfirmPurchase.addEventListener('click', handleModalBuyNow);
+    }
+});
+
+// Open Purchase Modal
+function openPurchaseModal() {
+    if (currentStock <= 0) {
+        return showToast('Stok habis!', 'error');
+    }
+
+    // Populate modal with product info
+    const productName = document.getElementById('product-name').textContent;
+    const productImg = document.getElementById('main-img').src;
+    
+    document.getElementById('modal-product-name').textContent = productName;
+    document.getElementById('modal-product-img').src = productImg;
+    document.getElementById('modal-product-price').textContent = formatRupiah(currentPrice);
+    
+    // Reset quantity
+    if (modalQtyInput) modalQtyInput.value = 1;
+    updateModalTotalPrice();
+
+    // Show modal
+    purchaseModal.classList.add('show');
+    document.body.style.overflow = 'hidden'; // Prevent background scroll
+}
+
+// Close Purchase Modal
+function closePurchaseModal() {
+    purchaseModal.classList.remove('show');
+    document.body.style.overflow = ''; // Restore scroll
+}
+
+// Modal Quantity Controls
+function increaseModalQty() {
+    let val = parseInt(modalQtyInput.value);
+    if (val < currentStock) {
+        modalQtyInput.value = val + 1;
+        updateModalTotalPrice();
+    } else {
+        showToast('Stok maksimum tercapai', 'error');
+    }
+}
+
+function decreaseModalQty() {
+    let val = parseInt(modalQtyInput.value);
+    if (val > 1) {
+        modalQtyInput.value = val - 1;
+        updateModalTotalPrice();
+    }
+}
+
+function updateModalTotalPrice() {
+    if (!modalQtyInput || !modalTotalPrice) return;
+    const qty = parseInt(modalQtyInput.value);
+    const total = currentPrice * qty;
+    modalTotalPrice.textContent = formatRupiah(total);
+}
+
+// Handle Buy Now from Modal
+async function handleModalBuyNow() {
+    if (currentStock <= 0) return showToast('Stok habis!', 'error');
+
+    const quantity = parseInt(modalQtyInput.value);
+    const productName = document.getElementById('product-name').textContent;
+    const selectedSize = document.querySelector('#size-options .variant-btn.active')?.textContent || null;
+    const selectedColor = document.querySelector('#color-options .variant-btn.active')?.textContent || null;
+
+    const itemData = {
+        total_price: currentPrice * quantity,
+        items: [{
+            id: productId,
+            name: productName,
+            price: currentPrice,
+            quantity: quantity,
+            size: selectedSize,
+            color: selectedColor
+        }]
+    };
+
+    const confirmBtn = document.getElementById('btnConfirmPurchase');
+
+    try {
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+
+        const response = await fetch('../checkout/PlaceOrder.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(itemData)
+        });
+
+        const rawData = await response.text();
+        let snapToken = "";
+
+        // Parse response
+        if (rawData.trim().startsWith('{')) {
+            const result = JSON.parse(rawData);
+            if (!result.success) {
+                showToast(result.message || 'Gagal memproses', 'error');
+                resetConfirmBtn(confirmBtn);
+                return;
+            }
+            snapToken = result.token || result.snap_token;
+        } else {
+            snapToken = rawData.trim();
+        }
+
+        // Validate and open Snap
+        if (snapToken && snapToken.length > 10) {
+            if (typeof window.snap !== 'undefined') {
+                closePurchaseModal(); // Close modal before payment
+                window.snap.pay(snapToken, {
+                    onSuccess: function(result) {
+                         // Pass order_id to success page for verification
+                         window.location.href = `../user/success.html?order_id=${result.order_id}`;
+                    },
+                    onPending: () => alert('Selesaikan pembayaran Anda'),
+                    onError: () => {
+                        showToast('Pembayaran gagal', 'error');
+                        resetConfirmBtn(confirmBtn);
+                    },
+                    onClose: () => resetConfirmBtn(confirmBtn)
+                });
+            } else {
+                showToast('Library pembayaran belum siap, coba lagi', 'error');
+                resetConfirmBtn(confirmBtn);
+            }
+        } else {
+            showToast('Token tidak valid', 'error');
+            resetConfirmBtn(confirmBtn);
+        }
+
+    } catch (error) {
+        console.error('Checkout error:', error);
+        showToast('Terjadi kesalahan sistem', 'error');
+        resetConfirmBtn(confirmBtn);
+    }
+}
+
+function resetConfirmBtn(btn) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-check-circle"></i> Beli Sekarang';
+}

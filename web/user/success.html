@@ -129,9 +129,58 @@ p {
 </div>
 
 <script>
-    setTimeout(() => {
-        window.location.href = "dashboard.html";
-    }, 7000);
+    document.addEventListener('DOMContentLoaded', async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('order_id');
+        const statusDisplay = document.querySelector('.status');
+        const title = document.querySelector('h1');
+        const message = document.querySelector('p');
+        const icon = document.querySelector('.icon');
+
+        if (orderId) {
+            statusDisplay.textContent = '🔄 Memverifikasi Pembayaran...';
+            statusDisplay.style.background = '#e0f2fe';
+            statusDisplay.style.color = '#0284c7';
+
+            try {
+                // Call manual check API
+                const response = await fetch('../api/user/manual-check-status.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ order_id: orderId })
+                });
+
+                const result = await response.json();
+
+                if (result.success && result.status === 'processing') {
+                    statusDisplay.textContent = '📦 Pembayaran Terkonfirmasi & Barang Dibeli!';
+                    statusDisplay.style.background = 'rgba(46,204,113,.12)';
+                    statusDisplay.style.color = 'var(--success)';
+                } else if (result.success && result.status === 'pending') {
+                    statusDisplay.textContent = '⏳ Menunggu Pembayaran...';
+                    statusDisplay.style.color = '#f59e0b';
+                    statusDisplay.style.background = '#fef3c7';
+                    message.innerHTML = 'Pembayaran Anda belum terkonfirmasi oleh sistem.<br>Silakan selesaikan pembayaran.';
+                    icon.style.color = '#f59e0b';
+                    icon.style.background = '#fef3c7';
+                    icon.innerHTML = '!';
+                } else {
+                    throw new Error(result.message || 'Verifikasi gagal');
+                }
+
+            } catch (error) {
+                console.error(error);
+                statusDisplay.textContent = '⚠️ Gagal Verifikasi Otomatis';
+                statusDisplay.style.color = '#ef4444';
+                message.innerHTML = 'Jangan khawatir, jika saldo Anda terpotong,<br>transaksi tetap akan diproses oleh sistem.';
+            }
+        }
+
+        // Auto redirect after delay
+        setTimeout(() => {
+            window.location.href = "dashboard.html";
+        }, 5000);
+    });
 </script>
 
 </body>

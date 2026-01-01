@@ -42,8 +42,14 @@ function loadMyOrders() {
                     // Tombol Cancel User
                     actionBtn = `<button class="btn-cancel" onclick="cancelOrder(${order.id})" style="background:#e74c3c; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Batalkan Pesanan</button>`;
                 } else if (order.status === 'processing') {
-                    statusText = 'Sedang Diproses';
+                    statusText = 'Menunggu Konfirmasi Penjual';
                     statusColor = '#3498db'; // Biru
+                    // Allow cancel for paid orders too (refund stock)
+                    actionBtn = `<button class="btn-cancel" onclick="cancelOrder(${order.id})" style="background:#e74c3c; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Batalkan Pesanan</button>`;
+                } else if (order.status === 'confirmed') {
+                    statusText = 'Sedang Dikemas / Diproses Seller';
+                    statusColor = '#2980b9'; // Biru tua
+                    // No cancel button allowed after confirmation
                 } else if (order.status === 'shipped') {
                     statusText = 'Barang Sedang Diantar 🚚';
                     statusColor = '#1abc9c'; // Tosca

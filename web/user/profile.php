@@ -1,6 +1,27 @@
 <?php 
 session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
+
+// Check for user session - prioritize namespaced session
+$isUserLoggedIn = false;
+$userId = null;
+
+// First check namespaced user session
+if (isset($_SESSION['user']) && isset($_SESSION['user']['user_id'])) {
+    $isUserLoggedIn = true;
+    $userId = $_SESSION['user']['user_id'];
+    // Sync legacy vars from namespaced session
+    $_SESSION['user_id'] = $_SESSION['user']['user_id'];
+    $_SESSION['username'] = $_SESSION['user']['username'];
+    $_SESSION['role'] = $_SESSION['user']['role'];
+}
+// Fallback: check legacy session vars for user role
+elseif (isset($_SESSION['user_id']) && isset($_SESSION['role']) && $_SESSION['role'] === 'user') {
+    $isUserLoggedIn = true;
+    $userId = $_SESSION['user_id'];
+}
+
+// Redirect if not logged in as user
+if (!$isUserLoggedIn) {
     header('Location: ../pages/auth/login.html');
     exit();
 }
@@ -50,6 +71,7 @@ try {
 
     <script src="../assets/js/user/profile.js?v=<?php echo time(); ?>"></script>
     <script src="../assets/js/user/pesanan.js?v=<?php echo time(); ?>"></script>
+    <script src="../assets/js/user/notifikasi.js?v=1"></script>
     <!-- Leaflet & Location Logic -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="../assets/js/components/location-picker.js?v=1"></script>

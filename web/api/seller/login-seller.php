@@ -59,12 +59,17 @@ try {
         exit;
     }
     
-    // Create fresh session
-    session_unset();
-    session_destroy();
-    session_start();
-    session_regenerate_id(true);
+    // Use namespaced session for SELLER - separate from user
+    // DON'T destroy entire session, just update seller namespace
+    $_SESSION['seller'] = [
+        'user_id' => $user['id'],
+        'username' => $user['username'],
+        'role' => $user['role'],
+        'seller_id' => $user['seller_id'],
+        'store_name' => $user['store_name']
+    ];
 
+    // Update legacy session vars for backward compat (seller takes priority when on seller pages)
     $_SESSION['user_id'] = $user['id'];
     $_SESSION['username'] = $user['username'];
     $_SESSION['role'] = $user['role'];

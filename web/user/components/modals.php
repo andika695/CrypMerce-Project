@@ -37,9 +37,9 @@
                 🚪 Logout
             </button>
             
-            <!-- Pilihan 2: Ganti ke Akun Seller -->
-            <button onclick="window.location.href='../seller/dashboard.php'" class="btn-switch-user">
-                💼 Ganti ke Akun Seller
+            <!-- Pilihan 2: Ganti ke Akun Seller (harus login dulu) -->
+            <button onclick="window.location.href='../pages/auth/loginSeller.html'" class="btn-switch-user">
+                💼 Login ke Akun Seller
             </button>
         </div>
         

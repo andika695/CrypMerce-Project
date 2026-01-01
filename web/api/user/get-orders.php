@@ -16,7 +16,7 @@ try {
             s.store_name
             FROM orders o
             JOIN sellers s ON o.seller_id = s.id
-            WHERE o.buyer_id = ?
+            WHERE o.buyer_id = ? AND o.status != 'pending'
             ORDER BY o.created_at DESC";
 
     $stmt = $pdo->prepare($sql);

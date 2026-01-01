@@ -37,6 +37,14 @@ try {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($user && password_verify($password, $user['password'])) {
+        // Use namespaced session for USER - separate from seller
+        $_SESSION['user'] = [
+            'user_id' => $user['id'],
+            'username' => $user['username'],
+            'role' => $user['role']
+        ];
+
+        // Also set legacy session vars for backward compatibility
         $_SESSION['user_id']  = $user['id'];
         $_SESSION['username'] = $user['username'];
         $_SESSION['role']     = $user['role'];

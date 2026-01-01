@@ -499,6 +499,8 @@ async function loadOrders() {
                             <button class="btn-sm btn-approve" onclick="updateOrderStatus(${order.id}, 'processing')">Terima</button>
                             <button class="btn-sm btn-cancel" onclick="updateOrderStatus(${order.id}, 'cancelled')">Tolak</button>
                         ` : order.status === 'processing' ? `
+                            <button class="btn-sm btn-approve" style="background:#2ecc71" onclick="updateOrderStatus(${order.id}, 'confirmed')">Konfirmasi Pesanan ✅</button>
+                        ` : order.status === 'confirmed' ? `
                             <button class="btn-sm btn-approve" style="background:#3498db" onclick="updateOrderStatus(${order.id}, 'shipped')">Antar Barang 🚚</button>
                         ` : order.status === 'shipped' ? `
                             <span style="color:#f39c12; font-style:italic;">Menunggu Konfirmasi User</span>

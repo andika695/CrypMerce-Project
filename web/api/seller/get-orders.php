@@ -35,7 +35,7 @@ try {
             (SELECT COUNT(*) FROM order_items WHERE order_id = o.id) as total_items
         FROM orders o
         JOIN users u ON o.buyer_id = u.id
-        WHERE o.seller_id = :seller_id
+        WHERE o.seller_id = :seller_id AND o.status != 'pending'
         ORDER BY o.created_at DESC
     ");
     $stmt->execute(['seller_id' => $seller_id]);

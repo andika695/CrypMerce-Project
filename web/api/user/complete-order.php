@@ -9,15 +9,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user_id']) && !isset($_SESSION['user']['user_id'])) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
 }
 
+$user_id = $_SESSION['user']['user_id'] ?? $_SESSION['user_id'];
+
 $data = json_decode(file_get_contents('php://input'), true);
 $order_id = $data['order_id'] ?? null;
-$user_id = $_SESSION['user_id'];
 
 if (!$order_id) {
     echo json_encode(['success' => false, 'message' => 'Order ID required']);
@@ -43,6 +44,10 @@ try {
     // 2. Update status ke 'completed'
     $stmtUpdate = $pdo->prepare("UPDATE orders SET status = 'completed' WHERE id = ?");
     $stmtUpdate->execute([$order_id]);
+
+    // 3. Create Notification
+    require_once '../helpers/notification_helper.php';
+    createNotification($pdo, $user_id, "Pesanan Selesai", "Terima kasih telah mengkonfirmasi penerimaan barang.", $order_id, "success");
 
     echo json_encode(['success' => true, 'message' => 'Pesanan telah diterima']);
 

@@ -9,15 +9,20 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-if (!isset($_SESSION['user_id'])) {
-    http_response_code(401);
+$user_id = null;
+if (isset($_SESSION['user']['user_id'])) {
+    $user_id = $_SESSION['user']['user_id'];
+} elseif (isset($_SESSION['user_id'])) {
+    $user_id = $_SESSION['user_id'];
+}
+
+if (!$user_id) {
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
 }
 
 $data = json_decode(file_get_contents('php://input'), true);
 $order_id = $data['order_id'] ?? null;
-$user_id = $_SESSION['user_id'];
 
 if (!$order_id) {
     echo json_encode(['success' => false, 'message' => 'Order ID required']);
@@ -25,38 +30,29 @@ if (!$order_id) {
 }
 
 try {
-    // 1. Cek apakah pesanan milik user ini DAN statusnya masih 'pending'
+    $pdo->beginTransaction();
+
+    // 1. Cek User & Order
     $stmt = $pdo->prepare("SELECT status FROM orders WHERE id = ? AND buyer_id = ?");
     $stmt->execute([$order_id, $user_id]);
     $order = $stmt->fetch();
 
     if (!$order) {
-        echo json_encode(['success' => false, 'message' => 'Pesanan tidak ditemukan']);
-        exit;
+        throw new Exception("Pesanan tidak ditemukan");
     }
 
-    if ($order['status'] !== 'pending') {
-        echo json_encode(['success' => false, 'message' => 'Hanya pesanan pending yang bisa dibatalkan']);
-        exit;
+    if ($order['status'] !== 'pending' && $order['status'] !== 'processing') {
+        throw new Exception("Pesanan tidak dapat dibatalkan pada tahap ini");
     }
 
-    // 2. Batalkan pesanan
-    // (Opsional: Kembalikan stok produk jika sistem mengharuskan)
-    
-    $pdo->beginTransaction();
-    
-    // Update status
-    $stmtUpdate = $pdo->prepare("UPDATE orders SET status = 'cancelled' WHERE id = ?");
-    $stmtUpdate->execute([$order_id]);
-    
-    // Kembalikan stok (Loop status item di order ini)
-    $stmtItems = $pdo->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = ?");
-    $stmtItems->execute([$order_id]);
-    $items = $stmtItems->fetchAll();
-    
-    $stmtRestock = $pdo->prepare("UPDATE products SET stock = stock + ? WHERE id = ?");
-    foreach ($items as $item) {
-        $stmtRestock->execute([$item['quantity'], $item['product_id']]);
+    // 2. Logic Refund Stok (Hanya jika processing/paid)
+    if ($order['status'] === 'processing') {
+        $stmtItems = $pdo->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = ?");
+        $stmtItems->execute([$order_id]);
+        $stmtRestock = $pdo->prepare("UPDATE products SET stock = stock + ? WHERE id = ?");
+        foreach ($items as $item) {
+            $stmtRestock->execute([$item['quantity'], $item['product_id']]);
+        }
     }
     
     $pdo->commit();
