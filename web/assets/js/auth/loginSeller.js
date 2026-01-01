@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showError('password', 'Password wajib diisi');
             hasError = true;
         }
-        
+
         if (!nameToko) {
             showError('nameToko', 'Nama toko wajib diisi');
             hasError = true;

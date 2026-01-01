@@ -49,6 +49,7 @@ try {
     </div>
 
     <script src="../assets/js/user/profile.js?v=<?php echo time(); ?>"></script>
+    <script src="../assets/js/user/pesanan.js?v=<?php echo time(); ?>"></script>
     <!-- Leaflet & Location Logic -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="../assets/js/components/location-picker.js?v=1"></script>

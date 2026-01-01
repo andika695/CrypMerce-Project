@@ -48,7 +48,7 @@ try {
         ]);
         exit;
     }
-    
+
     // Verify store name matches
     if ($user['store_name'] !== $storeName) {
         http_response_code(401);
@@ -59,7 +59,12 @@ try {
         exit;
     }
     
-    // Create session
+    // Create fresh session
+    session_unset();
+    session_destroy();
+    session_start();
+    session_regenerate_id(true);
+
     $_SESSION['user_id'] = $user['id'];
     $_SESSION['username'] = $user['username'];
     $_SESSION['role'] = $user['role'];

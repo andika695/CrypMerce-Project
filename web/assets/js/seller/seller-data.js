@@ -264,14 +264,14 @@ function updateProfileView(data) {
 }
 
 function updateSidebarProfile(data) {
-    // Update sidebar with store name
-    const logo = document.querySelector('.logo');
-    if (logo) {
+    // Update Desktop Sidebar
+    const desktopLogo = document.querySelector('.desktop-logo');
+    if (desktopLogo) {
         const imgSrc = data.profile_photo ? (data.profile_photo.startsWith('http') ? data.profile_photo : `../${data.profile_photo}`) : null;
-        logo.innerHTML = `
+        desktopLogo.innerHTML = `
             <div class="sidebar-profile">
                 <div class="sidebar-avatar">
-                    ${imgSrc ? `<img src="${imgSrc}" alt="Profile">` : '👤'}
+                    ${imgSrc ? `<img src="${imgSrc}" style="width:100%; height:100%; object-fit:cover;" alt="Profile">` : '👤'}
                 </div>
                 <div class="sidebar-info">
                     <strong>${data.store_name}</strong>
@@ -279,6 +279,12 @@ function updateSidebarProfile(data) {
                 </div>
             </div>
         `;
+    }
+
+    // Update Mobile Header
+    const mobileStoreName = document.getElementById('mobile-store-name');
+    if (mobileStoreName) {
+        mobileStoreName.textContent = data.store_name;
     }
 }
 
@@ -492,6 +498,12 @@ async function loadOrders() {
                         ${order.status === 'pending' ? `
                             <button class="btn-sm btn-approve" onclick="updateOrderStatus(${order.id}, 'processing')">Terima</button>
                             <button class="btn-sm btn-cancel" onclick="updateOrderStatus(${order.id}, 'cancelled')">Tolak</button>
+                        ` : order.status === 'processing' ? `
+                            <button class="btn-sm btn-approve" style="background:#3498db" onclick="updateOrderStatus(${order.id}, 'shipped')">Antar Barang 🚚</button>
+                        ` : order.status === 'shipped' ? `
+                            <span style="color:#f39c12; font-style:italic;">Menunggu Konfirmasi User</span>
+                        ` : order.status === 'completed' ? `
+                            <span style="color:#27ae60; font-weight:bold;">Barang Sudah Sampai</span>
                         ` : '-'}
                     </td>
                 </tr>

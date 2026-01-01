@@ -20,9 +20,25 @@ if (!isset($_SESSION['seller_id'])) {
         $_SESSION['seller_id'] = $recoveredId;
         $_SESSION['role'] = 'seller';
     } else {
-        http_response_code(403);
-        echo json_encode(['success' => false, 'message' => 'Profil seller tidak ditemukan']);
-        exit;
+         // Self-healing: Create seller record if user has seller role but no seller record
+        // Verify user role first
+        $roleStmt = $pdo->prepare("SELECT role, username FROM users WHERE id = :uid");
+        $roleStmt->execute([':uid' => $_SESSION['user_id']]);
+        $userData = $roleStmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($userData && $userData['role'] === 'seller') {
+            // Auto-create seller profile
+            $createStmt = $pdo->prepare("INSERT INTO sellers (user_id, store_name, store_description) VALUES (:uid, :store_name, 'Deskripsi toko belum diatur')");
+            $defaultStoreName = $userData['username'] . "'s Store";
+            $createStmt->execute([':uid' => $_SESSION['user_id'], ':store_name' => $defaultStoreName]);
+            
+            $_SESSION['seller_id'] = $pdo->lastInsertId();
+            $_SESSION['role'] = 'seller';
+        } else {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'Profil seller tidak ditemukan']);
+            exit;
+        }
     }
 }
 
@@ -45,7 +61,56 @@ try {
     $profile = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if (!$profile) {
-        throw new Exception('Profil tidak ditemukan');
+        $checkStmt = $pdo->prepare("SELECT id FROM sellers WHERE user_id = :uid");
+        $checkStmt->execute([':uid' => $userId]);
+        $exists = $checkStmt->fetchColumn();
+
+        if (!$exists) {
+            $roleStmt = $pdo->prepare("SELECT role, username FROM users WHERE id = :uid");
+            $roleStmt->execute([':uid' => $userId]);
+            $userData = $roleStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$userData) {
+                 throw new Exception('User data not found for ID: ' . $userId);
+            }
+            if ($userData['role'] !== 'seller') {
+                 // Do NOT auto-upgrade. Return specific error so frontend can redirect.
+                 throw new Exception('User role is not seller');
+            }
+
+            try {
+                $createStmt = $pdo->prepare("INSERT INTO sellers (user_id, store_name) VALUES (:uid, :store_name)");
+                $defaultStoreName = $userData['username'] . "'s Store";
+                $createStmt->execute([':uid' => $userId, ':store_name' => $defaultStoreName]);
+                $_SESSION['seller_id'] = $pdo->lastInsertId();
+            } catch (PDOException $e) {
+                throw new Exception('Failed to auto-create seller profile: ' . $e->getMessage());
+            }
+
+            // Retry fetch
+            $stmt->execute([':user_id' => $userId]);
+            $profile = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$profile) {
+                 throw new Exception('Profile still null after creation. DB Insert ID: ' . $_SESSION['seller_id']);
+            }
+        } else {
+             // Record exists but JOIN failed. Likely user_id mismatch in JOIN or mismatched columns?
+             // Fetch just from sellers to verify
+             $sStmt = $pdo->prepare("SELECT * FROM sellers WHERE user_id = :uid");
+             $sStmt->execute([':uid' => $userId]);
+             $sellerRaw = $sStmt->fetch(PDO::FETCH_ASSOC);
+             
+             if ($sellerRaw) {
+                 throw new Exception('Seller record exists (ID: ' . $sellerRaw['id'] . ') but JOIN failed. Check foreign keys.');
+             } else {
+                 throw new Exception('Ghost record? Check logic error.');
+             }
+        }
+    }
+
+    if (!$profile) {
+        throw new Exception('Profil tidak ditemukan (Final Check) - User ID: ' . $userId);
     }
 
     // 2. Get follower count (handle case where follows table might not exist yet)

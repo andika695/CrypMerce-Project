@@ -20,9 +20,25 @@ if (!isset($_SESSION['seller_id'])) {
         $_SESSION['seller_id'] = $recoveredId;
         $_SESSION['role'] = 'seller'; // Ensure role is synced
     } else {
-        http_response_code(403);
-        echo json_encode(['success' => false, 'message' => 'Anda belum terdaftar sebagai seller']);
-        exit;
+        // Self-healing: Create seller record if user has seller role but no seller record
+        // Verify user role first
+        $roleStmt = $pdo->prepare("SELECT role, username FROM users WHERE id = :uid");
+        $roleStmt->execute([':uid' => $_SESSION['user_id']]);
+        $userData = $roleStmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($userData && $userData['role'] === 'seller') {
+            // Auto-create seller profile
+            $createStmt = $pdo->prepare("INSERT INTO sellers (user_id, store_name) VALUES (:uid, :store_name)");
+            $defaultStoreName = $userData['username'] . "'s Store";
+            $createStmt->execute([':uid' => $_SESSION['user_id'], ':store_name' => $defaultStoreName]);
+            
+            $_SESSION['seller_id'] = $pdo->lastInsertId();
+            $_SESSION['role'] = 'seller';
+        } else {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'Anda belum terdaftar sebagai seller']);
+            exit;
+        }
     }
 }
 

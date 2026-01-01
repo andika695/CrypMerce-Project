@@ -326,36 +326,68 @@
 }
 
 /* Mobile Small */
-@media (max-width: 600px) {
-  .logo img {
-    height: 32px;
+/* Mobile & Tablet Portrait */
+@media (max-width: 768px) {
+  .logo {
+    display: none !important; /* Force hide logo */
+  }
+
+  /* Make Search fill available space */
+  .search-wrapper {
+    flex: 1;
+    width: auto;
+    max-width: none;
+    margin-right: 8px; /* Spacing before icons */
+  }
+
+  .search-bar {
+    width: 100%;
   }
 
   .search-bar input {
+    width: 100%; /* Ensure input takes space */
+    min-width: 50px; /* Prevent collapse */
     font-size: 13px;
-    padding: 0 12px;
+    padding: 0 8px;
   }
 
   .search-btn {
-    width: 36px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .search-btn svg {
+    width: 16px;
+    height: 16px;
   }
 
   .header-right {
-    gap: 8px;
+    gap: 5px;
+    flex-shrink: 0;
+    display: flex !important; /* Ensure icons show */
   }
 
   .icon-btn {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
+    padding: 5px;
   }
 
   .icon-btn img {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
   }
 
-  /* Hide text 'Kategori' button text if exists, or adjust layout */
   .header-content {
-    gap: 12px;
+    gap: 8px; /* Tighter spacing */
+    padding: 0 10px;
+    justify-content: space-between;
+  }
+}
+
+/* Small Mobile Adjustments */
+@media (max-width: 480px) {
+  .search-bar input {
+    font-size: 12px;
   }
 }

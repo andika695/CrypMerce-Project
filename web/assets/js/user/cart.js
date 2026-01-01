@@ -1,5 +1,6 @@
 // Cart Page JavaScript
-let cartItems = [];
+let allCartItems = []; // Original data
+let cartItems = [];    // Display data (filtered)
 let selectedItems = new Set();
 
 // Initialize page
@@ -58,10 +59,11 @@ async function loadCart() {
     console.log("Cart API Response:", data); // Debug log
 
     if (data.success) {
-      cartItems = data.cart_items;
-      console.log("Cart items loaded:", cartItems.length);
+      allCartItems = data.cart_items;
+      cartItems = [...allCartItems]; // Initialize display with all items
+      console.log("Cart items loaded:", allCartItems.length);
 
-      if (cartItems.length === 0) {
+      if (allCartItems.length === 0) {
         showEmptyCart();
       } else {
         renderCartItems();
@@ -86,7 +88,16 @@ function renderCartItems() {
   const container = document.getElementById("cartItemsContainer");
 
   if (!cartItems || cartItems.length === 0) {
-    showEmptyCart();
+    if (allCartItems.length > 0) {
+        container.innerHTML = `
+            <div class="empty-state" style="text-align:center; padding: 40px;">
+                <p>Tidak ada produk yang cocok dengan kategori/pencarian ini.</p>
+                <button onclick="resetFilter()" class="btn-browse" style="margin-top:10px;">Lihat Semua</button>
+            </div>
+        `;
+    } else {
+        showEmptyCart();
+    }
     return;
   }
 
@@ -114,6 +125,44 @@ function renderCartItems() {
   container.innerHTML = html;
   attachItemEventListeners();
 }
+
+// Global Filter Handlers for header.js
+window.loadProductsByCategory = function(category) {
+    console.log("Filtering cart by category:", category);
+    const normalizedCategory = category.toLowerCase().replace('-', ' ');
+    
+    cartItems = allCartItems.filter(item => {
+        const productCategory = (item.category_name || '').toLowerCase();
+        return productCategory.includes(normalizedCategory);
+    });
+    
+    renderCartItems();
+    
+    // Update cart title if exists
+    const title = document.querySelector('.cart-header .cart-title');
+    if (title) title.innerHTML = `<i class="fas fa-shopping-cart"></i> Keranjang: ${category.replace('-', ' ')}`;
+};
+
+window.performSearch = function(query) {
+    console.log("Searching cart for:", query);
+    const q = query.toLowerCase().trim();
+    
+    cartItems = allCartItems.filter(item => 
+        item.product_name.toLowerCase().includes(q) || 
+        (item.category_name && item.category_name.toLowerCase().includes(q))
+    );
+    
+    renderCartItems();
+};
+
+function resetFilter() {
+    cartItems = [...allCartItems];
+    renderCartItems();
+    const title = document.querySelector('.cart-header .cart-title');
+    if (title) title.innerHTML = `<i class="fas fa-shopping-cart"></i> Keranjang Belanja`;
+}
+
+// ... rest of existing functions starting from renderSellerGroup ...
 
 // Render Seller Group
 function renderSellerGroup(sellerId, group) {

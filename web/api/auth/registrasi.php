@@ -89,6 +89,14 @@ try {
         ':role'     => $role
     ]);
 
+    // If role is seller, create seller profile immediately
+    if ($role === 'seller') {
+        $userId = $pdo->lastInsertId();
+        $storeName = $username . "'s Store"; // Default store name
+        $stmtSeller = $pdo->prepare("INSERT INTO sellers (user_id, store_name) VALUES (?, ?)");
+        $stmtSeller->execute([$userId, $storeName]);
+    }
+
     http_response_code(201);
     echo json_encode([
         'success' => true,

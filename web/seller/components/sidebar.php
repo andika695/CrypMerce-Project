@@ -6,14 +6,27 @@
             <span></span>
             <span></span>
         </button>
-        <h2 class="logo mobile-logo">CrypMerce Seller</h2>
+        <div class="logo mobile-logo" style="display:flex; align-items:center; gap:10px; justify-content:center;">
+             <span style="font-size:16px;">🏪</span>
+             <span id="mobile-store-name">CrypMerce Seller</span>
+        </div>
     </div>
     
     <!-- Overlay untuk menutup sidebar saat diklik di luar -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     
     <div class="sidebar-content">
-        <h2 class="logo desktop-logo">CrypMerce Seller</h2>
+        <div class="logo desktop-logo">
+            <div class="sidebar-profile">
+                 <div class="sidebar-avatar">
+                     <span>👤</span>
+                 </div>
+                 <div class="sidebar-info">
+                     <strong>Memuat...</strong>
+                     <small>...</small>
+                 </div>
+            </div>
+        </div>
             <button class="sidebar-close" id="sidebarClose">
         ✕
     </button>

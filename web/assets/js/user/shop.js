@@ -147,3 +147,20 @@ function updateFollowButton(isFollowing) {
         btn.innerHTML = '<i class="fas fa-plus"></i> Follow';
     }
 }
+
+// Global Handlers for header.js
+window.loadProductsByCategory = function(category) {
+    console.log("Filtering store products by category:", category);
+    const filtered = allProducts.filter(p => 
+        p.category_name.toLowerCase().includes(category.toLowerCase().replace('-', ' '))
+    );
+    renderProducts(filtered);
+    
+    // Update store section title if exists
+    const title = document.querySelector('.shop-container .section-title');
+    if (title) title.textContent = `📦 Produk: ${category.replace('-', ' ')}`;
+};
+
+window.performSearch = function(query) {
+    filterProducts(query);
+};

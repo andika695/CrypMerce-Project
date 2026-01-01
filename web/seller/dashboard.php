@@ -1,3 +1,16 @@
+<?php
+session_start();
+// Redirect if not logged in
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../auth/login.html");
+    exit;
+}
+// Redirect if not seller (e.g. if user matches but role is user)
+if (isset($_SESSION['role']) && $_SESSION['role'] !== 'seller') {
+     header("Location: ../user/dashboard.html");
+     exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>

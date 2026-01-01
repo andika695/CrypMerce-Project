@@ -47,12 +47,15 @@ try {
             p.price as product_price,
             p.stock as product_stock,
             p.image as product_image,
+            p.image as product_image,
+            cat.name as category_name,
             s.id as seller_id,
             s.store_name as seller_name,
             s.location as seller_location,
             s.profile_photo as seller_photo
         FROM cart c
         INNER JOIN products p ON c.product_id = p.id
+        LEFT JOIN categories cat ON p.category_id = cat.id
         INNER JOIN sellers s ON p.seller_id = s.id
         WHERE c.user_id = ?
         ORDER BY s.store_name, c.added_at DESC
