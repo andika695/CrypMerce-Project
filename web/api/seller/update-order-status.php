@@ -88,6 +88,18 @@ try {
         $title = "Pesanan Ditolak";
         $message = "Maaf, pesanan Anda ditolak oleh penjual.";
         $type = "error";
+    } else if ($status === 'return_approved') {
+        $title = "Return Disetujui";
+        $message = "Penjual telah menyetujui return Anda. Silakan kirim barang kembali.";
+        $type = "success";
+    } else if ($status === 'return_rejected') {
+        $title = "Return Ditolak";
+        $message = "Maaf, permintaan return Anda ditolak oleh penjual.";
+        $type = "error";
+    } else if ($status === 'return_completed') {
+        $title = "Return Berhasil";
+        $message = "Barang return telah diterima oleh penjual. Proses return selesai.";
+        $type = "success";
     }
 
     createNotification($pdo, $orderData['buyer_id'], $title, $message, $order_id, $type);

@@ -505,7 +505,18 @@ async function loadOrders() {
                         ` : order.status === 'shipped' ? `
                             <span style="color:#f39c12; font-style:italic;">Menunggu Konfirmasi User</span>
                         ` : order.status === 'completed' ? `
-                            <span style="color:#27ae60; font-weight:bold;">Barang Sudah Sampai</span>
+                            <span style="color:#27ae60; font-weight:bold;">Barang Sudah Sampai ✅</span>
+                        ` : order.status === 'return_requested' ? `
+                            <button class="btn-sm btn-approve" style="background:#9b59b6" onclick="updateOrderStatus(${order.id}, 'return_approved')">Konfirmasi Return ✅</button>
+                            <button class="btn-sm btn-cancel" onclick="updateOrderStatus(${order.id}, 'return_rejected')">Tolak Return ❌</button>
+                        ` : order.status === 'return_approved' ? `
+                            <span style="color:#3498db; font-style:italic;">Menunggu User Kirim Barang</span>
+                        ` : order.status === 'return_shipped' ? `
+                            <button class="btn-sm btn-approve" style="background:#27ae60" onclick="updateOrderStatus(${order.id}, 'return_completed')">Barang Kembalian Sampai 📦</button>
+                        ` : order.status === 'return_completed' ? `
+                            <span style="color:#27ae60; font-weight:bold;">Return Selesai ✅</span>
+                        ` : order.status === 'return_rejected' ? `
+                            <span style="color:#e74c3c; font-weight:bold;">Return Ditolak</span>
                         ` : '-'}
                     </td>
                 </tr>
