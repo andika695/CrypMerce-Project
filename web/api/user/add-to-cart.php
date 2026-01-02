@@ -18,14 +18,14 @@ error_log("Session data: " . json_encode($_SESSION));
 error_log("POST data: " . json_encode($_POST));
 
 // Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user']) || !isset($_SESSION['user']['user_id'])) {
     ob_clean();
     echo json_encode(['success' => false, 'message' => 'User not logged in', 'debug' => 'no_session']);
     exit;
 }
 
 // Allow both user and seller for now (for testing)
-$user_id = $_SESSION['user_id'];
+$user_id = $_SESSION['user']['user_id'];
 error_log("User ID: " . $user_id);
 
 // Validate input

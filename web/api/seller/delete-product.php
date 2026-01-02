@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Cek sesi login seller
-if (!isset($_SESSION['seller_id'])) {
+if (!isset($_SESSION['seller']) || !isset($_SESSION['seller']['seller_id'])) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
@@ -19,7 +19,7 @@ if (!isset($_SESSION['seller_id'])) {
 
 $data = json_decode(file_get_contents('php://input'), true);
 $productId = filter_var($data['id'] ?? null, FILTER_VALIDATE_INT);
-$sellerId = $_SESSION['seller_id'];
+$sellerId = $_SESSION['seller']['seller_id'];
 
 if (!$productId) {
     http_response_code(400);

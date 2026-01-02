@@ -10,14 +10,14 @@ require __DIR__ . '/../config/config.php';
 header('Content-Type: application/json');
 
 // Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user']) || !isset($_SESSION['user']['user_id'])) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
 }
 
 try {
-    $userId = $_SESSION['user_id'];
+    $userId = $_SESSION['user']['user_id'];
     
     $stmt = $pdo->prepare("
         SELECT id, username, email, full_name, phone_number, profile_photo,

@@ -1,23 +1,8 @@
 <?php
 session_start();
 
-// Check for seller session - prioritize namespaced session
-$isSellerLoggedIn = false;
-
-// First check namespaced seller session
-if (isset($_SESSION['seller']) && isset($_SESSION['seller']['seller_id'])) {
-    $isSellerLoggedIn = true;
-    // Sync legacy vars from namespaced session
-    $_SESSION['user_id'] = $_SESSION['seller']['user_id'];
-    $_SESSION['username'] = $_SESSION['seller']['username'];
-    $_SESSION['role'] = $_SESSION['seller']['role'];
-    $_SESSION['seller_id'] = $_SESSION['seller']['seller_id'];
-    $_SESSION['store_name'] = $_SESSION['seller']['store_name'];
-}
-// Fallback: check legacy session vars
-elseif (isset($_SESSION['user_id']) && isset($_SESSION['role']) && $_SESSION['role'] === 'seller') {
-    $isSellerLoggedIn = true;
-}
+// Check for seller session - use namespaced session only
+$isSellerLoggedIn = isset($_SESSION['seller']) && isset($_SESSION['seller']['seller_id']);
 
 // Redirect if not logged in as seller
 if (!$isSellerLoggedIn) {

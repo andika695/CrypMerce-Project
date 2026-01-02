@@ -112,3 +112,14 @@
         </form>
     </div>
 </div>
+
+<!-- ORDER DETAILS MODAL -->
+<div id="order-details-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeOrderDetailsModal()">&times;</span>
+        <h2>Detail Pesanan</h2>
+        <div id="order-details-content">
+            <p style="text-align: center; padding: 20px;">Memuat detail pesanan...</p>
+        </div>
+    </div>
+</div>

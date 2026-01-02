@@ -4,30 +4,14 @@ header('Content-Type: application/json');
 require_once '../config/config.php';
 
 // Check authentication
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['seller']) || !isset($_SESSION['seller']['seller_id'])) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
 }
 
-// Robust session recovery for sellers
-if (!isset($_SESSION['seller_id']) || $_SESSION['role'] !== 'seller') {
-    $stmt = $pdo->prepare("SELECT id FROM sellers WHERE user_id = ?");
-    $stmt->execute([$_SESSION['user_id']]);
-    $seller_id = $stmt->fetchColumn();
-    
-    if ($seller_id) {
-        $_SESSION['seller_id'] = $seller_id;
-        $_SESSION['role'] = 'seller';
-    } else {
-        http_response_code(403);
-        echo json_encode(['success' => false, 'message' => 'Forbidden: Seller profile not found']);
-        exit;
-    }
-}
-
-$seller_id = $_SESSION['seller_id'];
-$user_id = $_SESSION['user_id'];
+$seller_id = $_SESSION['seller']['seller_id'];
+$user_id = $_SESSION['seller']['user_id'];
 
 // Handle profile photo upload if exists to Cloudinary
 $photo_path = null;
@@ -70,7 +54,8 @@ try {
     if ($store_name) {
         $updates[] = "store_name = :store_name";
         $params['store_name'] = $store_name;
-        $_SESSION['store_name'] = $store_name; // Update session
+        // Update session (namespaced)
+        $_SESSION['seller']['store_name'] = $store_name;
     }
     
     

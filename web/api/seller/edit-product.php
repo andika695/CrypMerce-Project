@@ -10,13 +10,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-if (!isset($_SESSION['seller_id'])) {
+if (!isset($_SESSION['seller']) || !isset($_SESSION['seller']['seller_id'])) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
 }
 
-$sellerId = $_SESSION['seller_id'];
+$sellerId = $_SESSION['seller']['seller_id'];
 
 // Ambil input
 $productId   = filter_var($_POST['product_id'] ?? null, FILTER_VALIDATE_INT);

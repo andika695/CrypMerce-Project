@@ -51,4 +51,9 @@ volumes:
 
 networks:
   mybridge:
-    driver: bridge
+    external: true
+
+# networks:
+#   mybridge:
+#     driver: bridge
+#     name:  mybridge

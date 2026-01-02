@@ -4,14 +4,14 @@ require_once __DIR__ . '/../../api/config/config.php';
 
 header('Content-Type: application/json');
 
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
+if (!isset($_SESSION['user']) || !isset($_SESSION['user']['user_id'])) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit();
 }
 
 $response = ['success' => false, 'message' => ''];
-$userId = $_SESSION['user_id'];
+$userId = $_SESSION['user']['user_id'];
 $name = $_POST['name'] ?? '';
 
 try {

@@ -18,8 +18,8 @@ try {
         throw new Exception('Data tidak ditemukan');
     }
 
-    $user_id   = $_SESSION['user_id'] ?? null;
-    $user_role = $_SESSION['role'] ?? null;
+    $user_id   = $_SESSION['user']['user_id'] ?? null;
+    $user_role = $_SESSION['user']['role'] ?? null;
 
     if (!$user_id || $user_role !== 'user') {
         http_response_code(403);

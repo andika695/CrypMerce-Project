@@ -9,13 +9,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-if (!isset($_SESSION['user_id']) && !isset($_SESSION['user']['user_id'])) {
+if (!isset($_SESSION['user']) || !isset($_SESSION['user']['user_id'])) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
 }
 
-$user_id = $_SESSION['user']['user_id'] ?? $_SESSION['user_id'];
+$user_id = $_SESSION['user']['user_id'];
 
 $data = json_decode(file_get_contents('php://input'), true);
 $order_id = $data['order_id'] ?? null;

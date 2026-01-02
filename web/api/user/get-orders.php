@@ -3,12 +3,12 @@ header('Content-Type: application/json');
 require_once '../config/config.php';
 session_start();
 
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user']) || !isset($_SESSION['user']['user_id'])) {
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit();
 }
 
-$user_id = $_SESSION['user_id']; // Ambil ID user dari session login
+$user_id = $_SESSION['user']['user_id']; // Ambil ID user dari session login
 
 // Query untuk mengambil riwayat pesanan beserta satu contoh nama produk untuk ringkasan
 try {

@@ -11,27 +11,13 @@ require __DIR__ . '/../services/geocoding-service.php';
 header('Content-Type: application/json');
 
 // Check if user is logged in as seller
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'seller') {
+if (!isset($_SESSION['seller']) || !isset($_SESSION['seller']['seller_id'])) {
     http_response_code(401);
     echo json_encode([
         'success' => false,
         'message' => 'Unauthorized'
     ]);
     exit;
-}
-
-// Robust seller_id recovery
-if (!isset($_SESSION['seller_id'])) {
-    $recoveryStmt = $pdo->prepare("SELECT id FROM sellers WHERE user_id = :uid");
-    $recoveryStmt->execute([':uid' => $_SESSION['user_id']]);
-    $recoveredId = $recoveryStmt->fetchColumn();
-    if ($recoveredId) {
-        $_SESSION['seller_id'] = $recoveredId;
-    } else {
-        http_response_code(403);
-        echo json_encode(['success' => false, 'message' => 'Seller ID not found']);
-        exit;
-    }
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -44,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 try {
-    $sellerId = $_SESSION['seller_id'];
+    $sellerId = $_SESSION['seller']['seller_id'];
     $latitude = filter_var($_POST['latitude'] ?? null, FILTER_VALIDATE_FLOAT);
     $longitude = filter_var($_POST['longitude'] ?? null, FILTER_VALIDATE_FLOAT);
     $addressDetail = trim($_POST['address_detail'] ?? '');

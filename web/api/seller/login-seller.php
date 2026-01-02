@@ -60,7 +60,6 @@ try {
     }
     
     // Use namespaced session for SELLER - separate from user
-    // DON'T destroy entire session, just update seller namespace
     $_SESSION['seller'] = [
         'user_id' => $user['id'],
         'username' => $user['username'],
@@ -68,13 +67,6 @@ try {
         'seller_id' => $user['seller_id'],
         'store_name' => $user['store_name']
     ];
-
-    // Update legacy session vars for backward compat (seller takes priority when on seller pages)
-    $_SESSION['user_id'] = $user['id'];
-    $_SESSION['username'] = $user['username'];
-    $_SESSION['role'] = $user['role'];
-    $_SESSION['seller_id'] = $user['seller_id'];
-    $_SESSION['store_name'] = $user['store_name'];
     
     http_response_code(200);
     echo json_encode([

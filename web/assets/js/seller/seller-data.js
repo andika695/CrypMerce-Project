@@ -34,6 +34,10 @@ function updateStats(stats) {
     // Add follower count to stats if element exists
     const followerStat = document.getElementById('follower-count');
     if (followerStat) followerStat.textContent = stats.follower_count;
+    
+    // Add total revenue with currency formatting
+    const revenueStat = document.getElementById('total-revenue');
+    if (revenueStat) revenueStat.textContent = 'Rp ' + Number(stats.total_revenue || 0).toLocaleString('id-ID');
 }
 
 function updateProductTable(products) {
@@ -497,6 +501,7 @@ async function loadOrders() {
                     <td>Rp ${Number(order.total_amount).toLocaleString('id-ID')}</td>
                     <td><span class="status-badge ${order.status}">${order.status}</span></td>
                     <td>
+                        <button class="btn-sm" style="background:#3498db; margin-right:5px;" onclick="viewOrderDetails(${order.id})">Detail</button>
                         ${order.status === 'pending' ? `
                             <button class="btn-sm btn-approve" onclick="updateOrderStatus(${order.id}, 'processing')">Terima</button>
                             <button class="btn-sm btn-cancel" onclick="updateOrderStatus(${order.id}, 'cancelled')">Tolak</button>
@@ -550,6 +555,86 @@ async function updateOrderStatus(orderId, status) {
     }
 }
 
+async function viewOrderDetails(orderId) {
+    const modal = document.getElementById('order-details-modal');
+    const content = document.getElementById('order-details-content');
+    
+    if (!modal || !content) return;
+    
+    // Show modal with loading state
+    modal.style.display = 'block';
+    content.innerHTML = '<p style="text-align: center; padding: 20px;">Memuat detail pesanan...</p>';
+    
+    try {
+        const response = await fetch(`../api/seller/get-order-details.php?order_id=${orderId}`);
+        const result = await response.json();
+        
+        if (result.success) {
+            const { order, items } = result;
+            
+            // Build items table
+            const itemsHTML = items.map(item => {
+                const imgSrc = item.product_image 
+                    ? (item.product_image.startsWith('http') ? item.product_image : `../assets/images/products/${item.product_image}`)
+                    : '../assets/images/bag.png';
+                
+                return `
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <img src="${imgSrc}" 
+                                     onerror="this.src='../assets/images/bag.png'"
+                                     style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                <span>${item.product_name}</span>
+                            </div>
+                        </td>
+                        <td>Rp ${Number(item.price_at_purchase).toLocaleString('id-ID')}</td>
+                        <td>${item.quantity}</td>
+                        <td>Rp ${Number(item.subtotal).toLocaleString('id-ID')}</td>
+                    </tr>
+                `;
+            }).join('');
+            
+            content.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <p><strong>ID Pesanan:</strong> #ORD-${order.id}</p>
+                    <p><strong>Waktu:</strong> ${new Date(order.created_at).toLocaleString('id-ID')}</p>
+                    <p><strong>Status:</strong> <span class="status-badge ${order.status}">${order.status}</span></p>
+                </div>
+                <h3 style="margin-bottom: 10px;">Daftar Barang</h3>
+                <table class="order-table" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>Produk</th>
+                            <th>Harga</th>
+                            <th>Jumlah</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itemsHTML}
+                    </tbody>
+                </table>
+                <div style="margin-top: 20px; text-align: right; font-size: 18px;">
+                    <strong>Total: Rp ${Number(order.total_amount).toLocaleString('id-ID')}</strong>
+                </div>
+            `;
+        } else {
+            content.innerHTML = `<p style="text-align: center; padding: 20px; color: #e74c3c;">${result.message}</p>`;
+        }
+    } catch (error) {
+        console.error('Error loading order details:', error);
+        content.innerHTML = '<p style="text-align: center; padding: 20px; color: #e74c3c;">Terjadi kesalahan saat memuat detail pesanan.</p>';
+    }
+}
+
+function closeOrderDetailsModal() {
+    const modal = document.getElementById('order-details-modal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
 
 // Handle Profile Update Form
 document.getElementById('edit-profile-form')?.addEventListener('submit', async (e) => {
@@ -592,6 +677,8 @@ document.querySelectorAll('.menu-item').forEach(item => {
 });
 
 window.updateOrderStatus = updateOrderStatus;
+window.viewOrderDetails = viewOrderDetails;
+window.closeOrderDetailsModal = closeOrderDetailsModal;
 window.openEditProfileModal = openEditProfileModal;
 window.closeEditProfileModal = closeEditProfileModal;
 

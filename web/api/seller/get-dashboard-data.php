@@ -4,45 +4,14 @@ require '../config/config.php';
 
 header('Content-Type: application/json');
 
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
+// Check if seller is logged in
+if (!isset($_SESSION['seller']) || !isset($_SESSION['seller']['seller_id'])) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Sesi berakhir, silakan login kembali']);
     exit;
 }
 
-// 1. Recover seller_id if missing
-if (!isset($_SESSION['seller_id'])) {
-    $stmt = $pdo->prepare("SELECT id FROM sellers WHERE user_id = :uid");
-    $stmt->execute([':uid' => $_SESSION['user_id']]);
-    $recoveredId = $stmt->fetchColumn();
-    if ($recoveredId) {
-        $_SESSION['seller_id'] = $recoveredId;
-        $_SESSION['role'] = 'seller'; // Ensure role is synced
-    } else {
-        // Self-healing: Create seller record if user has seller role but no seller record
-        // Verify user role first
-        $roleStmt = $pdo->prepare("SELECT role, username FROM users WHERE id = :uid");
-        $roleStmt->execute([':uid' => $_SESSION['user_id']]);
-        $userData = $roleStmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($userData && $userData['role'] === 'seller') {
-            // Auto-create seller profile
-            $createStmt = $pdo->prepare("INSERT INTO sellers (user_id, store_name) VALUES (:uid, :store_name)");
-            $defaultStoreName = $userData['username'] . "'s Store";
-            $createStmt->execute([':uid' => $_SESSION['user_id'], ':store_name' => $defaultStoreName]);
-            
-            $_SESSION['seller_id'] = $pdo->lastInsertId();
-            $_SESSION['role'] = 'seller';
-        } else {
-            http_response_code(403);
-            echo json_encode(['success' => false, 'message' => 'Anda belum terdaftar sebagai seller']);
-            exit;
-        }
-    }
-}
-
-$seller_id = $_SESSION['seller_id'];
+$seller_id = $_SESSION['seller']['seller_id'];
 
 try {
     // 1. Get stats
@@ -78,7 +47,21 @@ try {
         $follower_count = 0; // Silent fail if table doesn't exist
     }
     
-    // 4. Get recent products
+    // 4. Get total revenue from completed orders
+    $total_revenue = 0;
+    try {
+        $revenueStmt = $pdo->prepare("
+            SELECT COALESCE(SUM(total_amount), 0) as revenue 
+            FROM orders 
+            WHERE seller_id = :seller_id AND status = 'completed'
+        ");
+        $revenueStmt->execute(['seller_id' => $seller_id]);
+        $total_revenue = (float)$revenueStmt->fetchColumn();
+    } catch (PDOException $e) {
+        $total_revenue = 0;
+    }
+    
+    // 5. Get recent products
     $productsQuery = "
         SELECT 
             p.id,
@@ -112,7 +95,8 @@ try {
             'total_products' => (int) $stats['total_products'],
             'total_stock' => (int) $stats['total_stock'],
             'total_orders' => $total_orders,
-            'follower_count' => $follower_count
+            'follower_count' => $follower_count,
+            'total_revenue' => $total_revenue
         ],
         'products' => $products
     ]);

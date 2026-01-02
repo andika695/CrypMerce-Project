@@ -8,12 +8,12 @@ header('Pragma: no-cache');
 header('Expires: 0');
 
 // Check if user is logged in
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
+if (!isset($_SESSION['user']) || !isset($_SESSION['user']['user_id'])) {
     echo json_encode(['success' => false, 'message' => 'User not authenticated']);
     exit;
 }
 
-$user_id = $_SESSION['user_id'];
+$user_id = $_SESSION['user']['user_id'];
 
 // Validate input
 if (!isset($_POST['cart_item_id'])) {

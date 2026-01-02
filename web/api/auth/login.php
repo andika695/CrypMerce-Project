@@ -44,19 +44,19 @@ try {
             'role' => $user['role']
         ];
 
-        // Also set legacy session vars for backward compatibility
-        $_SESSION['user_id']  = $user['id'];
-        $_SESSION['username'] = $user['username'];
-        $_SESSION['role']     = $user['role'];
-
-        // If seller, fetch seller_id
+        // If seller, also populate seller namespace
         if ($user['role'] === 'seller') {
             $sellerStmt = $pdo->prepare("SELECT id, store_name FROM sellers WHERE user_id = :uid");
             $sellerStmt->execute([':uid' => $user['id']]);
             $sellerData = $sellerStmt->fetch(PDO::FETCH_ASSOC);
             if ($sellerData) {
-                $_SESSION['seller_id'] = $sellerData['id'];
-                $_SESSION['store_name'] = $sellerData['store_name'];
+                $_SESSION['seller'] = [
+                    'user_id' => $user['id'],
+                    'username' => $user['username'],
+                    'role' => 'seller',
+                    'seller_id' => $sellerData['id'],
+                    'store_name' => $sellerData['store_name']
+                ];
             }
         }
 

@@ -4,46 +4,15 @@ require __DIR__ . '/../config/config.php';
 
 header('Content-Type: application/json');
 
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
+// Check if seller is logged in
+if (!isset($_SESSION['seller']) || !isset($_SESSION['seller']['seller_id'])) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
 }
 
-// Robust seller_id recovery
-if (!isset($_SESSION['seller_id'])) {
-    $recoveryStmt = $pdo->prepare("SELECT id FROM sellers WHERE user_id = :uid");
-    $recoveryStmt->execute([':uid' => $_SESSION['user_id']]);
-    $recoveredId = $recoveryStmt->fetchColumn();
-    if ($recoveredId) {
-        $_SESSION['seller_id'] = $recoveredId;
-        $_SESSION['role'] = 'seller';
-    } else {
-         // Self-healing: Create seller record if user has seller role but no seller record
-        // Verify user role first
-        $roleStmt = $pdo->prepare("SELECT role, username FROM users WHERE id = :uid");
-        $roleStmt->execute([':uid' => $_SESSION['user_id']]);
-        $userData = $roleStmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($userData && $userData['role'] === 'seller') {
-            // Auto-create seller profile
-            $createStmt = $pdo->prepare("INSERT INTO sellers (user_id, store_name, store_description) VALUES (:uid, :store_name, 'Deskripsi toko belum diatur')");
-            $defaultStoreName = $userData['username'] . "'s Store";
-            $createStmt->execute([':uid' => $_SESSION['user_id'], ':store_name' => $defaultStoreName]);
-            
-            $_SESSION['seller_id'] = $pdo->lastInsertId();
-            $_SESSION['role'] = 'seller';
-        } else {
-            http_response_code(403);
-            echo json_encode(['success' => false, 'message' => 'Profil seller tidak ditemukan']);
-            exit;
-        }
-    }
-}
-
 try {
-    $userId = $_SESSION['user_id'];
+    $userId = $_SESSION['seller']['user_id'];
     
     // 1. Get seller profile (with fallback for missing location column)
     // 1. Get seller profile

@@ -17,29 +17,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Cek apakah user login sebagai seller
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'seller') {
+if (!isset($_SESSION['seller']) || !isset($_SESSION['seller']['seller_id'])) {
     ob_clean();
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized: Hanya seller yang dapat menambah produk']);
     exit;
 }
 
-// Ambil seller_id dari session (asumsi login-seller.php sudah set ini)
-// Jika belum ada di session, kita harus query ulang berdasarkan user_id
-if (!isset($_SESSION['seller_id'])) {
-    // Fallback: Ambil seller_id dari database berdasarkan user_id
-    $stmt = $pdo->prepare("SELECT id FROM sellers WHERE user_id = ?");
-    $stmt->execute([$_SESSION['user_id']]);
-    $seller = $stmt->fetch();
-    
-    if (!$seller) {
-        ob_clean();
-        http_response_code(403);
-        echo json_encode(['success' => false, 'message' => 'Profil seller tidak ditemukan']);
-        exit;
-    }
-    $_SESSION['seller_id'] = $seller['id'];
-}
+$seller_id = $_SESSION['seller']['seller_id'];
 
 try {
     // Validasi input
@@ -51,7 +36,7 @@ try {
         exit;
     }
 
-    $seller_id   = $_SESSION['seller_id'];
+    // seller_id sudah di-set di atas
     $category_id = filter_var($_POST['category_id'], FILTER_VALIDATE_INT);
     $name        = trim($_POST['name']);
     $price       = filter_var($_POST['price'], FILTER_VALIDATE_FLOAT);

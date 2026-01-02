@@ -151,6 +151,13 @@ body {
   color: #3533cd;
 }
 
+/* Smaller font for revenue to fit long numbers */
+#total-revenue {
+  font-size: 24px;
+  word-break: break-word;
+  line-height: 1.2;
+}
+
 /* ===== TABLE ===== */
 .product-table {
   background: #ffffff;

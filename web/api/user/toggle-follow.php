@@ -4,13 +4,13 @@ require_once '../config/config.php';
 
 header('Content-Type: application/json');
 
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user']) || !isset($_SESSION['user']['user_id'])) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Silakan login terlebih dahulu']);
     exit;
 }
 
-$user_id = $_SESSION['user_id'];
+$user_id = $_SESSION['user']['user_id'];
 $data = json_decode(file_get_contents('php://input'), true);
 $seller_id = $data['seller_id'] ?? null;
 

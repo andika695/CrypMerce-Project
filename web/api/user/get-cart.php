@@ -8,22 +8,16 @@ header('Pragma: no-cache');
 header('Expires: 0');
 
 // Debug: log session info
-error_log("Cart API - User ID: " . ($_SESSION['user_id'] ?? 'not set'));
-error_log("Cart API - Role: " . ($_SESSION['role'] ?? 'not set'));
+error_log("Cart API - User ID: " . ($_SESSION['user']['user_id'] ?? 'not set'));
+error_log("Cart API - Role: " . ($_SESSION['user']['role'] ?? 'not set'));
 
 // Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user']) || !isset($_SESSION['user']['user_id'])) {
     echo json_encode(['success' => false, 'message' => 'User not logged in', 'debug' => 'no_session']);
     exit;
 }
 
-// For now, allow both user and seller to view cart (for testing)
-// if ($_SESSION['role'] !== 'user') {
-//     echo json_encode(['success' => false, 'message' => 'Only users can access cart']);
-//     exit;
-// }
-
-$user_id = $_SESSION['user_id'];
+$user_id = $_SESSION['user']['user_id'];
 
 try {
     // First, check if cart has any items for this user

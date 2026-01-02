@@ -5,27 +5,13 @@ require __DIR__ . '/../config/config.php';
 header('Content-Type: application/json');
 
 // Check if user is logged in as seller
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'seller') {
+if (!isset($_SESSION['seller']) || !isset($_SESSION['seller']['seller_id'])) {
     http_response_code(401);
     echo json_encode([
         'success' => false,
         'message' => 'Unauthorized'
     ]);
     exit;
-}
-
-// Robust seller_id recovery
-if (!isset($_SESSION['seller_id'])) {
-    $recoveryStmt = $pdo->prepare("SELECT id FROM sellers WHERE user_id = :uid");
-    $recoveryStmt->execute([':uid' => $_SESSION['user_id']]);
-    $recoveredId = $recoveryStmt->fetchColumn();
-    if ($recoveredId) {
-        $_SESSION['seller_id'] = $recoveredId;
-    } else {
-        http_response_code(403);
-        echo json_encode(['success' => false, 'message' => 'Seller ID not found']);
-        exit;
-    }
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -37,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$sellerId = $_SESSION['seller_id'];
+$sellerId = $_SESSION['seller']['seller_id'];
 $storeName = trim($_POST['storeName'] ?? '');
 
 if (!$storeName) {
@@ -151,8 +137,8 @@ try {
         ]);
     }
     
-    // Update session
-    $_SESSION['store_name'] = $storeName;
+    // Update session (namespaced)
+    $_SESSION['seller']['store_name'] = $storeName;
     
     http_response_code(200);
     echo json_encode([

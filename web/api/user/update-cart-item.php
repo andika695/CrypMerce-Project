@@ -13,12 +13,12 @@ error_log("Session: " . json_encode($_SESSION));
 error_log("POST: " . json_encode($_POST));
 
 // Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user']) || !isset($_SESSION['user']['user_id'])) {
     echo json_encode(['success' => false, 'message' => 'User not logged in']);
     exit;
 }
 
-$user_id = $_SESSION['user_id'];
+$user_id = $_SESSION['user']['user_id'];
 
 // Validate input
 if (!isset($_POST['cart_item_id']) || !isset($_POST['quantity'])) {

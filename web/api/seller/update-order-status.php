@@ -3,41 +3,9 @@ header('Content-Type: application/json');
 require_once '../config/config.php';
 session_start();
 
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['seller']) || !isset($_SESSION['seller']['seller_id'])) {
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
-}
-
-// Robust seller_id recovery & Self-Healing
-if (!isset($_SESSION['seller_id'])) {
-    $userId = $_SESSION['user_id'];
-    
-    // Check if seller record exists
-    $checkStmt = $pdo->prepare("SELECT id FROM sellers WHERE user_id = :uid");
-    $checkStmt->execute([':uid' => $userId]);
-    $recoveredId = $checkStmt->fetchColumn();
-
-    if ($recoveredId) {
-        $_SESSION['seller_id'] = $recoveredId;
-        $_SESSION['role'] = 'seller';
-    } else {
-        // Auto-create if user has seller role but no record
-        $roleStmt = $pdo->prepare("SELECT role, username FROM users WHERE id = :uid");
-        $roleStmt->execute([':uid' => $userId]);
-        $userData = $roleStmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($userData && $userData['role'] === 'seller') {
-             $createStmt = $pdo->prepare("INSERT INTO sellers (user_id, store_name) VALUES (:uid, :store_name)");
-             $defaultStoreName = $userData['username'] . "'s Store";
-             $createStmt->execute([':uid' => $userId, ':store_name' => $defaultStoreName]);
-             
-             $_SESSION['seller_id'] = $pdo->lastInsertId();
-             $_SESSION['role'] = 'seller';
-        } else {
-             echo json_encode(['success' => false, 'message' => 'Access denied: Not a seller']);
-             exit;
-        }
-    }
 }
 
 $data = json_decode(file_get_contents('php://input'), true);
@@ -49,7 +17,7 @@ if (!isset($data['order_id']) || !isset($data['status'])) {
 
 $order_id = $data['order_id'];
 $status = $data['status'];
-$seller_id = $_SESSION['seller_id'];
+$seller_id = $_SESSION['seller']['seller_id'];
 
 try {
     // Verify order belongs to seller AND fetch buyer_id for notification

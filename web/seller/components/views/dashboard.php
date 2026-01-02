@@ -17,6 +17,10 @@
             <h3>Pengikut</h3>
             <p id="follower-count">0</p>
         </div>
+        <div class="card">
+            <h3>Total Keuntungan</h3>
+            <p id="total-revenue">Rp 0</p>
+        </div>
     </div>
 
     <section class="product-table">
