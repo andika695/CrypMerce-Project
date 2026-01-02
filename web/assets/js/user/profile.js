@@ -166,6 +166,7 @@ menuItems.forEach(item => {
     // Function to close sidebar
     function closeSidebar() {
         if (sidebar) sidebar.classList.remove('active');
+        if (hamburgerBtn) hamburgerBtn.classList.remove('active'); // Reset hamburger animation via class
         if (sidebarOverlay) sidebarOverlay.classList.remove('active');
         document.body.style.overflow = 'auto';
     }
@@ -173,13 +174,21 @@ menuItems.forEach(item => {
     // Function to open sidebar
     function openSidebar() {
         if (sidebar) sidebar.classList.add('active');
+        if (hamburgerBtn) hamburgerBtn.classList.add('active'); // Trigger hamburger animation via class
         if (sidebarOverlay) sidebarOverlay.classList.add('active');
         document.body.style.overflow = 'hidden';
     }
 
     // Event listeners for sidebar toggle
     if (hamburgerBtn) {
-        hamburgerBtn.addEventListener('click', openSidebar);
+        hamburgerBtn.addEventListener('click', function(e) {
+            e.stopPropagation(); // Mencegah event bubbling
+            if (sidebar.classList.contains('active')) {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
+        });
     }
 
     if (sidebarOverlay) {

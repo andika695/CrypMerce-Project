@@ -4,6 +4,32 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const menuItems = document.querySelectorAll('.menu-item');
     const views = document.querySelectorAll('.view');
+    const mobilePageTitle = document.getElementById('mobile-page-title');
+    
+    // Page Title Mapping
+    const pageTitles = {
+        'dashboard': 'Dashboard',
+        'profile': 'Profil Seller',
+        'add-product': 'Tambah Produk',
+        'my-store': 'Toko Saya',
+        'orders': 'Pesanan Masuk',
+        'location-settings': 'Lokasi Toko',
+        'logout': 'Logout'
+    };
+
+    function updateMobileTitle(page) {
+        if (mobilePageTitle && pageTitles[page]) {
+            mobilePageTitle.textContent = pageTitles[page];
+        } else if (mobilePageTitle) {
+            mobilePageTitle.textContent = 'Dashboard';
+        }
+    }
+    
+    // Initialize title on load
+    const initialActive = document.querySelector('.menu-item.active');
+    if (initialActive) {
+        updateMobileTitle(initialActive.dataset.page);
+    }
     
     console.log('Found menu items:', menuItems.length);
     console.log('Found views:', views.length);
@@ -25,6 +51,9 @@ document.addEventListener('DOMContentLoaded', () => {
             // Update active menu
             menuItems.forEach(mi => mi.classList.remove('active'));
             item.classList.add('active');
+
+            // Update Mobile Header Title
+            updateMobileTitle(page);
 
             // Show corresponding view
             views.forEach(view => {

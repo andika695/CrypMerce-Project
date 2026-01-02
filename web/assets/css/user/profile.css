@@ -43,7 +43,7 @@ body {
   height: 100vh;
   left: 0;
   top: 0;
-  z-index: 100;
+  z-index: 2000;
 }
 
 .sidebar .logo {
@@ -465,10 +465,11 @@ h1 {
   top: 0;
   left: 0;
   width: 100%;
-  background: white;
-  z-index: 1000;
+  background: var(--primary-blue);
+  z-index: 2001;
   padding: 15px 20px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-bottom: 2px solid var(--primary-yellow);
   align-items: center;
   justify-content: space-between;
 }
@@ -480,35 +481,52 @@ h1 {
 .page-title {
   font-size: 1.3rem;
   font-weight: 600;
-  color: var(--dark-blue);
-  margin-left: 60px;
+  color: var(--primary-yellow);
+  margin-left: 0; /* Removed margin as hamburger is absolute/fixed sometimes or flex */
   flex: 1;
   text-align: center;
 }
 
 .hamburger-btn {
   display: none;
-  position: fixed;
-  top: 15px;
-  left: 20px;
-  z-index: 1001;
-  background: var(--primary-blue);
+  background: transparent;
   border: none;
-  color: white;
-  width: 45px;
-  height: 45px;
-  border-radius: 8px;
-  font-size: 1.2rem;
+  color: var(--primary-yellow);
+  font-size: 1.5rem;
   cursor: pointer;
-  box-shadow: var(--shadow);
+  z-index: 1001;
+  padding: 0;
   transition: all 0.3s ease;
-  align-items: center;
-  justify-content: center;
+  width: 30px;
+  height: 24px;
+  display: flex !important;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.hamburger-btn span {
+  display: block;
+  height: 3px;
+  width: 100%;
+  background-color: var(--primary-yellow);
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+.hamburger-btn.active span:nth-child(1) {
+  transform: translateY(10.5px) rotate(45deg);
+}
+
+.hamburger-btn.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-btn.active span:nth-child(3) {
+  transform: translateY(-10.5px) rotate(-45deg);
 }
 
 .hamburger-btn:hover {
-  background: var(--dark-blue);
-  transform: scale(1.05);
+  transform: scale(1.05); /* Sedikit efek zoom saat hover */
 }
 
 /* Responsive untuk mobile */
@@ -518,10 +536,8 @@ h1 {
   }
 
   .hamburger-btn {
-    display: flex;
-    position: fixed;
-    top: 15px;
-    left: 20px;
+    display: block;
+    position: static; /* Reset from fixed */
   }
 
   .sidebar {
@@ -529,7 +545,7 @@ h1 {
     transition: transform 0.3s ease;
     width: 280px;
     box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2);
-    padding-top: 1rem;
+    padding-top: 80px; /* Push content down below fixed header */
     top: 0;
     height: 100vh;
   }

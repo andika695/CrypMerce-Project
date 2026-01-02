@@ -265,20 +265,22 @@ function updateProfileView(data) {
 
 function updateSidebarProfile(data) {
     // Update Desktop Sidebar
-    const desktopLogo = document.querySelector('.desktop-logo');
-    if (desktopLogo) {
-        const imgSrc = data.profile_photo ? (data.profile_photo.startsWith('http') ? data.profile_photo : `../${data.profile_photo}`) : null;
-        desktopLogo.innerHTML = `
-            <div class="sidebar-profile">
-                <div class="sidebar-avatar">
-                    ${imgSrc ? `<img src="${imgSrc}" style="width:100%; height:100%; object-fit:cover;" alt="Profile">` : '👤'}
-                </div>
-                <div class="sidebar-info">
-                    <strong>${data.store_name}</strong>
-                    <small>${data.username}</small>
-                </div>
-            </div>
-        `;
+    // Update Desktop/Mobile Sidebar (Unified)
+    const sidebarImg = document.getElementById('sidebar-img');
+    const sidebarName = document.getElementById('sidebar-user-name');
+    const sidebarRole = document.querySelector('.sidebar-user-role'); // Optional dynamic role
+
+    if (sidebarImg && data.profile_photo) {
+        const imgSrc = data.profile_photo.startsWith('http') ? data.profile_photo : `../${data.profile_photo}`;
+        sidebarImg.src = imgSrc;
+    }
+    
+    if (sidebarName) {
+        sidebarName.textContent = data.store_name;
+    }
+
+    if (sidebarRole) {
+        sidebarRole.textContent = data.username ? data.username : 'Seller'; // Show username or 'Seller'
     }
 
     // Update Mobile Header

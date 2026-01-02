@@ -56,7 +56,9 @@ try {
     <!-- Mobile Header -->
     <div class="mobile-header">
         <button class="hamburger-btn" id="hamburgerBtn">
-            <i class="fas fa-bars"></i>
+            <span></span>
+            <span></span>
+            <span></span>
         </button>
         <div class="page-title" id="pageTitle">Profil Saya</div>
     </div>

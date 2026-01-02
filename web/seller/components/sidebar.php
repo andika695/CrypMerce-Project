@@ -7,8 +7,7 @@
             <span></span>
         </button>
         <div class="logo mobile-logo" style="display:flex; align-items:center; gap:10px; justify-content:center;">
-             <span style="font-size:16px;">🏪</span>
-             <span id="mobile-store-name">CrypMerce Seller</span>
+             <span id="mobile-page-title">Dashboard</span>
         </div>
     </div>
     
@@ -16,41 +15,37 @@
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     
     <div class="sidebar-content">
-        <div class="logo desktop-logo">
-            <div class="sidebar-profile">
+        <div class="sidebar-header-section">
+            <div class="user-profile-sidebar"> <!-- Layout mirip User -->
                  <div class="sidebar-avatar">
-                     <span>👤</span>
+                     <img id="sidebar-img" src="../assets/images/person.png" alt="Profile" style="width:100%; height:100%; object-fit:cover;">
                  </div>
-                 <div class="sidebar-info">
-                     <strong>Memuat...</strong>
-                     <small>...</small>
-                 </div>
+                 <h3 id="sidebar-user-name" class="sidebar-user-name">Memuat...</h3>
+                 <p class="sidebar-user-role">Seller</p>
             </div>
         </div>
-            <button class="sidebar-close" id="sidebarClose">
-        ✕
-    </button>
+
         <ul>
             <li class="menu-item" data-page="profile">
-                <span>👤</span> Profil
+                Profil
             </li>
             <li class="menu-item active" data-page="dashboard">
-                <span>📊</span> Dashboard
+                Dashboard
             </li>
             <li class="menu-item" data-page="add-product">
-                <span>➕</span> Tambah Produk
+                Tambah Produk
             </li>
             <li class="menu-item" data-page="my-store">
-                <span>🏪</span> Toko Saya
+                Toko Saya
             </li>
             <li class="menu-item" data-page="orders">
-                <span>🛒</span> Pesanan
+                Pesanan
             </li>
             <li class="menu-item" data-page="location-settings">
-                <span>📍</span> Lokasi Toko
+                Lokasi Toko
             </li>
             <li class="menu-item" data-page="logout">
-                <span>🚪</span> Logout
+                Logout
             </li>
         </ul>
     </div>
