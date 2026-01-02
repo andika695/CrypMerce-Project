@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../assets/css/user/shop.css?v=1.2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="icon" type="image/png" href="../../../assets/images/logo.png">
+    <link rel="stylesheet" href="../assets/css/ai-chat.css">
 </head>
 <body>
     <!-- Standard User Header -->
@@ -75,13 +76,13 @@
 
         <!-- Store Header -->
         <div class="store-new-header">
-            <div class="store-main-info" style="flex: 1; min-width: 0;">
+            <div class="store-main-info">
                 <div class="store-avatar-circle">
                     <img id="store-profile-img" src="../assets/images/person.png" alt="Store Profile">
                 </div>
-                <div class="store-details" style="min-width: 0; flex: 1;">
+                <div class="store-details">
                     <div class="name-row">
-                        <h1 id="store-page-name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Memuat Toko...</h1>
+                        <h1 id="store-page-name">Memuat Toko...</h1>
                     </div>
                     <div class="store-stats-mini">
                         <span class="followers-count">👥 <strong id="store-followers">0</strong> pengikut</span>
@@ -93,13 +94,13 @@
                 </div>
             </div>
             
-            <div class="action-buttons" style="margin: 0 24px; flex-shrink: 0;">
+            <div class="action-buttons">
                 <button id="follow-btn" class="btn-follow-shop">
                     <i class="fas fa-plus"></i> Follow
                 </button>
             </div>
 
-            <div class="store-stats-grid" style="flex-shrink: 0;">
+            <div class="store-stats-grid">
                 <div class="stat-item">
                     <span class="stat-label">Rating & ulasan</span>
                     <span class="stat-value"><span id="store-rating">⭐ -</span> <small>(0 ulasan)</small></span>
@@ -141,5 +142,6 @@
     </div>
     <script src="../assets/js/user/header.js?v=3"></script>
     <script src="../assets/js/user/shop.js?v=1.2"></script>
+    <script src="../assets/js/ai-chat.js"></script>
 </body>
 </html>
