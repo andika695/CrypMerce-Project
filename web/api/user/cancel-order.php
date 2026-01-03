@@ -12,8 +12,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $user_id = null;
 if (isset($_SESSION['user']['user_id'])) {
     $user_id = $_SESSION['user']['user_id'];
-} elseif (isset($_SESSION['user_id'])) {
-    $user_id = $_SESSION['user_id'];
 }
 
 if (!$user_id) {

@@ -58,7 +58,7 @@ async function loadProducts(category = null, search = null) {
                     <div class="product-stats">
                          <span>Stok: ${p.stock}</span>
                          <span>•</span>
-                         <span>Terjual 0</span>
+                         <span>Terjual ${p.sold_count}</span>
                     </div>
                 </div>
             `;

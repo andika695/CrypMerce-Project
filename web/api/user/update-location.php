@@ -11,7 +11,8 @@ require __DIR__ . '/../services/geocoding-service.php';
 header('Content-Type: application/json');
 
 // Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
+// Check if user is logged in
+if (!isset($_SESSION['user']) || !isset($_SESSION['user']['user_id'])) {
     http_response_code(401);
     echo json_encode([
         'success' => false,
@@ -30,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 try {
-    $userId = $_SESSION['user_id'];
+    $userId = $_SESSION['user']['user_id'];
     $latitude = filter_var($_POST['latitude'] ?? null, FILTER_VALIDATE_FLOAT);
     $longitude = filter_var($_POST['longitude'] ?? null, FILTER_VALIDATE_FLOAT);
     $addressDetail = trim($_POST['address_detail'] ?? '');

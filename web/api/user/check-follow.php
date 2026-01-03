@@ -5,7 +5,7 @@ require_once '../config/config.php';
 header('Content-Type: application/json');
 
 $seller_id = $_GET['seller_id'] ?? null;
-$user_id = $_SESSION['user_id'] ?? null;
+$user_id = $_SESSION['user']['user_id'] ?? null;
 
 if (!$seller_id) {
     echo json_encode(['success' => false, 'message' => 'Seller ID missing']);

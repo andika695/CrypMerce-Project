@@ -312,7 +312,7 @@ function updateFollowButton(isFollowing) {
     isFollowing ? followBtn.classList.add('following') : followBtn.classList.remove('following');
 }
 
-async function handleAddToCart() {
+async function handleAddToCart(e) {
     if (currentStock <= 0) return showToast('Stok habis!', 'error');
 
     const quantity = parseInt(qtyInput.value); 
@@ -323,12 +323,18 @@ async function handleAddToCart() {
         return showToast('Produk tidak valid', 'error');
     }
 
-    const cartBtn = document.querySelector('.btn-add-cart');
-    const originalText = cartBtn.textContent;
+    // Determine which button was clicked
+    const clickedBtn = e.currentTarget;
+    const originalContent = clickedBtn.innerHTML; // Use innerHTML to preserve icons if any
 
     try {
-        cartBtn.disabled = true;
-        cartBtn.textContent = 'Adding...';
+        clickedBtn.disabled = true;
+        // Check if it's the mobile button (icon based) or desktop (text based) to set appropriate loading state
+        if (clickedBtn.id === 'btnCartMobile') {
+             clickedBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        } else {
+             clickedBtn.textContent = 'Adding...';
+        }
 
         const formData = new FormData();
         formData.append('product_id', productId);
@@ -356,6 +362,7 @@ async function handleAddToCart() {
 
         if (result.success) {
             showToast('Berhasil masuk keranjang!', 'success');
+            // Optional: Update cart badge if needed
         } else {
             showToast(result.message || 'Gagal menambahkan ke keranjang', 'error');
         }
@@ -364,8 +371,8 @@ async function handleAddToCart() {
         console.error('Cart Error:', error);
         showToast('Gagal terhubung ke server', 'error');
     } finally {
-        cartBtn.disabled = false;
-        cartBtn.textContent = originalText;
+        clickedBtn.disabled = false;
+        clickedBtn.innerHTML = originalContent;
     }
 }
 

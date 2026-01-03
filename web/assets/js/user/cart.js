@@ -1,7 +1,12 @@
-// Cart Page JavaScript
 let allCartItems = []; // Original data
 let cartItems = [];    // Display data (filtered)
 let selectedItems = new Set();
+let currentSelectedItems = [];
+let currentTotalPrice = 0;
+let cryptoRates = {
+    'btc': 0.00000065, // Fallback (1 IDR = x BTC)
+    'eth': 0.000018    // Fallback (1 IDR = x ETH)
+};
 
 // Initialize page
 document.addEventListener("DOMContentLoaded", async () => {
@@ -41,11 +46,12 @@ function setupEventListeners() {
     selectAllCheckbox.addEventListener("change", handleSelectAll);
   }
 
-  // Checkout button
-  const checkoutBtn = document.getElementById("checkoutBtn");
-  if (checkoutBtn) {
-    checkoutBtn.addEventListener("click", handleCheckout);
-  }
+  // Checkout buttons
+  const midtransBtn = document.getElementById("checkoutMidtransBtn");
+  if (midtransBtn) midtransBtn.addEventListener("click", () => handleCheckoutClick('midtrans'));
+
+  const cryptoBtn = document.getElementById("checkoutCryptoBtn");
+  if (cryptoBtn) cryptoBtn.addEventListener("click", () => handleCheckoutClick('crypto'));
 }
 
 // Load Cart from API
@@ -162,7 +168,6 @@ function resetFilter() {
     if (title) title.innerHTML = `<i class="fas fa-shopping-cart"></i> Keranjang Belanja`;
 }
 
-// ... rest of existing functions starting from renderSellerGroup ...
 
 // Render Seller Group
 function renderSellerGroup(sellerId, group) {
@@ -423,27 +428,31 @@ function updateSummary() {
   });
 
   document.getElementById("summaryTotalItems").textContent = selectedCount;
-  document.getElementById("summaryTotalPrice").textContent = `Rp ${formatPrice(
-    totalPrice
-  )}`;
-  document.getElementById("checkoutCount").textContent = selectedCount;
+  document.getElementById("summaryTotalPrice").textContent = `Rp ${formatPrice(totalPrice)}`;
 
-  // Enable/disable checkout button
-  const checkoutBtn = document.getElementById("checkoutBtn");
-  checkoutBtn.disabled = selectedCount === 0;
+  // Update Buttons
+  const midtransBtn = document.getElementById("checkoutMidtransBtn");
+  const cryptoBtn = document.getElementById("checkoutCryptoBtn");
+  
+  if (midtransBtn) {
+      midtransBtn.disabled = selectedCount === 0;
+      document.getElementById("checkoutCountMidtrans").textContent = selectedCount;
+  }
+  
+  if (cryptoBtn) {
+      cryptoBtn.disabled = selectedCount === 0;
+      document.getElementById("checkoutCountCrypto").textContent = selectedCount;
+  }
 }
 
-// Handle Checkout
-async function handleCheckout() {
+// Prepare Checkout Data (Helper)
+function prepareCheckoutData() {
     if (selectedItems.size === 0) {
         showToast('Pilih produk terlebih dahulu', 'error');
-        return;
+        return false;
     }
 
-    const checkoutBtn = document.getElementById('checkoutBtn');
-    
-    // 1. Ambil item yang dipilih dari array cartItems
-    const selectedProductList = cartItems
+    currentSelectedItems = cartItems
         .filter(item => selectedItems.has(item.cart_item_id))
         .map(item => ({
             id: item.product_id,
@@ -453,119 +462,227 @@ async function handleCheckout() {
             seller_id: item.seller_id
         }));
 
-    // 2. Hitung total harga
-    const total_price = selectedProductList.reduce(
+    currentTotalPrice = currentSelectedItems.reduce(
         (sum, item) => sum + (item.price * item.quantity),
         0
     );
+    return true;
+}
 
-    // 3. Bungkus dalam objek payload (Inilah variabel 'data' yang tadinya missing)
+// Handle Checkout Click Router
+function handleCheckoutClick(method) {
+    if (!prepareCheckoutData()) return;
+
+    if (method === 'midtrans') {
+        processMidtransCheckout();
+    } else if (method === 'crypto') {
+        openCryptoModal();
+    }
+}
+
+function openCryptoModal() {
+    const modal = document.getElementById('cryptoPaymentModal');
+    modal.classList.add('show');
+    
+    // Reset state
+    document.getElementById('cryptoSelect').value = "";
+    document.getElementById('cryptoPaymentDetails').style.display = 'none';
+
+    // Fetch live rates
+    fetchCryptoRates();
+    
+    // Setup listeners
+    const select = document.getElementById('cryptoSelect');
+    select.onchange = handleCryptoCoinSelect;
+    
+    // Unbind previous onclick to prevent multiple listeners if any (simple approach)
+    const confirmBtn = document.getElementById('confirmCryptoBtn');
+    confirmBtn.onclick = processCryptoPayment;
+    
+    // Close modal listener
+    modal.querySelector('.close-modal').onclick = () => {
+        modal.classList.remove('show');
+        resetCheckoutButtons();
+    };
+}
+
+// Fetch Live Crypto Rates (CoinGecko)
+async function fetchCryptoRates() {
+    try {
+        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=idr');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        
+        // Update rates: 1 IDR = 1 / Price_in_IDR
+        if (data.bitcoin && data.bitcoin.idr) {
+             cryptoRates.btc = 1 / data.bitcoin.idr;
+        }
+        if (data.ethereum && data.ethereum.idr) {
+             cryptoRates.eth = 1 / data.ethereum.idr;
+        }
+        console.log('Live Crypto Rates fetched:', cryptoRates);
+        
+        // If a coin is already selected, update the display
+        const currentCoin = document.getElementById('cryptoSelect').value;
+        if (currentCoin) {
+            handleCryptoCoinSelect({ target: { value: currentCoin } });
+        }
+
+    } catch (error) {
+        console.warn('Failed to fetch live crypto rates, using fallback:', error);
+    }
+}
+
+function handleCryptoCoinSelect(e) {
+    const coin = e.target.value;
+    const details = document.getElementById('cryptoPaymentDetails');
+    const qrImg = document.getElementById('cryptoQr');
+    const walletText = document.getElementById('walletAddress');
+    const amountText = document.getElementById('cryptoAmount');
+    const currencyText = document.getElementById('cryptoCurrency');
+    const fiatText = document.getElementById('fiatAmount');
+    
+    if (!coin) {
+        details.style.display = 'none';
+        return;
+    }
+    
+    details.style.display = 'block';
+    
+    // Simulation Data
+    const wallets = {
+        'btc': '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+        'eth': '0x742d35Cc6634C0532925a3b844Bc454e4438f44e'
+    };
+    
+    // Generate QR (using google chart api for simplicity)
+    const address = wallets[coin];
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${address}`;
+    
+    walletText.textContent = address;
+    currencyText.textContent = coin.toUpperCase();
+    fiatText.textContent = `Rp ${formatPrice(currentTotalPrice)}`;
+    
+    // Calculate amount using current rates (live or fallback)
+    const rate = cryptoRates[coin] || 0;
+    const cryptoVal = currentTotalPrice * rate;
+    amountText.textContent = cryptoVal.toFixed(8); // 8 decimal places for crypto
+}
+
+// Process Crypto Payment (Step: Create Order -> Confirm)
+async function processCryptoPayment() {
+    const confirmBtn = document.getElementById('confirmCryptoBtn');
+    const coinType = document.getElementById('cryptoSelect').value;
+    
+    try {
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+        
+        // 1. Create Order
+        const payload = {
+            total_price: currentTotalPrice,
+            items: currentSelectedItems,
+            coin_type: coinType
+        };
+        
+        const createRes = await fetch('../checkout/PlaceOrderCrypto.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        const createData = await createRes.json();
+        
+        if (!createData.success) throw new Error(createData.message || 'Gagal membuat pesanan Crypto');
+        
+        const orderUuid = createData.order_uuid;
+        
+        // 2. Simulate Payment Confirmation (Delay for realism)
+        await new Promise(r => setTimeout(r, 1500));
+        
+        const confirmRes = await fetch('../checkout/ConfirmCryptoPayment.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order_uuid: orderUuid })
+        });
+        
+        const confirmData = await confirmRes.json();
+        
+        if (!confirmData.success) throw new Error(confirmData.message || 'Gagal konfirmasi pembayaran');
+        
+        // Success
+        window.location.href = '../user/success.html';
+        
+    } catch (error) {
+        console.error('Crypto payment error:', error);
+        showToast(error.message, 'error');
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Selesai Pembayaran';
+    }
+}
+
+// Process Midtrans
+async function processMidtransCheckout() {
+    const checkoutBtn = document.getElementById('checkoutMidtransBtn');
     const payload = {
-        total_price: total_price,
-        items: selectedProductList
+        total_price: currentTotalPrice,
+        items: currentSelectedItems
     };
 
     try {
         checkoutBtn.disabled = true;
         checkoutBtn.textContent = 'Memproses...';
 
-        // 4. Kirim ke PlaceOrder.php (Di sini data akan masuk ke DB & Midtrans)
         const response = await fetch('../checkout/PlaceOrder.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload) // Menggunakan payload yang sudah didefinisikan
+            body: JSON.stringify(payload)
         });
 
         if (!response.ok) throw new Error('Gagal menghubungi server');
 
         const snapToken = await response.text();
 
-        // 5. Jalankan Midtrans Snap
+        // Check if window.snap is available
+        if (typeof window.snap === 'undefined') {
+             throw new Error("Sistem pembayaran belum siap. Mohon refresh halaman.");
+        }
+
         window.snap.pay(snapToken, {
             onSuccess: function (result) {
-                // Opsional: Panggil API untuk hapus item dari keranjang setelah sukses
                 window.location.href = '../user/success.html';
             },
-            // onPending: function (result) {
-            //     // Jika pembayaran tertunda, arahkan ke histori agar bisa dibayar nanti
-            //     window.location.href = 'order-history.html';
-            // },
             onError: function (result) {
                 showToast('Pembayaran gagal', 'error');
-                checkoutBtn.disabled = false;
-                checkoutBtn.innerHTML = `Checkout (<span id="checkoutCount">${selectedItems.size}</span>)`;
+                resetCheckoutButtons();
             },
             onClose: function () {
-                checkoutBtn.disabled = false;
-                checkoutBtn.innerHTML = `Checkout (<span id="checkoutCount">${selectedItems.size}</span>)`;
+                resetCheckoutButtons();
             }
         });
 
     } catch (error) {
         console.error('Checkout error:', error);
-        showToast('Terjadi kesalahan saat memproses pesanan', 'error');
-        checkoutBtn.disabled = false;
-        checkoutBtn.innerHTML = `Checkout (<span id="checkoutCount">${selectedItems.size}</span>)`;
+        showToast(error.message || 'Terjadi kesalahan saat memproses pesanan', 'error');
+        resetCheckoutButtons();
     }
 }
-// async function handleCheckout() {
-//   if (selectedItems.size === 0) {
-//     showToast("Pilih produk terlebih dahulu", "error");
-//     return;
-//   }
 
-//   // Ambil item yang dipilih
-//   const items = cartItems
-//     .filter((item) => selectedItems.has(item.cart_item_id))
-//     .map((item) => ({
-//       id: item.product_id,
-//       name: item.product_name,
-//       price: item.product_price,
-//       quantity: item.quantity,
-//     }));
-
-//   // Hitung total harga
-//   const total_price = items.reduce(
-//     (sum, item) => sum + item.price * item.quantity,
-//     0
-//   );
-
-//   const data = {
-//     total_price,
-//     items,
-//   };
-
-//   try {
-//     const response = await fetch("../checkout/PlaceOrder.php", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify(data),
-//     });
-
-//     const result = await response.json();
-
-//     if (result.success) {
-//       window.snap.pay(result.token, {
-//         onSuccess: () => (window.location.href = "../user/success.html"),
-//         onPending: function (result) {
-//           console.log("Payment pending:", result);
-//         },
-//         onError: function (result) {
-//           console.log("Payment error:", result);
-//           showToast("Terjadi kesalahan saat pembayaran", "error");
-//         },
-//       });
-//     } else {
-//       console.error("Checkout API error:", result.message);
-//       showToast(result.message || "Gagal memproses checkout", "error");
-//     }
-//   } catch (error) {
-//     console.error("Checkout error:", error);
-//     showToast("Terjadi kesalahan teknis saat checkout", "error");
-//   }
-// }
+function resetCheckoutButtons() {
+    const midtransBtn = document.getElementById("checkoutMidtransBtn");
+    const cryptoBtn = document.getElementById("checkoutCryptoBtn");
+    const count = selectedItems.size;
+    
+    if (midtransBtn) {
+        midtransBtn.disabled = false;
+        midtransBtn.innerHTML = `Checkout IDR (<span id="checkoutCountMidtrans">${count}</span>)`;
+    }
+    
+    if (cryptoBtn) {
+        cryptoBtn.disabled = false;
+        cryptoBtn.innerHTML = `Checkout Crypto (<span id="checkoutCountCrypto">${count}</span>)`;
+    }
+}
 
 // Show Empty Cart
 function showEmptyCart() {
@@ -583,6 +700,10 @@ function showEmptyCart() {
 // Show Toast Notification
 function showToast(message, type = "success") {
   const toast = document.getElementById("toast");
+  if (!toast) {
+      alert(message);
+      return;
+  }
   toast.textContent = message;
   toast.className = `toast ${type} show`;
 

@@ -8,7 +8,14 @@ $search = $_GET['search'] ?? null;
 
 try {
     $sql = "
-        SELECT p.id, p.name, p.price, p.stock, p.image, p.created_at, c.name as category_name
+        SELECT 
+            p.id, p.name, p.price, p.stock, p.image, p.created_at, c.name as category_name,
+            (
+                SELECT COALESCE(SUM(oi.quantity), 0)
+                FROM order_items oi
+                JOIN orders o ON oi.order_id = o.id
+                WHERE oi.product_id = p.id AND o.status = 'completed'
+            ) as sold_count
         FROM products p
         LEFT JOIN categories c ON p.category_id = c.id
         WHERE p.stock > 0

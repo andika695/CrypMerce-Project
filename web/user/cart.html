@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Keranjang - CrypMerce</title>
     <link rel="stylesheet" href="../assets/css/user/header-dashboard.css?v=2">
-    <link rel="stylesheet" href="../assets/css/user/cart.css?v=1.0">
+    <link rel="stylesheet" href="../assets/css/user/cart.css?v=1.1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" >
     <link rel="icon" type="image/png" href="../../../assets/images/logo.png">
@@ -125,15 +125,21 @@
                         <span class="summary-value" id="summaryTotalPrice">Rp 0</span>
                     </div>
                     
-                    <button class="checkout-btn" id="checkoutBtn">
-                        Checkout (<span id="checkoutCount">0</span>)
-                    </button>
+                    <div class="checkout-actions">
+                        <button class="checkout-btn midtrans-btn" id="checkoutMidtransBtn">
+                            Checkout IDR (<span id="checkoutCountMidtrans">0</span>)
+                        </button>
+                        <button class="checkout-btn crypto-btn" id="checkoutCryptoBtn">
+                            Checkout Crypto (<span id="checkoutCountCrypto">0</span>)
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
     <div class="mobile-kategori" id="mobileKategori">
         <h3>Kategori Belanja</h3>
         <ul class="kategori-list">
@@ -147,9 +153,63 @@
             <li data-value="makanan">Makanan</li>
         </ul>
     </div>
+
+
+
+    <!-- Crypto Payment Modal -->
+    <div id="cryptoPaymentModal" class="modal-overlay">
+        <div class="modal-content crypto-modal-content">
+            <div class="modal-header">
+                <h3>Crypto Payment (Simulasi)</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            
+            <div class="crypto-selection">
+                <label for="cryptoSelect">Pilih Coin:</label>
+                <div class="select-wrapper">
+                    <select id="cryptoSelect">
+                        <option value="" disabled selected>-- Pilih Coin --</option>
+                        <option value="btc">Bitcoin (BTC)</option>
+                        <option value="eth">Ethereum (ETH)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="cryptoPaymentDetails" class="crypto-details" style="display: none;">
+                <div class="qr-container">
+                    <!-- Placeholder QR Code -->
+                    <img id="cryptoQr" src="" alt="QR Code" class="qr-image">
+                </div>
+                
+                <div class="wallet-info">
+                    <p class="label">Alamat Wallet:</p>
+                    <div class="wallet-address-box">
+                        <span id="walletAddress">...</span>
+                        <button class="copy-btn" title="Salin"><i class="far fa-copy"></i></button>
+                    </div>
+                </div>
+
+                <div class="amount-info">
+                    <p class="label">Total Pembayaran:</p>
+                    <div class="amount-box">
+                        <span id="cryptoAmount">...</span> <span id="cryptoCurrency">BTC</span>
+                        <br>
+                        <small>(<span id="fiatAmount">Rp ...</span>)</small>
+                    </div>
+                </div>
+
+                <div class="alert-box">
+                    <i class="fas fa-info-circle"></i>
+                    <p>Ini hanya simulasi. Klik "Selesai Pembayaran" untuk menyelesaikan pesanan.</p>
+                </div>
+
+                <button id="confirmCryptoBtn" class="confirm-btn">Selesai Pembayaran</button>
+            </div>
+        </div>
+    </div>
     <script src="../assets/js/user/notifikasi.js?v=2"></script>
     <script src="../assets/js/user/header.js?v=3"></script>
-    <script src="../assets/js/user/cart.js?v=1.2"></script>
+    <script src="../assets/js/user/cart.js?v=1.4"></script>
     <script src="../assets/js/ai-chat.js"></script>
 </body>
 </html>

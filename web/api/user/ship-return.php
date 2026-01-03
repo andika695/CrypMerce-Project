@@ -4,7 +4,7 @@ require_once '../config/config.php';
 session_start();
 
 // Validasi user login
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION['user']) || !isset($_SESSION['user']['user_id'])) {
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;
 }
@@ -17,7 +17,7 @@ if (!isset($data['order_id'])) {
 }
 
 $order_id = $data['order_id'];
-$user_id = $_SESSION['user_id'];
+$user_id = $_SESSION['user']['user_id'];
 
 try {
     // 1. Validasi order milik user DAN status = 'return_approved'
