@@ -366,6 +366,16 @@ function updateProfileView(data) {
         
         const profileFollowers = document.getElementById('profile-followers');
         if (profileFollowers) profileFollowers.textContent = data.follower_count || 0;
+
+        const profileRating = document.getElementById('profile-rating');
+        const profileReviews = document.getElementById('profile-reviews');
+        if (profileRating) {
+            const rating = data.rating > 0 ? data.rating : '-';
+            profileRating.textContent = `⭐ ${rating}`;
+        }
+        if (profileReviews) {
+            profileReviews.textContent = data.total_reviews || 0;
+        }
         
         const avatarDiv = document.querySelector('.profile-avatar');
         if (avatarDiv) {
@@ -478,8 +488,17 @@ async function loadMyStoreData() {
             document.getElementById('store-page-name').textContent = data.store_name || 'Nama Toko';
             document.getElementById('store-location').textContent = data.location || 'Gudang Blibli';
             document.getElementById('store-followers').textContent = data.follower_count || '0';
-            document.getElementById('store-rating').textContent = '⭐ -';
-            document.getElementById('store-reviews').textContent = '0';
+            
+            // Populate Rating Stats
+            const ratingElem = document.getElementById('store-rating');
+            const reviewsElem = document.getElementById('store-reviews');
+            if (ratingElem) {
+                const rating = data.rating > 0 ? data.rating : '-';
+                ratingElem.textContent = `⭐ ${rating}`;
+            }
+            if (reviewsElem) {
+                reviewsElem.textContent = data.total_reviews || '0';
+            }
             
             const profileImg = document.getElementById('store-profile-img');
             if (data.profile_photo) {
@@ -551,46 +570,145 @@ function updateStoreProductGrid(products) {
     });
 }
 
-function viewStoreProductDetail(productId) {
-    const product = currentStoreProducts.find(p => p.id == productId);
-    if (!product) return;
+async function viewStoreProductDetail(productId) {
+    const view = document.getElementById('product-detail-view');
+    if (!view) return;
 
-    const modal = document.getElementById('product-preview-modal');
-    
-    // Set content
-    document.getElementById('preview-name').textContent = product.name;
-    document.getElementById('preview-price').textContent = `Rp ${Number(product.price).toLocaleString('id-ID')}`;
-    document.getElementById('preview-category').textContent = product.category_name || '-';
-    document.getElementById('preview-stock').textContent = product.stock;
-    document.getElementById('preview-description').textContent = product.description || 'Tidak ada deskripsi.';
-    
-    const previewImg = document.getElementById('preview-img');
-    const imgSrc = product.image ? (product.image.startsWith('http') ? product.image : `../assets/images/products/${product.image}`) : `../assets/images/bag.png`;
-    previewImg.src = imgSrc;
-    previewImg.onerror = () => previewImg.src = '../assets/images/bag.png';
+    // Show loading state
+    document.getElementById('seller-product-name').textContent = 'Memuat...';
 
-    // Show modal
-    modal.style.display = 'block';
-    document.body.style.overflow = 'hidden'; 
+    // Update active view
+    const views = document.querySelectorAll('.view');
+    views.forEach(v => v.classList.remove('active'));
+    view.classList.add('active');
+
+    // Update mobile title if exists
+    const mobileTitle = document.getElementById('mobile-page-title');
+    if (mobileTitle) mobileTitle.textContent = 'Detail Produk';
+
+    try {
+        const response = await fetch(`../api/user/get-product-detail.php?id=${productId}`);
+        const result = await response.json();
+
+        if (result.success) {
+            const data = result.data;
+            
+            // Basic Info
+            document.getElementById('seller-product-name').textContent = data.name;
+            document.getElementById('seller-product-price').textContent = 'Rp ' + Number(data.price).toLocaleString('id-ID');
+            document.getElementById('seller-product-weight').textContent = data.weight + ' gram';
+            document.getElementById('seller-product-stock').textContent = data.stock;
+            document.getElementById('seller-product-category').textContent = data.category_name || '-';
+            document.getElementById('seller-product-description').innerHTML = data.description ? 
+                data.description.replace(/\n/g, '<br>') : 'Tidak ada deskripsi.';
+
+            // Images
+            const imagesArray = data.images && data.images.length > 0 ? data.images : (data.image ? [data.image] : []);
+            const mainImg = document.getElementById('seller-main-img');
+            const thumbGallery = document.getElementById('seller-thumbnail-gallery');
+
+            if (imagesArray.length > 0) {
+                const firstImgPath = imagesArray[0].startsWith('http') ? imagesArray[0] : `../assets/images/products/${imagesArray[0]}`;
+                mainImg.src = firstImgPath;
+                
+                if (thumbGallery) {
+                    thumbGallery.innerHTML = '';
+                    if (imagesArray.length > 1) {
+                        imagesArray.forEach((img, index) => {
+                            const imgPath = img.startsWith('http') ? img : `../assets/images/products/${img}`;
+                            const thumb = document.createElement('div');
+                            thumb.className = 'thumbnail-item' + (index === 0 ? ' active' : '');
+                            thumb.innerHTML = `<img src="${imgPath}" alt="Thumb ${index}">`;
+                            thumb.onclick = () => {
+                                mainImg.src = imgPath;
+                                thumbGallery.querySelectorAll('.thumbnail-item').forEach(t => t.classList.remove('active'));
+                                thumb.classList.add('active');
+                            };
+                            thumbGallery.appendChild(thumb);
+                        });
+                    }
+                }
+            } else {
+                mainImg.src = '../assets/images/no-image.png';
+            }
+
+            // Seller Info (even though it's their own store)
+            if (data.seller) {
+                document.getElementById('seller-view-name').textContent = data.seller.store_name;
+                document.getElementById('seller-view-location').textContent = data.seller.location || 'Indonesia';
+                if (data.seller.photo) {
+                    const photoSrc = data.seller.photo.startsWith('http') ? data.seller.photo : `../${data.seller.photo}`;
+                    document.getElementById('seller-view-photo').src = photoSrc;
+                }
+            }
+
+            // Load Reviews
+            loadSellerViewReviews(productId);
+
+        } else {
+            alert('Gagal memuat detail produk: ' + result.message);
+            backToStore();
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat memuat data');
+        backToStore();
+    }
 }
 
-function closeProductPreviewModal() {
-    const modal = document.getElementById('product-preview-modal');
-    modal.style.display = 'none';
-    document.body.style.overflow = 'auto'; // Restore scroll
+function backToStore() {
+    const views = document.querySelectorAll('.view');
+    views.forEach(v => v.classList.remove('active'));
+    
+    const myStoreView = document.getElementById('my-store-view');
+    if (myStoreView) myStoreView.classList.add('active');
+
+    const mobileTitle = document.getElementById('mobile-page-title');
+    if (mobileTitle) mobileTitle.textContent = 'Toko Saya';
+}
+
+async function loadSellerViewReviews(id) {
+    const container = document.getElementById('seller-product-reviews');
+    const countElem = document.getElementById('seller-review-count');
+    
+    try {
+        const response = await fetch(`../api/user/get-product-reviews.php?id=${id}`);
+        const result = await response.json();
+        
+        if (result.success && result.data.length > 0) {
+            countElem.textContent = `(${result.data.length})`;
+            container.innerHTML = result.data.slice(0, 3).map(review => `
+                <div class="review-card">
+                    <img src="${review.profile_photo ? (review.profile_photo.startsWith('http') ? review.profile_photo : `../assets/images/profiles/${review.profile_photo}`) : '../assets/images/default-avatar.png'}" class="review-avatar">
+                    <div class="review-content">
+                        <div class="review-header">
+                            <span class="reviewer-name">${review.username || 'Pengguna'}</span>
+                            <span class="review-date">${review.created_at_formatted}</span>
+                        </div>
+                        <div class="review-stars">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
+                        <div class="review-text">${review.review || '<i>Tidak ada komentar tertulis.</i>'}</div>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            countElem.textContent = '(0)';
+            container.innerHTML = `<div class="no-reviews">Belum ada ulasan.</div>`;
+        }
+    } catch (error) {
+        container.innerHTML = `<p style="color:red;">Gagal memuat ulasan.</p>`;
+    }
 }
 
 window.loadDashboardData = loadDashboardData;
 window.loadSellerProfile = loadSellerProfile;
 window.loadCategories = loadCategories;
 window.editProduct = editProduct;
-window.editProduct = editProduct;
 window.deleteProduct = deleteProduct;
 window.closeEditProductModal = closeEditProductModal;
 window.loadMyStoreData = loadMyStoreData;
 window.filterStoreProducts = filterStoreProducts;
-window.closeProductPreviewModal = closeProductPreviewModal;
 window.viewStoreProductDetail = viewStoreProductDetail;
+window.backToStore = backToStore;
 
 // ===== ORDERS SYSTEM =====
 async function loadOrders() {

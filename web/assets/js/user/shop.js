@@ -40,6 +40,12 @@ async function loadShopProfile(id) {
             document.getElementById('store-followers').textContent = data.follower_count;
             document.getElementById('store-total-products').textContent = data.total_products;
             
+            // Update Rating Stats
+            const ratingElem = document.getElementById('store-rating');
+            if (ratingElem) {
+                const rating = data.rating > 0 ? data.rating : '-';
+                ratingElem.innerHTML = `⭐ ${rating} <small>(${data.total_reviews} ulasan)</small>`;
+            }
             if (data.profile_photo) {
                 const imgSrc = data.profile_photo.startsWith('http') ? data.profile_photo : `../${data.profile_photo}`;
                 document.getElementById('store-profile-img').src = imgSrc;

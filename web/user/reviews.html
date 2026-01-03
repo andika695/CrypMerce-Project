@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ulasan Produk - CrypMerce</title>
+    <link rel="stylesheet" href="../assets/css/user/header-dashboard.css?v=2">
+    <link rel="stylesheet" href="../assets/css/user/product-detail.css?v=2.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="icon" type="image/png" href="../../../assets/images/logo.png">
+    
+    <style>
+        .reviews-container-full {
+            width: 100%; /* Full width relative to main-container */
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 16px; /* Matched to product detail radius */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* Matched shadow */
+            min-height: 400px;
+            border-left: 5px solid #3533cd; /* Consistent accent */
+        }
+        
+        .reviews-header-full {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .product-brief {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .product-brief img {
+            width: 50px;
+            height: 50px;
+            border-radius: 6px;
+            object-fit: cover;
+            border: 1px solid #eee;
+        }
+
+        .product-brief h2 {
+            font-size: 16px;
+            margin: 0;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header / Navbar (Reuse Header) -->
+    <header class="header">
+        <div class="main-container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="dashboard.html">
+                        <img src="../assets/images/logotesk.png" alt="Logo">
+                    </a>
+                </div>
+                
+                <div class="header-right">
+                    <button class="icon-btn" onclick="window.location.href='cart.html'">
+                        <img src="../assets/images/bag.png" alt="Bag">
+                    </button>
+                    <button class="akun-btn icon-btn" onclick="window.location.href='profile.php'">
+                        <img src="../assets/images/person.png" alt="User">
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-container main-content">
+        <div class="breadcrumb">
+            <a href="javascript:history.back()" style="text-decoration: none; color: #4b5563; display: flex; align-items: center; gap: 5px;">
+                <i class="fas fa-arrow-left"></i> Kembali ke Produk
+            </a>
+        </div>
+
+        <div class="reviews-container-full">
+            <div id="product-brief" class="product-brief">
+                <!-- Product Image & Name will be injected here -->
+            </div>
+
+            <div class="reviews-header-full">
+                <h1 style="font-size:20px; margin:0;">Semua Ulasan</h1>
+                <div style="font-size:16px; color:#555;">
+                    <span style="color:#f1c40f; font-size:18px;">★</span>
+                    <span id="avg-rating">0.0</span>/5.0 
+                    <span style="font-size:14px; color:#999;" id="total-reviews-count">(0)</span>
+                </div>
+            </div>
+            
+            <div id="reviews-list">
+                <div style="text-align:center; padding:50px; color:#888;">Memuat ulasan...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/js/user/reviews.js?v=1.0"></script>
+</body>
+</html>

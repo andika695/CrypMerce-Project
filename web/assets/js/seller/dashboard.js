@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'my-store': 'Toko Saya',
         'orders': 'Pesanan Masuk',
         'location-settings': 'Lokasi Toko',
+        'product-detail': 'Detail Produk',
         'logout': 'Logout'
     };
 

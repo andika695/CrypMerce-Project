@@ -46,3 +46,32 @@
         <button type="button" class="btn-cancel-logout" onclick="closeLogoutModal()">Batal</button>
     </div>
 </div>
+
+<!-- RATING MODAL -->
+<div id="rating-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeRatingModal()">&times;</span>
+        <h2>Beri Penilaian Toko</h2>
+        <form id="rating-form">
+            <input type="hidden" id="rating-order-id" name="order_id">
+            
+            <div class="star-rating">
+                <input type="radio" id="star5" name="rating" value="5" /><label for="star5" title="Sempurna">★</label>
+                <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="Sangat Baik">★</label>
+                <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="Baik">★</label>
+                <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="Cukup">★</label>
+                <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="Buruk">★</label>
+            </div>
+
+            <div class="form-group">
+                <label for="rating-review">Ulasan Anda (Opsional)</label>
+                <textarea id="rating-review" name="review" rows="3" placeholder="Bagaimana pengalaman belanja Anda?"></textarea>
+            </div>
+            
+            <div class="modal-buttons">
+                <button type="submit" class="btn-save">Kirim Penilaian</button>
+                <button type="button" class="btn-cancel" onclick="closeRatingModal()">Nanti Saja</button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,45 @@
+/* Star Rating Styles */
+.star-rating {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: center;
+  gap: 5px;
+  margin: 20px 0;
+}
+
+.star-rating input {
+  display: none;
+}
+
+.star-rating label {
+  font-size: 30px;
+  color: #ddd;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.star-rating input:checked ~ label,
+.star-rating label:hover,
+.star-rating label:hover ~ label {
+  color: #f1c40f; /* Gold color */
+}
+
+/* Modal Content Override for Rating */
+#rating-modal .modal-content {
+  max-width: 400px;
+  text-align: center;
+}
+
+#rating-modal h2 {
+  margin-bottom: 5px;
+}
+
+#rating-review {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-top: 10px;
+  resize: none;
+  font-family: inherit;
+}

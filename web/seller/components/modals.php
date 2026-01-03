@@ -1,31 +1,5 @@
 <!-- SELLER DASHBOARD MODALS -->
 
-<!-- PRODUCT PREVIEW MODAL -->
-<div id="product-preview-modal" class="modal">
-    <div class="modal-content product-preview-content">
-        <span class="close-modal" onclick="closeProductPreviewModal()">&times;</span>
-        <div class="preview-layout">
-            <div class="preview-left">
-                <div class="preview-main-image">
-                    <img id="preview-img" src="../assets/images/bag.png" alt="Product Image">
-                </div>
-            </div>
-            <div class="preview-right">
-                <h1 id="preview-name" class="preview-title">Nama Produk</h1>
-                <div class="preview-price-box"><h2 id="preview-price">Rp 0</h2></div>
-                <div class="preview-info-grid">
-                    <div class="info-item"><span class="label">Kategori</span><span class="value" id="preview-category">-</span></div>
-                    <div class="info-item"><span class="label">Stok</span><span class="value" id="preview-stock">0</span></div>
-                    <div class="info-item"><span class="label">Terjual</span><span class="value">0</span></div>
-                </div>
-                <div class="preview-description-section">
-                    <h3>Deskripsi Produk</h3>
-                    <div id="preview-description" class="preview-description-content">No description available.</div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- EDIT PRODUCT MODAL -->
 <div id="edit-product-modal" class="modal">

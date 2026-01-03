@@ -604,3 +604,85 @@ function resetConfirmBtn(btn) {
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-check-circle"></i> Beli Sekarang';
 }
+
+// 6. REVIEWS LOGIC
+// 6. REVIEWS LOGIC
+let allReviewsData = [];
+
+async function loadProductReviews(id) {
+    const container = document.getElementById('product-reviews');
+    const countElem = document.getElementById('review-count');
+    
+    try {
+        const response = await fetch(`../api/user/get-product-reviews.php?id=${id}`);
+        const result = await response.json();
+        
+        if (result.success && result.data.length > 0) {
+            allReviewsData = result.data; // Store globally
+            countElem.textContent = `(${allReviewsData.length})`;
+            
+            // Initial render: Top 3 (Sorted by rating DESC from API)
+            renderReviewsList(3);
+        } else {
+            countElem.textContent = '(0)';
+            container.innerHTML = `<div class="no-reviews">Belum ada ulasan untuk produk ini.</div>`;
+        }
+    } catch (error) {
+        console.error('Error loading reviews:', error);
+        container.innerHTML = `<p style="color:red; text-align:center;">Gagal memuat ulasan.</p>`;
+    }
+}
+
+function renderReviewsList(limit) {
+    const container = document.getElementById('product-reviews');
+    const reviewsToShow = allReviewsData.slice(0, limit);
+    
+    let html = reviewsToShow.map(review => createReviewCard(review)).join('');
+    
+    // Add "Load More" button if there are more reviews
+    if (allReviewsData.length > limit) {
+        html += `
+            <div class="load-more-container" style="text-align:center; margin-top:15px;">
+                <button onclick="window.location.href='reviews.html?id=${productId}'" class="btn-load-more">
+                    Lihat Semua Ulasan (${allReviewsData.length}) ➔
+                </button>
+            </div>
+        `;
+    }
+    
+    container.innerHTML = html;
+}
+
+function createReviewCard(review) {
+    // Generate stars
+    let starsHtml = '';
+    for(let i=1; i<=5; i++) {
+        starsHtml += i <= review.rating ? '★' : '☆';
+    }
+
+    // Default avatar
+    const avatar = review.profile_photo ? 
+        (review.profile_photo.startsWith('http') ? review.profile_photo : `../assets/images/profiles/${review.profile_photo}`) 
+        : '../assets/images/default-avatar.png';
+
+    return `
+        <div class="review-card">
+            <img src="${avatar}" alt="${review.username}" class="review-avatar" onerror="this.src='../assets/images/default-avatar.png'">
+            <div class="review-content">
+                <div class="review-header">
+                    <span class="reviewer-name">${review.username || 'Pengguna'}</span>
+                    <span class="review-date">${review.created_at_formatted}</span>
+                </div>
+                <div class="review-stars">${starsHtml}</div>
+                <div class="review-text">${review.review || '<i>Tidak ada komentar tertulis.</i>'}</div>
+            </div>
+        </div>
+    `;
+}
+
+// Tambahkan pemanggilan loadProductReviews di renderProduct atau init
+const originalRenderProduct = renderProduct;
+renderProduct = function(data) {
+    originalRenderProduct(data);
+    loadProductReviews(data.id); // Fetch reviews after product data
+};

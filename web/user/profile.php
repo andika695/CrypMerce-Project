@@ -51,6 +51,7 @@ try {
     <link rel="icon" type="image/png" href="../../../assets/images/logo.png">
     <!-- Tambahkan Font Awesome untuk ikon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/user/rating.css?v=1">
 </head>
 <body>
     <!-- Mobile Header -->

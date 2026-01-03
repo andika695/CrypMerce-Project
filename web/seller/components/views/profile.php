@@ -24,6 +24,10 @@
                     <label>Pengikut</label>
                     <p id="profile-followers">0</p>
                 </div>
+                <div class="info-item">
+                    <label>Rating & Ulasan</label>
+                    <p><span id="profile-rating">⭐ -</span> (<span id="profile-reviews">0</span> ulasan)</p>
+                </div>
             </div>
             <button class="btn-edit-profile" onclick="openEditProfileModal()">Edit Profil</button>
         </div>
