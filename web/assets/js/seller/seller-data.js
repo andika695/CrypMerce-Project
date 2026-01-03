@@ -83,6 +83,12 @@ function updateProductTable(products) {
 
 // ===== PRODUCT ACTIONS (DELETE & EDIT) =====
 
+// ===== EDIT PRODUCT STATE =====
+let editSelectedFiles = [];
+let removedExistingImages = [];
+let currentExistingImages = [];
+const MAX_EDIT_IMAGES = 5;
+
 // 1. Delete Product
 async function deleteProduct(id) {
     if (!confirm('Apakah Anda yakin ingin menghapus produk ini?')) return;
@@ -117,7 +123,7 @@ async function editProduct(id) {
         if (result.success) {
             const p = result.data;
             
-            // Fill form
+            // Fill form fields
             document.getElementById('edit-product-id').value = p.id;
             document.getElementById('edit-name').value = p.name;
             document.getElementById('edit-price').value = p.price;
@@ -126,15 +132,13 @@ async function editProduct(id) {
             document.getElementById('edit-category').value = p.category_id;
             document.getElementById('edit-description').value = p.description || '';
             
-            // Show image preview if exists
-            const preview = document.getElementById('edit-product-preview');
-            if (p.image) {
-                const imgSrc = p.image.startsWith('http') ? p.image : `../assets/images/products/${p.image}`;
-                preview.innerHTML = `<img src="${imgSrc}" alt="Preview" onerror="this.src='../assets/images/bag.png'">`;
-                preview.classList.add('show');
-            } else {
-                preview.innerHTML = '';
-            }
+            // Reset state
+            editSelectedFiles = [];
+            removedExistingImages = [];
+            // Parse images if API didn't (e.g. if specific endpoint version differs)
+            currentExistingImages = Array.isArray(p.images) ? p.images : (p.image ? [p.image] : []);
+            
+            renderEditPreviews();
 
             // Show modal
             const modal = document.getElementById('edit-product-modal');
@@ -149,15 +153,134 @@ async function editProduct(id) {
     }
 }
 
+function renderEditPreviews() {
+    const previewGrid = document.getElementById('edit-image-preview-grid');
+    const imageCounter = document.getElementById('edit-image-count');
+    
+    if (!previewGrid) return;
+    
+    previewGrid.innerHTML = '';
+    
+    // 1. Render Existing Images (that are not removed)
+    currentExistingImages.forEach((url, index) => {
+        if (removedExistingImages.includes(url)) return;
+        
+        const imgSrc = url.startsWith('http') ? url : `../assets/images/products/${url}`;
+        const item = document.createElement('div');
+        item.className = 'image-preview-item';
+        // Mark first non-removed image as primary (visually)
+        item.innerHTML = `
+            <img src="${imgSrc}" alt="Product Image" onerror="this.src='../assets/images/bag.png'">
+            <button type="button" class="remove-btn existing" data-url="${url}">&times;</button>
+        `;
+        
+        item.querySelector('.remove-btn').addEventListener('click', () => {
+             removedExistingImages.push(url);
+             renderEditPreviews();
+        });
+        
+        previewGrid.appendChild(item);
+    });
+    
+    // 2. Render New Selected Files
+    editSelectedFiles.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+             const item = document.createElement('div');
+             item.className = 'image-preview-item new-file';
+             item.innerHTML = `
+                <img src="${e.target.result}" alt="New Image">
+                <span class="primary-badge" style="background:#3498db; right:auto; left:6px;">Baru</span>
+                <button type="button" class="remove-btn" data-index="${index}">&times;</button>
+             `;
+             
+             item.querySelector('.remove-btn').addEventListener('click', () => {
+                 editSelectedFiles.splice(index, 1);
+                 renderEditPreviews();
+                 updateEditFileInput();
+             });
+             
+             // Append finding current position to ensure order (simple append works for small arrays)
+             previewGrid.appendChild(item);
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Update Counter
+    const totalImages = (currentExistingImages.length - removedExistingImages.length) + editSelectedFiles.length;
+    if (imageCounter) imageCounter.textContent = `${totalImages}/${MAX_EDIT_IMAGES} Foto`;
+}
+
+function handleEditFiles(files) {
+    const newFiles = Array.from(files);
+    const existingCount = currentExistingImages.length - removedExistingImages.length;
+    
+    // Validate total count
+    if (existingCount + editSelectedFiles.length + newFiles.length > MAX_EDIT_IMAGES) {
+        alert(`Maksimal ${MAX_EDIT_IMAGES} foto. Saat ini ada ${existingCount + editSelectedFiles.length} foto.`);
+        return;
+    }
+
+    newFiles.forEach(file => {
+        if (!file.type.startsWith('image/')) {
+            alert(`File "${file.name}" bukan gambar.`);
+            return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+            alert(`File "${file.name}" terlalu besar. Maksimal 2MB.`);
+            return;
+        }
+        editSelectedFiles.push(file);
+    });
+
+    renderEditPreviews();
+    updateEditFileInput();
+}
+
+function updateEditFileInput() {
+    const editImagesInput = document.getElementById('edit-images');
+    if (!editImagesInput) return;
+    
+    const dt = new DataTransfer();
+    editSelectedFiles.forEach(file => dt.items.add(file));
+    editImagesInput.files = dt.files;
+}
+
 // Close Modal Function
 function closeEditProductModal() {
     document.getElementById('edit-product-modal').style.display = 'none';
 }
 
-// 3. Handle Edit Form Submit
+// 3. Handle Edit Form Submit & Listeners
 document.addEventListener('DOMContentLoaded', () => {
     const editForm = document.getElementById('edit-product-form');
-    
+    const editUploadArea = document.getElementById('edit-upload-area');
+    const editImagesInput = document.getElementById('edit-images');
+
+    // Init Upload Listeners for Edit Modal
+    if (editUploadArea && editImagesInput) {
+        editUploadArea.addEventListener('click', () => editImagesInput.click());
+        
+        editUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            editUploadArea.classList.add('drag-over');
+        });
+
+        editUploadArea.addEventListener('dragleave', () => {
+            editUploadArea.classList.remove('drag-over'); 
+        });
+
+        editUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            editUploadArea.classList.remove('drag-over');
+            handleEditFiles(e.dataTransfer.files);
+        });
+
+        editImagesInput.addEventListener('change', (e) => {
+            handleEditFiles(e.target.files);
+        });
+    }
+
     if (editForm) {
         editForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -169,6 +292,15 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const formData = new FormData(editForm);
                 
+                // Add removed images
+                document.getElementById('edit-removed-images').value = JSON.stringify(removedExistingImages);
+                formData.set('removed_images', JSON.stringify(removedExistingImages));
+                
+                // New images are already in 'images[]' input via DataTransfer, 
+                // but if browser support is flaky, we can use this check:
+                // formData keys for files might be empty if input is not updated properly.
+                // updateEditFileInput() ensures input.files is sync.
+
                 const response = await fetch('../api/seller/edit-product.php', {
                     method: 'POST',
                     body: formData
@@ -189,24 +321,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'Simpan Perubahan';
-            }
-        });
-    }
-
-    // Edit Image Preview Handler
-    const editImageInput = document.getElementById('edit-image');
-    if (editImageInput) {
-        editImageInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            const preview = document.getElementById('edit-product-preview');
-            
-            if (file) {
-                 const reader = new FileReader();
-                 reader.onload = (e) => {
-                     preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-                     preview.classList.add('show');
-                 };
-                 reader.readAsDataURL(file);
             }
         });
     }
@@ -252,6 +366,16 @@ function updateProfileView(data) {
         
         const profileFollowers = document.getElementById('profile-followers');
         if (profileFollowers) profileFollowers.textContent = data.follower_count || 0;
+
+        const profileRating = document.getElementById('profile-rating');
+        const profileReviews = document.getElementById('profile-reviews');
+        if (profileRating) {
+            const rating = data.rating > 0 ? data.rating : '-';
+            profileRating.textContent = `⭐ ${rating}`;
+        }
+        if (profileReviews) {
+            profileReviews.textContent = data.total_reviews || 0;
+        }
         
         const avatarDiv = document.querySelector('.profile-avatar');
         if (avatarDiv) {
@@ -364,8 +488,17 @@ async function loadMyStoreData() {
             document.getElementById('store-page-name').textContent = data.store_name || 'Nama Toko';
             document.getElementById('store-location').textContent = data.location || 'Gudang Blibli';
             document.getElementById('store-followers').textContent = data.follower_count || '0';
-            document.getElementById('store-rating').textContent = '⭐ -';
-            document.getElementById('store-reviews').textContent = '0';
+            
+            // Populate Rating Stats
+            const ratingElem = document.getElementById('store-rating');
+            const reviewsElem = document.getElementById('store-reviews');
+            if (ratingElem) {
+                const rating = data.rating > 0 ? data.rating : '-';
+                ratingElem.textContent = `⭐ ${rating}`;
+            }
+            if (reviewsElem) {
+                reviewsElem.textContent = data.total_reviews || '0';
+            }
             
             const profileImg = document.getElementById('store-profile-img');
             if (data.profile_photo) {
@@ -437,46 +570,203 @@ function updateStoreProductGrid(products) {
     });
 }
 
-function viewStoreProductDetail(productId) {
-    const product = currentStoreProducts.find(p => p.id == productId);
-    if (!product) return;
+let currentProductReviews = [];
 
-    const modal = document.getElementById('product-preview-modal');
-    
-    // Set content
-    document.getElementById('preview-name').textContent = product.name;
-    document.getElementById('preview-price').textContent = `Rp ${Number(product.price).toLocaleString('id-ID')}`;
-    document.getElementById('preview-category').textContent = product.category_name || '-';
-    document.getElementById('preview-stock').textContent = product.stock;
-    document.getElementById('preview-description').textContent = product.description || 'Tidak ada deskripsi.';
-    
-    const previewImg = document.getElementById('preview-img');
-    const imgSrc = product.image ? (product.image.startsWith('http') ? product.image : `../assets/images/products/${product.image}`) : `../assets/images/bag.png`;
-    previewImg.src = imgSrc;
-    previewImg.onerror = () => previewImg.src = '../assets/images/bag.png';
+async function viewStoreProductDetail(productId) {
+    const view = document.getElementById('product-detail-view');
+    if (!view) return;
 
-    // Show modal
-    modal.style.display = 'block';
-    document.body.style.overflow = 'hidden'; 
+    // Store product ID globally for reviews page
+    window.currentProductId = productId;
+
+    // Show loading state
+    document.getElementById('seller-product-name').textContent = 'Memuat...';
+    document.getElementById('btn-see-all-reviews').style.display = 'none';
+
+    // Update active view
+    const views = document.querySelectorAll('.view');
+    views.forEach(v => v.classList.remove('active'));
+    view.classList.add('active');
+
+    // Update mobile title if exists
+    const mobileTitle = document.getElementById('mobile-page-title');
+    if (mobileTitle) mobileTitle.textContent = 'Detail Produk';
+
+    try {
+        const response = await fetch(`../api/user/get-product-detail.php?id=${productId}`);
+        const result = await response.json();
+
+        if (result.success) {
+            const data = result.data;
+            
+            // Basic Info
+            document.getElementById('seller-product-name').textContent = data.name;
+            document.getElementById('seller-product-price').textContent = 'Rp ' + Number(data.price).toLocaleString('id-ID');
+            document.getElementById('seller-product-weight').textContent = data.weight + ' gram';
+            document.getElementById('seller-product-stock').textContent = data.stock;
+            document.getElementById('seller-product-description').innerHTML = data.description ? 
+                data.description.replace(/\n/g, '<br>') : 'Tidak ada deskripsi.';
+
+            // Images
+            const imagesArray = data.images && data.images.length > 0 ? data.images : (data.image ? [data.image] : []);
+            const mainImg = document.getElementById('seller-main-img');
+            const thumbGallery = document.getElementById('seller-thumbnail-gallery');
+
+            if (imagesArray.length > 0) {
+                const firstImgPath = imagesArray[0].startsWith('http') ? imagesArray[0] : `../assets/images/products/${imagesArray[0]}`;
+                mainImg.src = firstImgPath;
+                
+                if (thumbGallery) {
+                    thumbGallery.innerHTML = '';
+                    if (imagesArray.length > 1) {
+                        imagesArray.forEach((img, index) => {
+                            const imgPath = img.startsWith('http') ? img : `../assets/images/products/${img}`;
+                            const thumb = document.createElement('div');
+                            thumb.className = 'thumbnail-item' + (index === 0 ? ' active' : '');
+                            thumb.innerHTML = `<img src="${imgPath}" alt="Thumb ${index}">`;
+                            thumb.onclick = () => {
+                                mainImg.src = imgPath;
+                                thumbGallery.querySelectorAll('.thumbnail-item').forEach(t => t.classList.remove('active'));
+                                thumb.classList.add('active');
+                            };
+                            thumbGallery.appendChild(thumb);
+                        });
+                    }
+                }
+            } else {
+                mainImg.src = '../assets/images/no-image.png';
+            }
+
+            // Seller Info
+            if (data.seller) {
+                document.getElementById('seller-view-name').textContent = data.seller.store_name;
+                document.getElementById('seller-view-location').textContent = data.seller.location || 'Indonesia';
+                if (data.seller.photo) {
+                    const photoSrc = data.seller.photo.startsWith('http') ? data.seller.photo : `../${data.seller.photo}`;
+                    document.getElementById('seller-view-photo').src = photoSrc;
+                }
+            }
+
+            // Load Reviews
+            loadSellerViewReviews(productId);
+
+        } else {
+            alert('Gagal memuat detail produk: ' + result.message);
+            backToStore();
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat memuat data');
+        backToStore();
+    }
 }
 
-function closeProductPreviewModal() {
-    const modal = document.getElementById('product-preview-modal');
-    modal.style.display = 'none';
-    document.body.style.overflow = 'auto'; // Restore scroll
+function backToStore() {
+    const views = document.querySelectorAll('.view');
+    views.forEach(v => v.classList.remove('active'));
+    
+    const myStoreView = document.getElementById('my-store-view');
+    if (myStoreView) myStoreView.classList.add('active');
+
+    const mobileTitle = document.getElementById('mobile-page-title');
+    if (mobileTitle) mobileTitle.textContent = 'Toko Saya';
+}
+
+async function loadSellerViewReviews(id) {
+    const container = document.getElementById('seller-product-reviews');
+    const titleElem = document.getElementById('seller-review-title');
+    const seeAllBtn = document.getElementById('btn-see-all-reviews');
+    const seeAllCountText = document.getElementById('btn-review-count-text');
+    
+    try {
+        const response = await fetch(`../api/user/get-product-reviews.php?id=${id}`);
+        const result = await response.json();
+        
+        if (result.success && result.data.length > 0) {
+            currentProductReviews = result.data;
+            const total = result.data.length;
+            if (titleElem) titleElem.textContent = `Ulasan (${total})`;
+            
+            // Show "See All" button centered if more than 3
+            if (total > 3) {
+                seeAllBtn.style.display = 'block';
+                if (seeAllCountText) seeAllCountText.textContent = `(${total})`;
+            } else {
+                seeAllBtn.style.display = 'none';
+            }
+
+            container.innerHTML = result.data.slice(0, 3).map(review => renderReviewItem(review)).join('');
+        } else {
+            currentProductReviews = [];
+            if (titleElem) titleElem.textContent = 'Ulasan (0)';
+            seeAllBtn.style.display = 'none';
+            container.innerHTML = `<div class="no-reviews">Belum ada ulasan untuk produk ini.</div>`;
+        }
+    } catch (error) {
+        console.error('Error loading reviews:', error);
+        container.innerHTML = `<p style="color:red; text-align:center;">Gagal memuat ulasan.</p>`;
+    }
+}
+
+function renderReviewItem(review) {
+    return `
+        <div class="review-card">
+            <img src="${review.profile_photo ? (review.profile_photo.startsWith('http') ? review.profile_photo : `../assets/images/profiles/${review.profile_photo}`) : '../assets/images/default-avatar.png'}" class="review-avatar">
+            <div class="review-content">
+                <div class="review-info-top" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span class="reviewer-name" style="font-weight: 700; color: #1f2937;">${review.username || 'Pengguna'}</span>
+                    <span class="review-date" style="font-size: 13px; color: #9ca3af;">${review.created_at_formatted}</span>
+                </div>
+                <div class="review-stars" style="color: #f5c444; margin-bottom: 10px;">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
+                <div class="review-text" style="color: #4b5563; line-height: 1.6;">${review.review || '<i>Tidak ada komentar tertulis.</i>'}</div>
+            </div>
+        </div>
+    `;
+}
+
+function viewAllReviews() {
+    // Get product ID from stored global variable (set in viewStoreProductDetail)
+    let productId = window.currentProductId;
+    
+    // Fallback: try to get from URL if available
+    if (!productId) {
+        const urlParams = new URLSearchParams(window.location.search);
+        productId = urlParams.get('id');
+    }
+    
+    if (productId) {
+        window.location.href = `reviews.php?id=${productId}`;
+    } else {
+        alert('Produk tidak ditemukan!');
+        console.error('Product ID not found for reviews page');
+    }
 }
 
 window.loadDashboardData = loadDashboardData;
 window.loadSellerProfile = loadSellerProfile;
 window.loadCategories = loadCategories;
 window.editProduct = editProduct;
-window.editProduct = editProduct;
 window.deleteProduct = deleteProduct;
 window.closeEditProductModal = closeEditProductModal;
 window.loadMyStoreData = loadMyStoreData;
 window.filterStoreProducts = filterStoreProducts;
-window.closeProductPreviewModal = closeProductPreviewModal;
 window.viewStoreProductDetail = viewStoreProductDetail;
+window.backToStore = backToStore;
+window.viewAllReviews = viewAllReviews;
+
+// Check if we need to show product detail after returning from reviews page
+document.addEventListener('DOMContentLoaded', () => {
+    const viewProductId = sessionStorage.getItem('viewProductId');
+    if (viewProductId) {
+        sessionStorage.removeItem('viewProductId');
+        // Wait a bit for views to be ready
+        setTimeout(() => {
+            if (typeof viewStoreProductDetail === 'function') {
+                viewStoreProductDetail(viewProductId);
+            }
+        }, 300);
+    }
+});
 
 // ===== ORDERS SYSTEM =====
 async function loadOrders() {

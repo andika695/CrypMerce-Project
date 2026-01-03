@@ -68,15 +68,16 @@ try {
 }
 
 // API Keys
-// API Keys
-$apiKey = getenv('GEOAPIFY_API_KEY');
-if (!$apiKey && isset($_ENV['GEOAPIFY_API_KEY'])) {
-    $apiKey = $_ENV['GEOAPIFY_API_KEY'];
-}
-// Fallback if env not loaded
-if (!$apiKey) {
-    $apiKey = '601773d95319404183f23f39e6a6544d'; // Hardcoded fallback from user
+$geoapifyKey = getenv('GEOAPIFY_API_KEY');
+if (!$geoapifyKey && isset($_ENV['GEOAPIFY_API_KEY'])) {
+    $geoapifyKey = $_ENV['GEOAPIFY_API_KEY'];
 }
 
-define('GEOAPIFY_API_KEY', $apiKey);
+// Ensure the key exists
+if (!$geoapifyKey) {
+    // If you need to debug why env is not loading, uncomment below:
+    // error_log("Warning: GEOAPIFY_API_KEY is not set in environment.");
+}
+
+define('GEOAPIFY_API_KEY', $geoapifyKey);
 

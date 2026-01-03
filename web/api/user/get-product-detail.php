@@ -33,6 +33,15 @@ try {
         // Decode variants json if exists
         $product['variants'] = $product['variants'] ? json_decode($product['variants'], true) : null;
         
+        // Handle images array - backward compatibility
+        $imagesArray = [];
+        if (!empty($product['images'])) {
+            $imagesArray = json_decode($product['images'], true) ?: [];
+        } elseif (!empty($product['image'])) {
+            // Fallback to single image if images array is empty
+            $imagesArray = [$product['image']];
+        }
+        
         // Construct clean response
         $response = [
             'success' => true,
@@ -43,7 +52,8 @@ try {
                 'stock' => $product['stock'],
                 'weight' => $product['weight'],
                 'description' => $product['description'],
-                'image' => $product['image'],
+                'image' => $product['image'], // Primary image for backward compatibility
+                'images' => $imagesArray, // All images array
                 'category_id' => $product['category_id'],
                 'variants' => $product['variants'],
                 'seller' => [
@@ -64,3 +74,4 @@ try {
 } catch (PDOException $e) {
     echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
 }
+

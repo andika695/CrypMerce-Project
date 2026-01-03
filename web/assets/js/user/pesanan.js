@@ -66,6 +66,9 @@ function loadMyOrders() {
           } else if (order.status === "completed") {
             statusText = "Selesai ✅";
             statusColor = "#27ae60"; // Hijau
+            if (!order.is_rated || order.is_rated == 0) {
+                 actionBtn = `<button class="btn-rate" onclick="openRatingModal(${order.id})" style="background:#f1c40f; color:#fff; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; font-weight:bold;">★ Beri Penilaian</button>`;
+            }
           } else if (order.status === "return_requested") {
             statusText = "Menunggu Konfirmasi Return dari Seller";
             statusColor = "#f39c12"; // Kuning
@@ -135,6 +138,83 @@ function loadMyOrders() {
     });
 }
 
+// Rating Modal Handlers
+let currentRatingOrderId = null;
+
+function openRatingModal(orderId) {
+    currentRatingOrderId = orderId;
+    document.getElementById('rating-order-id').value = orderId;
+    document.getElementById('rating-modal').style.display = 'flex';
+    
+    // Reset form
+    document.querySelectorAll('.star-rating input').forEach(input => input.checked = false);
+    document.getElementById('rating-review').value = '';
+}
+
+function closeRatingModal() {
+    document.getElementById('rating-modal').style.display = 'none';
+    currentRatingOrderId = null;
+    loadMyOrders(); // Refresh to update status UI
+}
+
+// Global Rating Submission Handler
+document.addEventListener('DOMContentLoaded', () => {
+    const ratingForm = document.getElementById('rating-form');
+    if (ratingForm) {
+        ratingForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = ratingForm.querySelector('.btn-save');
+            btn.disabled = true;
+            btn.textContent = 'Mengirim...';
+            
+            // Build data
+            const formData = new FormData(ratingForm);
+            const data = {
+                order_id: document.getElementById('rating-order-id').value,
+                rating: 0,
+                review: document.getElementById('rating-review').value
+            };
+            
+            // Get selected rating
+            const selectedStar = ratingForm.querySelector('input[name="rating"]:checked');
+            if (!selectedStar) {
+                alert('Mohon pilih jumlah bintang');
+                btn.disabled = false;
+                btn.textContent = 'Kirim Penilaian';
+                return;
+            }
+            data.rating = selectedStar.value;
+            
+            try {
+                const response = await fetch('../api/user/submit-rating.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Terima kasih atas ulasan Anda!');
+                    closeRatingModal();
+                } else {
+                    alert('Gagal mengirim ulasan: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error submitting rating:', error);
+                alert('Terjadi kesalahan server');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Kirim Penilaian';
+            }
+        });
+    }
+});
+
+// Update window.closeRatingModal for global access
+window.closeRatingModal = closeRatingModal;
+
 window.finishOrder = function (orderId) {
   if (
     !confirm(
@@ -151,8 +231,9 @@ window.finishOrder = function (orderId) {
     .then((res) => res.json())
     .then((res) => {
       if (res.success) {
-        alert("Terima kasih! Pesanan selesai.");
-        loadMyOrders();
+        // alert("Terima kasih! Pesanan selesai."); // Removed alert to focus on rating
+        // Open rating modal instead of reloading
+        openRatingModal(orderId);
       } else {
         alert("Gagal: " + res.message);
       }

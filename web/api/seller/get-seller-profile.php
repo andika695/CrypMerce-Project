@@ -103,6 +103,20 @@ try {
     foreach ($months as $en => $id) {
         $joinDate = str_replace($en, $id, $joinDate);
     }
+
+    // 4. Get Rating Stats (with Self-Healing)
+    $ratingStats = ['avg_rating' => 0, 'total_reviews' => 0];
+    try {
+        $rateStmt = $pdo->prepare("SELECT AVG(rating) as avg_rating, COUNT(*) as total_reviews FROM store_ratings WHERE seller_id = :seller_id");
+        $rateStmt->execute(['seller_id' => $profile['seller_id']]);
+        $stats = $rateStmt->fetch(PDO::FETCH_ASSOC);
+        
+        $ratingStats['avg_rating'] = $stats['avg_rating'] ? round($stats['avg_rating'], 1) : 0;
+        $ratingStats['total_reviews'] = (int)$stats['total_reviews'];
+    } catch (PDOException $e) {
+        // Table missing fallback
+        $ratingStats = ['avg_rating' => 0, 'total_reviews' => 0];
+    }
     
     echo json_encode([
         'success' => true,
@@ -122,7 +136,9 @@ try {
             'address' => $profile['address'],
             'city' => $profile['city'],
             'province' => $profile['province'],
-            'address_detail' => $profile['address_detail']
+            'address_detail' => $profile['address_detail'],
+            'rating' => $ratingStats['avg_rating'],
+            'total_reviews' => $ratingStats['total_reviews']
         ]
     ]);
     

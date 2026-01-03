@@ -10,4 +10,5 @@ require_once 'views/my-store.php';
 require_once 'views/orders.php';
 require_once 'views/profile.php';
 require_once 'views/location-settings.php';
+require_once 'views/product-detail.php';
 ?>

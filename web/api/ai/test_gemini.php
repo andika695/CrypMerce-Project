@@ -1,7 +1,13 @@
 <?php
-// Use direct .env loading or assume key is set if not using DB
-$apiKey = "AIzaSyCIMJD2HapF46Yqrt-BuUdtdvFIoZXaT2s";
-echo "Using Key: " . substr($apiKey, 0, 5) . "...\n";
+// Load key from environment variable
+$apiKey = getenv('GEMINI_API_KEY');
+if (!$apiKey && isset($_ENV['GEMINI_API_KEY'])) {
+    $apiKey = $_ENV['GEMINI_API_KEY'];
+}
+
+if (!$apiKey) {
+    die("Error: GEMINI_API_KEY is not set in environment variables or .env file.\n");
+}
 
 echo "Using Key: " . substr($apiKey, 0, 5) . "...\n";
 

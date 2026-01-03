@@ -68,11 +68,37 @@ function renderProduct(data) {
 
     currentStock = Number(data.stock);
 
-    // Image handling dengan fallback
-    if (data.image) {
-        const imgPath = data.image.startsWith('http') ? data.image : `../assets/images/products/${data.image}`;
-        document.getElementById('main-img').src = imgPath;
-        document.getElementById('footer-img').src = imgPath;
+    // Handle images array (new multi-image feature)
+    const imagesArray = data.images && data.images.length > 0 ? data.images : (data.image ? [data.image] : []);
+    
+    if (imagesArray.length > 0) {
+        // Set main image to first image
+        const mainImgPath = imagesArray[0].startsWith('http') ? imagesArray[0] : `../assets/images/products/${imagesArray[0]}`;
+        document.getElementById('main-img').src = mainImgPath;
+        document.getElementById('footer-img').src = mainImgPath;
+        
+        // Render thumbnail gallery if more than 1 image
+        const thumbnailGallery = document.getElementById('thumbnail-gallery');
+        if (thumbnailGallery && imagesArray.length > 1) {
+            thumbnailGallery.innerHTML = '';
+            imagesArray.forEach((img, index) => {
+                const imgPath = img.startsWith('http') ? img : `../assets/images/products/${img}`;
+                const thumbnail = document.createElement('div');
+                thumbnail.className = 'thumbnail-item' + (index === 0 ? ' active' : '');
+                thumbnail.innerHTML = `<img src="${imgPath}" alt="Product ${index + 1}">`;
+                thumbnail.addEventListener('click', () => {
+                    // Update main image
+                    document.getElementById('main-img').src = imgPath;
+                    document.getElementById('footer-img').src = imgPath;
+                    // Update active state
+                    thumbnailGallery.querySelectorAll('.thumbnail-item').forEach(t => t.classList.remove('active'));
+                    thumbnail.classList.add('active');
+                });
+                thumbnailGallery.appendChild(thumbnail);
+            });
+        } else if (thumbnailGallery) {
+            thumbnailGallery.innerHTML = ''; // Hide gallery for single image
+        }
     }
 
     document.getElementById('product-description').innerHTML = data.description ? 
@@ -91,9 +117,13 @@ function renderProduct(data) {
             document.getElementById('seller-photo').src = imgSrc;
         }
 
-        checkFollowStatus(data.seller.id);
-        const followBtn = document.querySelector('.btn-follow');
-        if (followBtn) followBtn.onclick = () => toggleFollow(data.seller.id);
+        if (data.seller && data.seller.id) {
+            checkFollowStatus(data.seller.id);
+            const followBtn = document.querySelector('.btn-follow');
+            if (followBtn) {
+                followBtn.onclick = () => toggleFollow(data.seller.id);
+            }
+        }
     }
 
     if (data.weight) {
@@ -281,15 +311,32 @@ function showToast(message, type = 'success') {
 
 // FOLLOW SYSTEM
 async function checkFollowStatus(sellerId) {
+    if (!sellerId) return;
     try {
         const response = await fetch(`../api/user/check-follow.php?seller_id=${sellerId}`);
         const result = await response.json();
-        if (result.success) updateFollowButton(result.following);
-    } catch (error) { console.error(error); }
+        if (result.success) {
+            updateFollowButton(result.following);
+        } else {
+            console.error('Check follow failed:', result.message);
+        }
+    } catch (error) { 
+        console.error('Error checking follow status:', error); 
+    }
 }
 
 async function toggleFollow(sellerId) {
+    if (!sellerId) {
+        console.error('Seller ID is required');
+        return;
+    }
+    
     const followBtn = document.querySelector('.btn-follow');
+    if (!followBtn) {
+        console.error('Follow button not found');
+        return;
+    }
+    
     if (followBtn.disabled) return;
     followBtn.disabled = true;
     
@@ -299,17 +346,43 @@ async function toggleFollow(sellerId) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ seller_id: sellerId })
         });
+        
+        if (response.status === 401) {
+            alert('Silakan login untuk mengikuti toko ini');
+            followBtn.disabled = false;
+            return;
+        }
+        
         const result = await response.json();
-        if (result.success) updateFollowButton(result.following);
-    } catch (error) { console.error(error); } 
-    finally { followBtn.disabled = false; }
+        if (result.success) {
+            updateFollowButton(result.following);
+            showToast(result.message, 'success');
+        } else {
+            showToast(result.message || 'Gagal mengikuti toko', 'error');
+        }
+    } catch (error) { 
+        console.error('Error toggling follow:', error);
+        showToast('Terjadi kesalahan saat mengikuti toko', 'error');
+    } 
+    finally { 
+        followBtn.disabled = false; 
+    }
 }
 
 function updateFollowButton(isFollowing) {
     const followBtn = document.querySelector('.btn-follow');
-    if (!followBtn) return;
-    followBtn.textContent = isFollowing ? 'Unfollow' : 'Follow';
-    isFollowing ? followBtn.classList.add('following') : followBtn.classList.remove('following');
+    if (!followBtn) {
+        console.warn('Follow button not found for update');
+        return;
+    }
+    
+    if (isFollowing) {
+        followBtn.classList.add('following');
+        followBtn.innerHTML = '<i class="fas fa-check"></i> Following';
+    } else {
+        followBtn.classList.remove('following');
+        followBtn.innerHTML = '<i class="fas fa-plus"></i> Follow';
+    }
 }
 
 async function handleAddToCart(e) {
@@ -585,3 +658,85 @@ function resetConfirmBtn(btn) {
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-check-circle"></i> Beli Sekarang';
 }
+
+// 6. REVIEWS LOGIC
+// 6. REVIEWS LOGIC
+let allReviewsData = [];
+
+async function loadProductReviews(id) {
+    const container = document.getElementById('product-reviews');
+    const countElem = document.getElementById('review-count');
+    
+    try {
+        const response = await fetch(`../api/user/get-product-reviews.php?id=${id}`);
+        const result = await response.json();
+        
+        if (result.success && result.data.length > 0) {
+            allReviewsData = result.data; // Store globally
+            countElem.textContent = `(${allReviewsData.length})`;
+            
+            // Initial render: Top 3 (Sorted by rating DESC from API)
+            renderReviewsList(3);
+        } else {
+            countElem.textContent = '(0)';
+            container.innerHTML = `<div class="no-reviews">Belum ada ulasan untuk produk ini.</div>`;
+        }
+    } catch (error) {
+        console.error('Error loading reviews:', error);
+        container.innerHTML = `<p style="color:red; text-align:center;">Gagal memuat ulasan.</p>`;
+    }
+}
+
+function renderReviewsList(limit) {
+    const container = document.getElementById('product-reviews');
+    const reviewsToShow = allReviewsData.slice(0, limit);
+    
+    let html = reviewsToShow.map(review => createReviewCard(review)).join('');
+    
+    // Add "Load More" button if there are more reviews
+    if (allReviewsData.length > limit) {
+        html += `
+            <div class="load-more-container" style="text-align:center; margin-top:15px;">
+                <button onclick="window.location.href='reviews.html?id=${productId}'" class="btn-load-more">
+                    Lihat Semua Ulasan (${allReviewsData.length}) ➔
+                </button>
+            </div>
+        `;
+    }
+    
+    container.innerHTML = html;
+}
+
+function createReviewCard(review) {
+    // Generate stars
+    let starsHtml = '';
+    for(let i=1; i<=5; i++) {
+        starsHtml += i <= review.rating ? '★' : '☆';
+    }
+
+    // Default avatar
+    const avatar = review.profile_photo ? 
+        (review.profile_photo.startsWith('http') ? review.profile_photo : `../assets/images/profiles/${review.profile_photo}`) 
+        : '../assets/images/default-avatar.png';
+
+    return `
+        <div class="review-card">
+            <img src="${avatar}" alt="${review.username}" class="review-avatar" onerror="this.src='../assets/images/default-avatar.png'">
+            <div class="review-content">
+                <div class="review-header">
+                    <span class="reviewer-name">${review.username || 'Pengguna'}</span>
+                    <span class="review-date">${review.created_at_formatted}</span>
+                </div>
+                <div class="review-stars">${starsHtml}</div>
+                <div class="review-text">${review.review || '<i>Tidak ada komentar tertulis.</i>'}</div>
+            </div>
+        </div>
+    `;
+}
+
+// Tambahkan pemanggilan loadProductReviews di renderProduct atau init
+const originalRenderProduct = renderProduct;
+renderProduct = function(data) {
+    originalRenderProduct(data);
+    loadProductReviews(data.id); // Fetch reviews after product data
+};

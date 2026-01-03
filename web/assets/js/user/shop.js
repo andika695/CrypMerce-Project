@@ -40,6 +40,12 @@ async function loadShopProfile(id) {
             document.getElementById('store-followers').textContent = data.follower_count;
             document.getElementById('store-total-products').textContent = data.total_products;
             
+            // Update Rating Stats
+            const ratingElem = document.getElementById('store-rating');
+            if (ratingElem) {
+                const rating = data.rating > 0 ? data.rating : '-';
+                ratingElem.innerHTML = `⭐ ${rating} <small>(${data.total_reviews} ulasan)</small>`;
+            }
             if (data.profile_photo) {
                 const imgSrc = data.profile_photo.startsWith('http') ? data.profile_photo : `../${data.profile_photo}`;
                 document.getElementById('store-profile-img').src = imgSrc;
@@ -100,12 +106,24 @@ function filterProducts(query) {
 }
 
 async function checkFollowStatus(id) {
+    if (!id) {
+        console.error('Seller ID is required');
+        return;
+    }
+    
     try {
-        const response = await fetch(`../api/user/check-follow.php?seller_id=${id}&v=1.1`);
+        const response = await fetch(`../api/user/check-follow.php?seller_id=${id}`);
         const result = await response.json();
         
         if (result.success) {
             updateFollowButton(result.following);
+            // Update follower count if element exists
+            const followerCountEl = document.getElementById('store-followers');
+            if (followerCountEl) {
+                followerCountEl.textContent = result.follower_count;
+            }
+        } else {
+            console.error('Check follow failed:', result.message);
         }
     } catch (error) {
         console.error('Error checking follow status:', error);
@@ -113,6 +131,20 @@ async function checkFollowStatus(id) {
 }
 
 async function toggleFollow(id) {
+    if (!id) {
+        console.error('Seller ID is required');
+        return;
+    }
+    
+    const btn = document.getElementById('follow-btn');
+    if (!btn) {
+        console.error('Follow button not found');
+        return;
+    }
+    
+    if (btn.disabled) return;
+    btn.disabled = true;
+    
     try {
         const response = await fetch('../api/user/toggle-follow.php', {
             method: 'POST',
@@ -122,16 +154,25 @@ async function toggleFollow(id) {
         
         if (response.status === 401) {
             alert('Silakan login untuk mengikuti toko ini');
+            btn.disabled = false;
             return;
         }
 
         const result = await response.json();
         if (result.success) {
             updateFollowButton(result.following);
-            document.getElementById('store-followers').textContent = result.follower_count;
+            const followerCountEl = document.getElementById('store-followers');
+            if (followerCountEl) {
+                followerCountEl.textContent = result.follower_count;
+            }
+        } else {
+            alert(result.message || 'Gagal mengikuti toko');
         }
     } catch (error) {
         console.error('Error toggling follow:', error);
+        alert('Terjadi kesalahan saat mengikuti toko');
+    } finally {
+        btn.disabled = false;
     }
 }
 

@@ -290,7 +290,7 @@ h1 {
 .modal {
   display: none; /* Hidden by default */
   position: fixed;
-  z-index: 200;
+  z-index: 3000; /* Higher than sidebar (2000) and header (2001) */
   left: 0;
   top: 0;
   width: 100%;
