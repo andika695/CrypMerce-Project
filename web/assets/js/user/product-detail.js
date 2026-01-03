@@ -117,9 +117,13 @@ function renderProduct(data) {
             document.getElementById('seller-photo').src = imgSrc;
         }
 
-        checkFollowStatus(data.seller.id);
-        const followBtn = document.querySelector('.btn-follow');
-        if (followBtn) followBtn.onclick = () => toggleFollow(data.seller.id);
+        if (data.seller && data.seller.id) {
+            checkFollowStatus(data.seller.id);
+            const followBtn = document.querySelector('.btn-follow');
+            if (followBtn) {
+                followBtn.onclick = () => toggleFollow(data.seller.id);
+            }
+        }
     }
 
     if (data.weight) {
@@ -307,15 +311,32 @@ function showToast(message, type = 'success') {
 
 // FOLLOW SYSTEM
 async function checkFollowStatus(sellerId) {
+    if (!sellerId) return;
     try {
         const response = await fetch(`../api/user/check-follow.php?seller_id=${sellerId}`);
         const result = await response.json();
-        if (result.success) updateFollowButton(result.following);
-    } catch (error) { console.error(error); }
+        if (result.success) {
+            updateFollowButton(result.following);
+        } else {
+            console.error('Check follow failed:', result.message);
+        }
+    } catch (error) { 
+        console.error('Error checking follow status:', error); 
+    }
 }
 
 async function toggleFollow(sellerId) {
+    if (!sellerId) {
+        console.error('Seller ID is required');
+        return;
+    }
+    
     const followBtn = document.querySelector('.btn-follow');
+    if (!followBtn) {
+        console.error('Follow button not found');
+        return;
+    }
+    
     if (followBtn.disabled) return;
     followBtn.disabled = true;
     
@@ -325,17 +346,43 @@ async function toggleFollow(sellerId) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ seller_id: sellerId })
         });
+        
+        if (response.status === 401) {
+            alert('Silakan login untuk mengikuti toko ini');
+            followBtn.disabled = false;
+            return;
+        }
+        
         const result = await response.json();
-        if (result.success) updateFollowButton(result.following);
-    } catch (error) { console.error(error); } 
-    finally { followBtn.disabled = false; }
+        if (result.success) {
+            updateFollowButton(result.following);
+            showToast(result.message, 'success');
+        } else {
+            showToast(result.message || 'Gagal mengikuti toko', 'error');
+        }
+    } catch (error) { 
+        console.error('Error toggling follow:', error);
+        showToast('Terjadi kesalahan saat mengikuti toko', 'error');
+    } 
+    finally { 
+        followBtn.disabled = false; 
+    }
 }
 
 function updateFollowButton(isFollowing) {
     const followBtn = document.querySelector('.btn-follow');
-    if (!followBtn) return;
-    followBtn.textContent = isFollowing ? 'Unfollow' : 'Follow';
-    isFollowing ? followBtn.classList.add('following') : followBtn.classList.remove('following');
+    if (!followBtn) {
+        console.warn('Follow button not found for update');
+        return;
+    }
+    
+    if (isFollowing) {
+        followBtn.classList.add('following');
+        followBtn.innerHTML = '<i class="fas fa-check"></i> Following';
+    } else {
+        followBtn.classList.remove('following');
+        followBtn.innerHTML = '<i class="fas fa-plus"></i> Follow';
+    }
 }
 
 async function handleAddToCart() {

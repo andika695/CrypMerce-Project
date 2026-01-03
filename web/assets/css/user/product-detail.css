@@ -122,7 +122,8 @@ body {
 .seller-widget {
   display: flex;
   align-items: center;
-  padding: 16px;
+  padding: 18px;
+  margin: auto;
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 12px;

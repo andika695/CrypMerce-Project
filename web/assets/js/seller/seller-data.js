@@ -570,12 +570,18 @@ function updateStoreProductGrid(products) {
     });
 }
 
+let currentProductReviews = [];
+
 async function viewStoreProductDetail(productId) {
     const view = document.getElementById('product-detail-view');
     if (!view) return;
 
+    // Store product ID globally for reviews page
+    window.currentProductId = productId;
+
     // Show loading state
     document.getElementById('seller-product-name').textContent = 'Memuat...';
+    document.getElementById('btn-see-all-reviews').style.display = 'none';
 
     // Update active view
     const views = document.querySelectorAll('.view');
@@ -598,7 +604,6 @@ async function viewStoreProductDetail(productId) {
             document.getElementById('seller-product-price').textContent = 'Rp ' + Number(data.price).toLocaleString('id-ID');
             document.getElementById('seller-product-weight').textContent = data.weight + ' gram';
             document.getElementById('seller-product-stock').textContent = data.stock;
-            document.getElementById('seller-product-category').textContent = data.category_name || '-';
             document.getElementById('seller-product-description').innerHTML = data.description ? 
                 data.description.replace(/\n/g, '<br>') : 'Tidak ada deskripsi.';
 
@@ -632,7 +637,7 @@ async function viewStoreProductDetail(productId) {
                 mainImg.src = '../assets/images/no-image.png';
             }
 
-            // Seller Info (even though it's their own store)
+            // Seller Info
             if (data.seller) {
                 document.getElementById('seller-view-name').textContent = data.seller.store_name;
                 document.getElementById('seller-view-location').textContent = data.seller.location || 'Indonesia';
@@ -669,33 +674,71 @@ function backToStore() {
 
 async function loadSellerViewReviews(id) {
     const container = document.getElementById('seller-product-reviews');
-    const countElem = document.getElementById('seller-review-count');
+    const titleElem = document.getElementById('seller-review-title');
+    const seeAllBtn = document.getElementById('btn-see-all-reviews');
+    const seeAllCountText = document.getElementById('btn-review-count-text');
     
     try {
         const response = await fetch(`../api/user/get-product-reviews.php?id=${id}`);
         const result = await response.json();
         
         if (result.success && result.data.length > 0) {
-            countElem.textContent = `(${result.data.length})`;
-            container.innerHTML = result.data.slice(0, 3).map(review => `
-                <div class="review-card">
-                    <img src="${review.profile_photo ? (review.profile_photo.startsWith('http') ? review.profile_photo : `../assets/images/profiles/${review.profile_photo}`) : '../assets/images/default-avatar.png'}" class="review-avatar">
-                    <div class="review-content">
-                        <div class="review-header">
-                            <span class="reviewer-name">${review.username || 'Pengguna'}</span>
-                            <span class="review-date">${review.created_at_formatted}</span>
-                        </div>
-                        <div class="review-stars">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
-                        <div class="review-text">${review.review || '<i>Tidak ada komentar tertulis.</i>'}</div>
-                    </div>
-                </div>
-            `).join('');
+            currentProductReviews = result.data;
+            const total = result.data.length;
+            if (titleElem) titleElem.textContent = `Ulasan (${total})`;
+            
+            // Show "See All" button centered if more than 3
+            if (total > 3) {
+                seeAllBtn.style.display = 'block';
+                if (seeAllCountText) seeAllCountText.textContent = `(${total})`;
+            } else {
+                seeAllBtn.style.display = 'none';
+            }
+
+            container.innerHTML = result.data.slice(0, 3).map(review => renderReviewItem(review)).join('');
         } else {
-            countElem.textContent = '(0)';
-            container.innerHTML = `<div class="no-reviews">Belum ada ulasan.</div>`;
+            currentProductReviews = [];
+            if (titleElem) titleElem.textContent = 'Ulasan (0)';
+            seeAllBtn.style.display = 'none';
+            container.innerHTML = `<div class="no-reviews">Belum ada ulasan untuk produk ini.</div>`;
         }
     } catch (error) {
-        container.innerHTML = `<p style="color:red;">Gagal memuat ulasan.</p>`;
+        console.error('Error loading reviews:', error);
+        container.innerHTML = `<p style="color:red; text-align:center;">Gagal memuat ulasan.</p>`;
+    }
+}
+
+function renderReviewItem(review) {
+    return `
+        <div class="review-card">
+            <img src="${review.profile_photo ? (review.profile_photo.startsWith('http') ? review.profile_photo : `../assets/images/profiles/${review.profile_photo}`) : '../assets/images/default-avatar.png'}" class="review-avatar">
+            <div class="review-content">
+                <div class="review-info-top" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span class="reviewer-name" style="font-weight: 700; color: #1f2937;">${review.username || 'Pengguna'}</span>
+                    <span class="review-date" style="font-size: 13px; color: #9ca3af;">${review.created_at_formatted}</span>
+                </div>
+                <div class="review-stars" style="color: #f5c444; margin-bottom: 10px;">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
+                <div class="review-text" style="color: #4b5563; line-height: 1.6;">${review.review || '<i>Tidak ada komentar tertulis.</i>'}</div>
+            </div>
+        </div>
+    `;
+}
+
+function viewAllReviews() {
+    // Get product ID from stored global variable (set in viewStoreProductDetail)
+    let productId = window.currentProductId;
+    
+    // Fallback: try to get from URL if available
+    if (!productId) {
+        const urlParams = new URLSearchParams(window.location.search);
+        productId = urlParams.get('id');
+    }
+    
+    if (productId) {
+        window.location.href = `reviews.php?id=${productId}`;
+    } else {
+        alert('Produk tidak ditemukan!');
+        console.error('Product ID not found for reviews page');
     }
 }
 
@@ -709,6 +752,21 @@ window.loadMyStoreData = loadMyStoreData;
 window.filterStoreProducts = filterStoreProducts;
 window.viewStoreProductDetail = viewStoreProductDetail;
 window.backToStore = backToStore;
+window.viewAllReviews = viewAllReviews;
+
+// Check if we need to show product detail after returning from reviews page
+document.addEventListener('DOMContentLoaded', () => {
+    const viewProductId = sessionStorage.getItem('viewProductId');
+    if (viewProductId) {
+        sessionStorage.removeItem('viewProductId');
+        // Wait a bit for views to be ready
+        setTimeout(() => {
+            if (typeof viewStoreProductDetail === 'function') {
+                viewStoreProductDetail(viewProductId);
+            }
+        }, 300);
+    }
+});
 
 // ===== ORDERS SYSTEM =====
 async function loadOrders() {
