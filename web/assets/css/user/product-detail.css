@@ -66,6 +66,58 @@ body {
   object-fit: cover;
 }
 
+/* THUMBNAIL GALLERY */
+.thumbnail-gallery {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.thumbnail-gallery::-webkit-scrollbar {
+  height: 4px;
+}
+
+.thumbnail-gallery::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.thumbnail-gallery::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+.thumbnail-item {
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+}
+
+.thumbnail-item:hover {
+  opacity: 1;
+  border-color: #d1d5db;
+}
+
+.thumbnail-item.active {
+  border-color: var(--primary);
+  opacity: 1;
+  box-shadow: 0 0 0 2px rgba(53, 51, 205, 0.2);
+}
+
+.thumbnail-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 /* SELLER WIDGET (Now in Left Column) */
 .seller-widget {
   display: flex;

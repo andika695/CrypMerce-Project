@@ -83,6 +83,12 @@ function updateProductTable(products) {
 
 // ===== PRODUCT ACTIONS (DELETE & EDIT) =====
 
+// ===== EDIT PRODUCT STATE =====
+let editSelectedFiles = [];
+let removedExistingImages = [];
+let currentExistingImages = [];
+const MAX_EDIT_IMAGES = 5;
+
 // 1. Delete Product
 async function deleteProduct(id) {
     if (!confirm('Apakah Anda yakin ingin menghapus produk ini?')) return;
@@ -117,7 +123,7 @@ async function editProduct(id) {
         if (result.success) {
             const p = result.data;
             
-            // Fill form
+            // Fill form fields
             document.getElementById('edit-product-id').value = p.id;
             document.getElementById('edit-name').value = p.name;
             document.getElementById('edit-price').value = p.price;
@@ -126,15 +132,13 @@ async function editProduct(id) {
             document.getElementById('edit-category').value = p.category_id;
             document.getElementById('edit-description').value = p.description || '';
             
-            // Show image preview if exists
-            const preview = document.getElementById('edit-product-preview');
-            if (p.image) {
-                const imgSrc = p.image.startsWith('http') ? p.image : `../assets/images/products/${p.image}`;
-                preview.innerHTML = `<img src="${imgSrc}" alt="Preview" onerror="this.src='../assets/images/bag.png'">`;
-                preview.classList.add('show');
-            } else {
-                preview.innerHTML = '';
-            }
+            // Reset state
+            editSelectedFiles = [];
+            removedExistingImages = [];
+            // Parse images if API didn't (e.g. if specific endpoint version differs)
+            currentExistingImages = Array.isArray(p.images) ? p.images : (p.image ? [p.image] : []);
+            
+            renderEditPreviews();
 
             // Show modal
             const modal = document.getElementById('edit-product-modal');
@@ -149,15 +153,134 @@ async function editProduct(id) {
     }
 }
 
+function renderEditPreviews() {
+    const previewGrid = document.getElementById('edit-image-preview-grid');
+    const imageCounter = document.getElementById('edit-image-count');
+    
+    if (!previewGrid) return;
+    
+    previewGrid.innerHTML = '';
+    
+    // 1. Render Existing Images (that are not removed)
+    currentExistingImages.forEach((url, index) => {
+        if (removedExistingImages.includes(url)) return;
+        
+        const imgSrc = url.startsWith('http') ? url : `../assets/images/products/${url}`;
+        const item = document.createElement('div');
+        item.className = 'image-preview-item';
+        // Mark first non-removed image as primary (visually)
+        item.innerHTML = `
+            <img src="${imgSrc}" alt="Product Image" onerror="this.src='../assets/images/bag.png'">
+            <button type="button" class="remove-btn existing" data-url="${url}">&times;</button>
+        `;
+        
+        item.querySelector('.remove-btn').addEventListener('click', () => {
+             removedExistingImages.push(url);
+             renderEditPreviews();
+        });
+        
+        previewGrid.appendChild(item);
+    });
+    
+    // 2. Render New Selected Files
+    editSelectedFiles.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+             const item = document.createElement('div');
+             item.className = 'image-preview-item new-file';
+             item.innerHTML = `
+                <img src="${e.target.result}" alt="New Image">
+                <span class="primary-badge" style="background:#3498db; right:auto; left:6px;">Baru</span>
+                <button type="button" class="remove-btn" data-index="${index}">&times;</button>
+             `;
+             
+             item.querySelector('.remove-btn').addEventListener('click', () => {
+                 editSelectedFiles.splice(index, 1);
+                 renderEditPreviews();
+                 updateEditFileInput();
+             });
+             
+             // Append finding current position to ensure order (simple append works for small arrays)
+             previewGrid.appendChild(item);
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Update Counter
+    const totalImages = (currentExistingImages.length - removedExistingImages.length) + editSelectedFiles.length;
+    if (imageCounter) imageCounter.textContent = `${totalImages}/${MAX_EDIT_IMAGES} Foto`;
+}
+
+function handleEditFiles(files) {
+    const newFiles = Array.from(files);
+    const existingCount = currentExistingImages.length - removedExistingImages.length;
+    
+    // Validate total count
+    if (existingCount + editSelectedFiles.length + newFiles.length > MAX_EDIT_IMAGES) {
+        alert(`Maksimal ${MAX_EDIT_IMAGES} foto. Saat ini ada ${existingCount + editSelectedFiles.length} foto.`);
+        return;
+    }
+
+    newFiles.forEach(file => {
+        if (!file.type.startsWith('image/')) {
+            alert(`File "${file.name}" bukan gambar.`);
+            return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+            alert(`File "${file.name}" terlalu besar. Maksimal 2MB.`);
+            return;
+        }
+        editSelectedFiles.push(file);
+    });
+
+    renderEditPreviews();
+    updateEditFileInput();
+}
+
+function updateEditFileInput() {
+    const editImagesInput = document.getElementById('edit-images');
+    if (!editImagesInput) return;
+    
+    const dt = new DataTransfer();
+    editSelectedFiles.forEach(file => dt.items.add(file));
+    editImagesInput.files = dt.files;
+}
+
 // Close Modal Function
 function closeEditProductModal() {
     document.getElementById('edit-product-modal').style.display = 'none';
 }
 
-// 3. Handle Edit Form Submit
+// 3. Handle Edit Form Submit & Listeners
 document.addEventListener('DOMContentLoaded', () => {
     const editForm = document.getElementById('edit-product-form');
-    
+    const editUploadArea = document.getElementById('edit-upload-area');
+    const editImagesInput = document.getElementById('edit-images');
+
+    // Init Upload Listeners for Edit Modal
+    if (editUploadArea && editImagesInput) {
+        editUploadArea.addEventListener('click', () => editImagesInput.click());
+        
+        editUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            editUploadArea.classList.add('drag-over');
+        });
+
+        editUploadArea.addEventListener('dragleave', () => {
+            editUploadArea.classList.remove('drag-over'); 
+        });
+
+        editUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            editUploadArea.classList.remove('drag-over');
+            handleEditFiles(e.dataTransfer.files);
+        });
+
+        editImagesInput.addEventListener('change', (e) => {
+            handleEditFiles(e.target.files);
+        });
+    }
+
     if (editForm) {
         editForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -169,6 +292,15 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const formData = new FormData(editForm);
                 
+                // Add removed images
+                document.getElementById('edit-removed-images').value = JSON.stringify(removedExistingImages);
+                formData.set('removed_images', JSON.stringify(removedExistingImages));
+                
+                // New images are already in 'images[]' input via DataTransfer, 
+                // but if browser support is flaky, we can use this check:
+                // formData keys for files might be empty if input is not updated properly.
+                // updateEditFileInput() ensures input.files is sync.
+
                 const response = await fetch('../api/seller/edit-product.php', {
                     method: 'POST',
                     body: formData
@@ -189,24 +321,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'Simpan Perubahan';
-            }
-        });
-    }
-
-    // Edit Image Preview Handler
-    const editImageInput = document.getElementById('edit-image');
-    if (editImageInput) {
-        editImageInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            const preview = document.getElementById('edit-product-preview');
-            
-            if (file) {
-                 const reader = new FileReader();
-                 reader.onload = (e) => {
-                     preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-                     preview.classList.add('show');
-                 };
-                 reader.readAsDataURL(file);
             }
         });
     }

@@ -68,11 +68,37 @@ function renderProduct(data) {
 
     currentStock = Number(data.stock);
 
-    // Image handling dengan fallback
-    if (data.image) {
-        const imgPath = data.image.startsWith('http') ? data.image : `../assets/images/products/${data.image}`;
-        document.getElementById('main-img').src = imgPath;
-        document.getElementById('footer-img').src = imgPath;
+    // Handle images array (new multi-image feature)
+    const imagesArray = data.images && data.images.length > 0 ? data.images : (data.image ? [data.image] : []);
+    
+    if (imagesArray.length > 0) {
+        // Set main image to first image
+        const mainImgPath = imagesArray[0].startsWith('http') ? imagesArray[0] : `../assets/images/products/${imagesArray[0]}`;
+        document.getElementById('main-img').src = mainImgPath;
+        document.getElementById('footer-img').src = mainImgPath;
+        
+        // Render thumbnail gallery if more than 1 image
+        const thumbnailGallery = document.getElementById('thumbnail-gallery');
+        if (thumbnailGallery && imagesArray.length > 1) {
+            thumbnailGallery.innerHTML = '';
+            imagesArray.forEach((img, index) => {
+                const imgPath = img.startsWith('http') ? img : `../assets/images/products/${img}`;
+                const thumbnail = document.createElement('div');
+                thumbnail.className = 'thumbnail-item' + (index === 0 ? ' active' : '');
+                thumbnail.innerHTML = `<img src="${imgPath}" alt="Product ${index + 1}">`;
+                thumbnail.addEventListener('click', () => {
+                    // Update main image
+                    document.getElementById('main-img').src = imgPath;
+                    document.getElementById('footer-img').src = imgPath;
+                    // Update active state
+                    thumbnailGallery.querySelectorAll('.thumbnail-item').forEach(t => t.classList.remove('active'));
+                    thumbnail.classList.add('active');
+                });
+                thumbnailGallery.appendChild(thumbnail);
+            });
+        } else if (thumbnailGallery) {
+            thumbnailGallery.innerHTML = ''; // Hide gallery for single image
+        }
     }
 
     document.getElementById('product-description').innerHTML = data.description ? 

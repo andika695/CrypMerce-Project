@@ -36,6 +36,15 @@ try {
     $product['stock'] = (int) $product['stock'];
     $product['category_id'] = (int) $product['category_id'];
 
+    // Handle images array
+    if (!empty($product['images'])) {
+        $product['images'] = json_decode($product['images'], true);
+    } elseif (!empty($product['image'])) {
+        $product['images'] = [$product['image']];
+    } else {
+        $product['images'] = [];
+    }
+
     echo json_encode(['success' => true, 'data' => $product]);
 
 } catch (PDOException $e) {

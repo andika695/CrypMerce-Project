@@ -65,9 +65,20 @@
                 <textarea id="edit-description" name="description" rows="3"></textarea>
             </div>
             <div class="form-group">
-                <label for="edit-image">Ganti Gambar (Opsional)</label>
-                <input type="file" id="edit-image" name="image" accept="image/*">
-                <div id="edit-product-preview" class="image-preview"></div>
+                <label>Foto Produk (Maks 5)</label>
+                <input type="hidden" id="edit-removed-images" name="removed_images">
+                
+                <div class="upload-area" id="edit-upload-area">
+                    <input type="file" id="edit-images" name="images[]" accept="image/*" multiple hidden>
+                    <div class="upload-placeholder">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Klik atau Drag & Drop foto di sini</p>
+                        <span>Format: JPG, PNG, GIF (Maks. 2MB)</span>
+                    </div>
+                </div>
+
+                <div class="image-preview-grid" id="edit-image-preview-grid"></div>
+                <div class="image-counter" id="edit-image-count">0/5 Foto</div>
             </div>
             <div class="modal-buttons">
                 <button type="submit" class="btn-save">Simpan Perubahan</button>

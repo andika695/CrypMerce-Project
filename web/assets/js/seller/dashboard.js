@@ -107,15 +107,23 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const submitBtn = document.getElementById('submit-btn');
     const requiredFields = form.querySelectorAll('[required]');
-    const imageInput = document.getElementById('image');
-    const imagePreview = document.getElementById('image-preview');
+    
+    // Multi-image upload elements
+    const uploadArea = document.getElementById('upload-area');
+    const imageInput = document.getElementById('product-images');
+    const previewGrid = document.getElementById('image-preview-grid');
+    const imageCounter = document.getElementById('image-count');
+    
+    // Store selected files
+    let selectedFiles = [];
+    const MAX_IMAGES = 5;
 
     console.log('Form elements found:', {
         form: !!form,
         submitBtn: !!submitBtn,
         requiredFields: requiredFields.length,
-        imageInput: !!imageInput,
-        imagePreview: !!imagePreview
+        uploadArea: !!uploadArea,
+        imageInput: !!imageInput
     });
 
     // Check form validity
@@ -141,40 +149,106 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial check
     checkFormValidity();
 
-    // ===== IMAGE PREVIEW =====
-    if (imageInput) {
-        imageInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            
-            if (file) {
-                // Validasi ukuran file (5MB)
-                if (file.size > 5 * 1024 * 1024) {
-                    alert('Ukuran gambar maksimal 5MB');
-                    imageInput.value = '';
-                    imagePreview.classList.remove('show');
-                    return;
-                }
-
-                // Validasi tipe file
-                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-                if (!allowedTypes.includes(file.type)) {
-                    alert('Format gambar tidak didukung. Gunakan JPG, PNG, atau GIF');
-                    imageInput.value = '';
-                    imagePreview.classList.remove('show');
-                    return;
-                }
-
-                // Show preview
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    imagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-                    imagePreview.classList.add('show');
-                };
-                reader.readAsDataURL(file);
-            } else {
-                imagePreview.classList.remove('show');
-            }
+    // ===== MULTI-IMAGE UPLOAD =====
+    if (uploadArea && imageInput) {
+        // Click to upload
+        uploadArea.addEventListener('click', () => {
+            imageInput.click();
         });
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        // File input change
+        imageInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+    }
+
+    function handleFiles(files) {
+        const newFiles = Array.from(files);
+        
+        // Validate total count
+        if (selectedFiles.length + newFiles.length > MAX_IMAGES) {
+            alert(`Maksimal ${MAX_IMAGES} foto. Anda sudah memilih ${selectedFiles.length} foto.`);
+            return;
+        }
+
+        newFiles.forEach(file => {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert(`File "${file.name}" bukan gambar.`);
+                return;
+            }
+
+            // Validate file size (2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert(`File "${file.name}" terlalu besar. Maksimal 2MB.`);
+                return;
+            }
+
+            selectedFiles.push(file);
+        });
+
+        updateImagePreviews();
+        updateImageInput();
+    }
+
+    function updateImagePreviews() {
+        if (!previewGrid) return;
+        
+        previewGrid.innerHTML = '';
+        
+        selectedFiles.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const item = document.createElement('div');
+                item.className = 'image-preview-item' + (index === 0 ? ' primary' : '');
+                item.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview ${index + 1}">
+                    ${index === 0 ? '<span class="primary-badge">Utama</span>' : ''}
+                    <button type="button" class="remove-btn" data-index="${index}">&times;</button>
+                `;
+                previewGrid.appendChild(item);
+
+                // Add remove handler
+                item.querySelector('.remove-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    removeImage(index);
+                });
+            };
+            reader.readAsDataURL(file);
+        });
+
+        if (imageCounter) {
+            imageCounter.textContent = selectedFiles.length;
+        }
+    }
+
+    function removeImage(index) {
+        selectedFiles.splice(index, 1);
+        updateImagePreviews();
+        updateImageInput();
+    }
+
+    function updateImageInput() {
+        // Create new DataTransfer and add files
+        const dt = new DataTransfer();
+        selectedFiles.forEach(file => dt.items.add(file));
+        imageInput.files = dt.files;
     }
 
     // ===== FORM SUBMISSION =====
@@ -215,7 +289,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Reset form
                 form.reset();
-                imagePreview.classList.remove('show');
+                // Reset multi-image state
+                selectedFiles = [];
+                if (previewGrid) previewGrid.innerHTML = '';
+                if (imageCounter) imageCounter.textContent = '0';
                 checkFormValidity();
 
                 // Redirect ke dashboard setelah 2 detik

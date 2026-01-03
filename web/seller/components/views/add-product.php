@@ -33,9 +33,19 @@
                 <textarea id="description" name="description" rows="4"></textarea>
             </div>
             <div class="form-group">
-                <label for="image">Gambar Produk</label>
-                <input type="file" id="image" name="image" accept="image/*">
-                <div id="image-preview" class="image-preview"></div>
+                <label>Foto Produk <span class="text-muted">(Maksimal 5 foto, foto pertama = utama)</span></label>
+                <div class="multi-image-upload">
+                    <input type="file" id="product-images" name="images[]" accept="image/*" multiple hidden>
+                    <div class="upload-area" id="upload-area">
+                        <div class="upload-placeholder" id="upload-placeholder">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Klik atau drag & drop foto di sini</p>
+                            <span>Format: JPG, PNG (Maks. 2MB per foto)</span>
+                        </div>
+                    </div>
+                    <div class="image-preview-grid" id="image-preview-grid"></div>
+                    <p class="image-counter"><span id="image-count">0</span>/5 foto dipilih</p>
+                </div>
             </div>
             <button type="submit" id="submit-btn" class="btn-primary" disabled>Simpan Produk</button>
         </form>
