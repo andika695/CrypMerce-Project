@@ -13,7 +13,11 @@ require __DIR__ . '/../services/geocoding-service.php';
 header('Content-Type: application/json');
 
 // Allow access if logged in user or seller
-if (!isset($_SESSION['user_id']) && !isset($_SESSION['seller_id'])) {
+// Allow access if logged in user or seller
+$isUser = isset($_SESSION['user']) && isset($_SESSION['user']['user_id']);
+$isSeller = isset($_SESSION['seller']) && isset($_SESSION['seller']['seller_id']);
+
+if (!$isUser && !$isSeller) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     exit;

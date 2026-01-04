@@ -49,23 +49,20 @@ if (strlen($password) < 8) {
 }
 
 // Handle profile photo upload
+// Handle profile photo upload
 $profilePhoto = null;
 if (isset($_FILES['profilePhoto']) && $_FILES['profilePhoto']['error'] === UPLOAD_ERR_OK) {
-    $uploadDir = __DIR__ . '/../../images/seller-profiles/';
+    require_once __DIR__ . '/../config/cloudinary.php';
     
-    // Create directory if not exists
-    if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0777, true);
-    }
-    
+    // Validate file extension (basic check before uploading)
     $fileExtension = strtolower(pathinfo($_FILES['profilePhoto']['name'], PATHINFO_EXTENSION));
-    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
     
     if (!in_array($fileExtension, $allowedExtensions)) {
         http_response_code(400);
         echo json_encode([
             'success' => false,
-            'message' => 'Format foto tidak didukung. Gunakan JPG, PNG, atau GIF'
+            'message' => 'Format foto tidak didukung. Gunakan JPG, JPEG, PNG, atau GIF'
         ]);
         exit;
     }
@@ -80,19 +77,28 @@ if (isset($_FILES['profilePhoto']) && $_FILES['profilePhoto']['error'] === UPLOA
         exit;
     }
     
-    $fileName = uniqid('seller_') . '.' . $fileExtension;
-    $uploadPath = $uploadDir . $fileName;
-    
-    if (!move_uploaded_file($_FILES['profilePhoto']['tmp_name'], $uploadPath)) {
+    // Upload to Cloudinary
+    try {
+        $upload = uploadToCloudinary($_FILES['profilePhoto'], 'crypmerce/seller-profiles');
+        
+        if ($upload['success']) {
+            $profilePhoto = $upload['url'];
+        } else {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Gagal mengupload foto profil: ' . $upload['message']
+            ]);
+            exit;
+        }
+    } catch (Exception $e) {
         http_response_code(500);
         echo json_encode([
             'success' => false,
-            'message' => 'Gagal mengupload foto profil'
+            'message' => 'Error upload: ' . $e->getMessage()
         ]);
         exit;
     }
-    
-    $profilePhoto = 'images/seller-profiles/' . $fileName;
 }
 
 try {

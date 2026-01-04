@@ -5,6 +5,22 @@
   font-family: "Inter", "Segoe UI", Arial, sans-serif;
 }
 
+:root {
+  --primary-yellow: #f5c444;
+  --primary-blue: #3533cd;
+  --light-blue: #4a48e0;
+  --dark-blue: #2a28b5;
+  --light-gray: #f8f9fa;
+  --medium-gray: #e9ecef;
+  --dark-gray: #495057;
+  --white: #ffffff;
+  --danger: #e74c3c;
+  --success: #2ecc71;
+  --info: #3498db;
+  --warning: #f1c40f;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
 body {
   background: #ffffff;
   min-height: 100vh;
@@ -1373,7 +1389,7 @@ body.sidebar-open {
 
 .btn-save {
   background: #3533cd;
-  color: #fff;
+  color: white;
 }
 
 .btn-save:hover {
@@ -2095,15 +2111,15 @@ aside.sidebar .logo {
     padding: 20px 16px;
     width: 100%;
   }
-  
+
   .product-detail-grid {
     padding: 20px;
   }
-  
+
   .product-content-bottom {
     padding: 20px;
   }
-  
+
   .reviews-full-body {
     padding: 20px;
   }

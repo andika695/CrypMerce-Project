@@ -60,20 +60,16 @@ try {
     $updatePhoto = false;
     
     if (isset($_FILES['profilePhoto']) && $_FILES['profilePhoto']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = __DIR__ . '/../../images/seller-profiles/';
-        
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
-        }
+        require_once __DIR__ . '/../config/cloudinary.php';
         
         $fileExtension = strtolower(pathinfo($_FILES['profilePhoto']['name'], PATHINFO_EXTENSION));
-        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
         
         if (!in_array($fileExtension, $allowedExtensions)) {
             http_response_code(400);
             echo json_encode([
                 'success' => false,
-                'message' => 'Format foto tidak didukung. Gunakan JPG, PNG, atau GIF'
+                'message' => 'Format foto tidak didukung. Gunakan JPG, JPEG, PNG, atau GIF'
             ]);
             exit;
         }
@@ -87,25 +83,33 @@ try {
             exit;
         }
         
-        $fileName = uniqid('seller_') . '.' . $fileExtension;
-        $uploadPath = $uploadDir . $fileName;
-        
-        if (!move_uploaded_file($_FILES['profilePhoto']['tmp_name'], $uploadPath)) {
+        try {
+            $upload = uploadToCloudinary($_FILES['profilePhoto'], 'crypmerce/seller-profiles');
+            
+            if ($upload['success']) {
+                $profilePhoto = $upload['url'];
+                $updatePhoto = true;
+                
+                // Get old photo to delete
+                $stmt = $pdo->prepare("SELECT profile_photo FROM sellers WHERE id = :seller_id");
+                $stmt->execute([':seller_id' => $sellerId]);
+                $oldPhoto = $stmt->fetchColumn();
+            } else {
+                http_response_code(500);
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Gagal mengupload foto: ' . $upload['message']
+                ]);
+                exit;
+            }
+        } catch (Exception $e) {
             http_response_code(500);
             echo json_encode([
                 'success' => false,
-                'message' => 'Gagal mengupload foto profil'
+                'message' => 'Error upload: ' . $e->getMessage()
             ]);
             exit;
         }
-        
-        $profilePhoto = 'images/seller-profiles/' . $fileName;
-        $updatePhoto = true;
-        
-        // Get old photo to delete
-        $stmt = $pdo->prepare("SELECT profile_photo FROM sellers WHERE id = :seller_id");
-        $stmt->execute([':seller_id' => $sellerId]);
-        $oldPhoto = $stmt->fetchColumn();
     }
     
     // Update seller profile
