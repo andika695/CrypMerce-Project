@@ -68,7 +68,12 @@
     <div class="main-container">
         <div class="dashboard-section">
             <div class="section-header-row">
-                <p class="search-query" style="margin-top: 10px; color: #6b7280;">Hasil Pencarian : <strong id="searchQueryText" style="color: #3533cd;">-</strong></p>
+                <div class="back-button-row" style="margin-bottom: 8px;">
+                    <a href="javascript:history.back()" style="text-decoration: none; color: #4b5563; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; transition: color 0.2s;">
+                        <i class="fas fa-arrow-left"></i> Kembali
+                    </a>
+                </div>
+                <p class="search-query" style="margin-top: 0; color: #6b7280;">Hasil Pencarian : <strong id="searchQueryText" style="color: #3533cd;">-</strong></p>
             </div>
             <div class="product-grid-6" id="searchResultsGrid">
                 <p style="text-align: center; padding: 40px; color: #666; grid-column: 1/-1;">Memuat hasil pencarian...</p>

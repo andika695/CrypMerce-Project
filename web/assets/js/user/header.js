@@ -151,13 +151,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchBtn = document.getElementById("searchBtn");
     const searchWrapper = document.querySelector(".search-wrapper");
 
-    // 1. Toggle Hamburger Menu
+    // 1. Toggle Hamburger Menu (Now only for notification or other mobile features if any)
     if (menuBtn && mobileKategori) {
         menuBtn.addEventListener("click", () => {
             mobileKategori.classList.toggle("active");
         });
 
-        // Close when clicking outside
         document.addEventListener("click", (e) => {
             if (!mobileKategori.contains(e.target) && !menuBtn.contains(e.target)) {
                 mobileKategori.classList.remove("active");
@@ -165,30 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 2. Category Selection Logic
-    function handleCategorySelection(value) {
-        if (!value) return;
 
-        // Try local filter first (Dashboard or Shop)
-        if (typeof window.loadProductsByCategory === 'function') {
-            window.loadProductsByCategory(value);
-            if (mobileKategori) mobileKategori.classList.remove("active");
-        } else {
-            // Redirect to dashboard with query param
-            // Use absolute-style path to be safe
-            window.location.href = `dashboard.html?category=${encodeURIComponent(value)}`;
-        }
-    }
-
-    // Category Dropdown (Desktop)
-    document.querySelectorAll(".kategori-dropdown li").forEach(item => {
-        item.addEventListener("click", () => handleCategorySelection(item.dataset.value));
-    });
-
-    // Category List (Mobile Sidebar)
-    document.querySelectorAll(".kategori-list li").forEach(item => {
-        item.addEventListener("click", () => handleCategorySelection(item.dataset.value));
-    });
 
     // Create search history dropdown if it doesn't exist
     if (searchWrapper && !document.getElementById('searchHistoryDropdown')) {

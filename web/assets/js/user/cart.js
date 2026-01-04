@@ -97,8 +97,7 @@ function renderCartItems() {
     if (allCartItems.length > 0) {
         container.innerHTML = `
             <div class="empty-state" style="text-align:center; padding: 40px;">
-                <p>Tidak ada produk yang cocok dengan kategori/pencarian ini.</p>
-                <button onclick="resetFilter()" class="btn-browse" style="margin-top:10px;">Lihat Semua</button>
+                <p>Tidak ada produk dalam keranjang.</p>
             </div>
         `;
     } else {
@@ -132,32 +131,8 @@ function renderCartItems() {
   attachItemEventListeners();
 }
 
-// Global Filter Handlers for header.js
-window.loadProductsByCategory = function(category) {
-    console.log("Filtering cart by category:", category);
-    const normalizedCategory = category.toLowerCase().replace('-', ' ');
-    
-    cartItems = allCartItems.filter(item => {
-        const productCategory = (item.category_name || '').toLowerCase();
-        return productCategory.includes(normalizedCategory);
-    });
-    
-    renderCartItems();
-    
-    // Update cart title if exists
-    const title = document.querySelector('.cart-header .cart-title');
-    if (title) title.innerHTML = `<i class="fas fa-shopping-cart"></i> Keranjang: ${category.replace('-', ' ')}`;
-};
-
-// Removed: performSearch is now handled by header.js globally
+// performSearch is now handled by header.js globally
 // All pages should redirect to search-results.html
-
-function resetFilter() {
-    cartItems = [...allCartItems];
-    renderCartItems();
-    const title = document.querySelector('.cart-header .cart-title');
-    if (title) title.innerHTML = `<i class="fas fa-shopping-cart"></i> Keranjang Belanja`;
-}
 
 
 // Render Seller Group
@@ -192,46 +167,34 @@ function renderCartItem(item) {
   const variantText = variant.length > 0 ? variant.join(", ") : "";
 
   return `
-        <div class="cart-item" data-item-id="${item.cart_item_id}">
-            <div class="item-checkbox">
-                <label class="custom-checkbox">
-                    <input type="checkbox" class="item-select" data-item-id="${
-                      item.cart_item_id
-                    }">
-                    <span class="checkmark"></span>
-                </label>
-            </div>
-            <img src="${imagePath}" alt="${
-    item.product_name
-  }" class="item-image" onerror="this.src='../assets/images/no-image.png'">
+    <div class="cart-item" data-item-id="${item.cart_item_id}">
+        <div class="item-checkbox">
+            <label class="custom-checkbox">
+                <input type="checkbox" class="item-select" data-item-id="${item.cart_item_id}">
+                <span class="checkmark"></span>
+            </label>
+        </div>
+        
+        <a href="product-detail.html?id=${item.product_id}" class="item-main-link">
+            <img src="${imagePath}" alt="${item.product_name}" class="item-image" onerror="this.src='../assets/images/no-image.png'">
             <div class="item-details">
                 <div class="item-name">${item.product_name}</div>
-                ${
-                  variantText
-                    ? `<div class="item-variant">${variantText}</div>`
-                    : ""
-                }
-                <div class="item-price">Rp ${formatPrice(
-                  item.product_price
-                )}</div>
+                ${variantText ? `<div class="item-variant">${variantText}</div>` : ""}
+                <div class="item-price">Rp ${formatPrice(item.product_price)}</div>
             </div>
-            <div class="item-actions">
-                <button class="remove-btn" data-item-id="${item.cart_item_id}">
-                    <i class="fas fa-trash"></i> Hapus
-                </button>
-                <div class="quantity-control">
-                    <button onclick="decreaseQuantity(${
-                      item.cart_item_id
-                    })">-</button>
-                    <input type="number" value="${
-                      item.quantity
-                    }" min="1" max="${item.product_stock}" readonly>
-                    <button onclick="increaseQuantity(${item.cart_item_id}, ${
-    item.product_stock
-  })">+</button>
-                </div>
+        </a>
+
+        <div class="item-actions">
+            <button class="remove-btn" data-item-id="${item.cart_item_id}">
+                <i class="fas fa-trash"></i> Hapus
+            </button>
+            <div class="quantity-control">
+                <button onclick="decreaseQuantity(${item.cart_item_id})">-</button>
+                <input type="number" value="${item.quantity}" min="1" max="${item.product_stock}" readonly>
+                <button onclick="increaseQuantity(${item.cart_item_id}, ${item.product_stock})">+</button>
             </div>
         </div>
+    </div>
     `;
 }
 
