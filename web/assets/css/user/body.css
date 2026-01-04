@@ -217,7 +217,6 @@ body {
   line-height: 1.4;
   color: var(--text-dark);
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* Max 2 baris judul */
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
