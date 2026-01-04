@@ -91,7 +91,7 @@
   align-items: center;
 }
 
-.btn-detect {
+.location-actions .btn-detect {
   background: linear-gradient(135deg, #3533cd 0%, #5553e0 100%);
   color: white;
   border: none;
@@ -107,12 +107,12 @@
   white-space: nowrap;
 }
 
-.btn-detect:hover {
+.location-actions .btn-detect:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(53, 51, 205, 0.3);
 }
 
-.btn-detect:disabled {
+.location-actions .btn-detect:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
@@ -140,7 +140,7 @@
   color: #9ca3af;
 }
 
-.btn-save {
+.location-actions .btn-save {
   background: #f5c444;
   color: #3533cd;
   border: none;
@@ -153,13 +153,13 @@
   white-space: nowrap;
 }
 
-.btn-save:hover {
+.location-actions .btn-save:hover {
   background: #e0b03d;
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(245, 196, 68, 0.4);
 }
 
-.btn-save:disabled {
+.location-actions .btn-save:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
