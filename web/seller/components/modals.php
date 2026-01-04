@@ -43,11 +43,11 @@
                 <input type="hidden" id="edit-removed-images" name="removed_images">
                 
                 <div class="upload-area" id="edit-upload-area">
-                    <input type="file" id="edit-images" name="images[]" accept="image/*" multiple hidden>
+                    <input type="file" id="edit-images" name="images[]" accept=".jpg, .jpeg, .png, image/png, image/jpeg, image/jpg" multiple hidden>
                     <div class="upload-placeholder">
                         <i class="fas fa-cloud-upload-alt"></i>
                         <p>Klik atau Drag & Drop foto di sini</p>
-                        <span>Format: JPG, PNG, GIF (Maks. 2MB)</span>
+                        <span>Format: JPG, JPEG, PNG (Maks. 2MB)</span>
                     </div>
                 </div>
 

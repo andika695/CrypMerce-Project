@@ -222,7 +222,14 @@ function handleEditFiles(files) {
     }
 
     newFiles.forEach(file => {
-        if (!file.type.startsWith('image/')) {
+        // Validate file type
+        const validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        const fileExtension = file.name.split('.').pop().toLowerCase();
+        
+        // Check mime type (if available) OR extension
+        const isImage = file.type.startsWith('image/') || validExtensions.includes(fileExtension);
+
+        if (!isImage) {
             alert(`File "${file.name}" bukan gambar.`);
             return;
         }

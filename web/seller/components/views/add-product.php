@@ -35,12 +35,12 @@
             <div class="form-group">
                 <label>Foto Produk <span class="text-muted">(Maksimal 5 foto, foto pertama = utama)</span></label>
                 <div class="multi-image-upload">
-                    <input type="file" id="product-images" name="images[]" accept="image/*" multiple hidden>
+                    <input type="file" id="product-images" name="images[]" accept=".jpg, .jpeg, .png, image/png, image/jpeg, image/jpg" multiple hidden>
                     <div class="upload-area" id="upload-area">
                         <div class="upload-placeholder" id="upload-placeholder">
                             <i class="fas fa-cloud-upload-alt"></i>
                             <p>Klik atau drag & drop foto di sini</p>
-                            <span>Format: JPG, PNG (Maks. 2MB per foto)</span>
+                            <span>Format: JPG, JPEG, PNG (Maks. 2MB per foto)</span>
                         </div>
                     </div>
                     <div class="image-preview-grid" id="image-preview-grid"></div>

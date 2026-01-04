@@ -36,10 +36,12 @@ body {
   gap: 24px;
   background: var(--white);
   padding: 24px;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border-left: 5px solid #f5c444; /* Dashboard card accent */
-  margin-bottom: 24px;
+  border-radius: 16px 16px 0 0; /* Top rounded only during merge */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* Keep shadow for the "whole" card */
+  border-left: none; /* Removed colored border */
+  margin-bottom: 0; /* Connect with bottom */
+  padding-bottom: 32px;
+  border-bottom: 1px solid #e5e7eb; /* Faint separator */
 }
 
 /* LEFT COLUMN CONTAINER */
@@ -48,6 +50,8 @@ body {
   flex-direction: column;
   gap: 24px;
 }
+
+/* ... (keep gallery styles same) ... */
 
 /* GALLERY (LEFT) */
 .main-image {
@@ -250,10 +254,12 @@ body {
 .product-content-bottom {
   background: var(--white);
   padding: 24px; /* Reduced from 32px */
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border-left: 5px solid #3533cd; /* Variant accent */
+  border-radius: 0 0 16px 16px; /* Bottom rounded */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* Unified shadow */
+  border-left: none; /* Removed colored border */
   margin-bottom: 40px;
+  border-top: none; /* Handled by grid border-bottom */
+  margin-top: 0;
 }
 
 .description-section {
