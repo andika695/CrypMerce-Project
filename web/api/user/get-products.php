@@ -5,6 +5,9 @@ header('Content-Type: application/json');
 
 $category = $_GET['category'] ?? null;
 $search = $_GET['search'] ?? null;
+$sort = $_GET['sort'] ?? null;
+$limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 20;
+$offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
 
 try {
     $sql = "
@@ -15,9 +18,18 @@ try {
                 FROM order_items oi
                 JOIN orders o ON oi.order_id = o.id
                 WHERE oi.product_id = p.id AND o.status = 'completed'
-            ) as sold_count
+            ) as sold_count,
+            (
+                SELECT COALESCE(AVG(r.rating), 0)
+                FROM store_ratings r
+                JOIN orders o ON r.order_id = o.id
+                JOIN order_items oi ON o.id = oi.order_id
+                WHERE oi.product_id = p.id
+            ) as avg_rating,
+            s.store_name
         FROM products p
         LEFT JOIN categories c ON p.category_id = c.id
+        LEFT JOIN sellers s ON p.seller_id = s.id
         WHERE p.stock > 0
     ";
     
@@ -32,7 +44,13 @@ try {
         $params['search'] = '%' . $search . '%';
     }
 
-    $sql .= " ORDER BY p.created_at DESC LIMIT 20";
+    if ($sort === 'best_selling') {
+        $sql .= " ORDER BY sold_count DESC";
+    } else {
+        $sql .= " ORDER BY p.created_at DESC";
+    }
+
+    $sql .= " LIMIT " . $limit . " OFFSET " . $offset;
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);

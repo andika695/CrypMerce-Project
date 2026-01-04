@@ -1,67 +1,86 @@
 document.addEventListener("DOMContentLoaded", () => {
+    const slidesContainer = document.querySelector(".slides");
+    const slides = document.querySelectorAll(".slide");
+    const prevBtn = document.querySelector(".prev");
+    const nextBtn = document.querySelector(".next");
+    const indicatorsContainer = document.querySelector(".indicators");
 
-    const slides = document.getElementById("slides");
-    const slideItems = document.querySelectorAll(".slide");
-    const indicatorsContainer = document.getElementById("indicators");
+    let currentIndex = 0;
+    const totalSlides = slides.length;
 
-    const prevBtn = document.getElementById("prevBtn");
-    const nextBtn = document.getElementById("nextBtn");
-
-    let index = 0;
-    const total = slideItems.length;
-    let autoSlide;
-
-    if (!slides || !prevBtn || !nextBtn || !indicatorsContainer) {
-        console.error("Slider element tidak ditemukan");
-        return;
-    }
-
-    slideItems.forEach((_, i) => {
-        const indicator = document.createElement("div");
-        indicator.className = "indicator";
-        if (i === 0) indicator.classList.add("active");
-
-        indicator.addEventListener("click", () => {
-            index = i;
-            showSlide();
-            resetAutoSlide();
+    // Create indicators
+    slides.forEach((_, index) => {
+        const dot = document.createElement("div");
+        dot.classList.add("indicator");
+        if (index === 0) dot.classList.add("active");
+        
+        dot.addEventListener("click", () => {
+            goToSlide(index);
+            resetInterval();
         });
-
-        indicatorsContainer.appendChild(indicator);
+        
+        indicatorsContainer.appendChild(dot);
     });
 
     const indicators = document.querySelectorAll(".indicator");
 
-    function showSlide() {
-        slides.style.transform = `translateX(${-index * 100}%)`;
-
+    function updateSlides() {
+        // Remove active class from all
+        slides.forEach(slide => slide.classList.remove("active"));
         indicators.forEach(ind => ind.classList.remove("active"));
-        indicators[index].classList.add("active");
+
+        // Add active class to current
+        if (slides[currentIndex]) {
+            slides[currentIndex].classList.add("active");
+        }
+        if (indicators[currentIndex]) {
+            indicators[currentIndex].classList.add("active");
+        }
+
+        // Calculate transform to center the active slide
+        // We want the active slide to be in the center.
+        // Formula: - (currentIndex * 80%) + (10% offset to center it since width is 80%, remaining 20% split by 2 = 10%)
+        const offset = -(currentIndex * 80) + 10;
+        slidesContainer.style.transform = `translateX(${offset}%)`;
     }
 
-    prevBtn.addEventListener("click", () => {
-        index = (index - 1 + total) % total;
-        showSlide();
-        resetAutoSlide();
-    });
+    function goToSlide(index) {
+        if (index < 0) {
+            currentIndex = totalSlides - 1;
+        } else if (index >= totalSlides) {
+            currentIndex = 0;
+        } else {
+            currentIndex = index;
+        }
+        updateSlides();
+    }
+
+    function nextSlide() {
+        goToSlide(currentIndex + 1);
+    }
+
+    function prevSlide() {
+        goToSlide(currentIndex - 1);
+    }
 
     nextBtn.addEventListener("click", () => {
-        index = (index + 1) % total;
-        showSlide();
-        resetAutoSlide();
+        nextSlide();
+        resetInterval();
     });
 
-    function startAutoSlide() {
-        autoSlide = setInterval(() => {
-            index = (index + 1) % total;
-            showSlide();
-        }, 4000);
+    prevBtn.addEventListener("click", () => {
+        prevSlide();
+        resetInterval();
+    });
+
+    // Auto slide
+    let slideInterval = setInterval(nextSlide, 5000);
+
+    function resetInterval() {
+        clearInterval(slideInterval);
+        slideInterval = setInterval(nextSlide, 5000);
     }
 
-    function resetAutoSlide() {
-        clearInterval(autoSlide);
-        startAutoSlide();
-    }
-
-    startAutoSlide();
+    // Initial load
+    updateSlides();
 });
