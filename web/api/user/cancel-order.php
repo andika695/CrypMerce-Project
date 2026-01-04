@@ -47,18 +47,24 @@ try {
     if ($order['status'] === 'processing') {
         $stmtItems = $pdo->prepare("SELECT product_id, quantity FROM order_items WHERE order_id = ?");
         $stmtItems->execute([$order_id]);
+        $items = $stmtItems->fetchAll(); // ADDED: fetch items
+        
         $stmtRestock = $pdo->prepare("UPDATE products SET stock = stock + ? WHERE id = ?");
         foreach ($items as $item) {
             $stmtRestock->execute([$item['quantity'], $item['product_id']]);
         }
     }
+
+    // 3. Update Status Pesanan (ADDED: missing status update)
+    $stmtUpdate = $pdo->prepare("UPDATE orders SET status = 'cancelled' WHERE id = ?");
+    $stmtUpdate->execute([$order_id]);
     
     $pdo->commit();
     
     echo json_encode(['success' => true, 'message' => 'Pesanan berhasil dibatalkan']);
 
-} catch (PDOException $e) {
+} catch (Exception $e) { // CHANGED: catch all exceptions
     if ($pdo->inTransaction()) $pdo->rollBack();
-    echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
 }
 ?>

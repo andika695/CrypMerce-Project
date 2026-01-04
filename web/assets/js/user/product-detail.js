@@ -141,6 +141,12 @@ function renderProduct(data) {
         if (weightEl) weightEl.textContent = weightDisplay;
     }
 
+    // Load Shipping Cost
+    const pid = productId || data.id;
+    if (pid) {
+        loadShippingCost(pid, 1);
+    }
+
     // Variants
     const variants = data.variants || {};
     renderVariants('size-options', variants.sizes || []);
@@ -157,6 +163,167 @@ function renderProduct(data) {
         if (cartBtn) cartBtn.disabled = true;
         document.getElementById('main-img').style.opacity = '0.5';
     }
+
+    // Load Reviews
+    loadProductReviews(data.id);
+
+    // Load Other Products from Store
+    if (data.seller && data.seller.id) {
+        loadStoreProducts(data.seller.id, data.id);
+    }
+
+    // Load Similar Products (same category, 12 max)
+    if (data.category_id) {
+        loadSimilarProducts(data.category_id, data.id);
+    }
+}
+
+async function loadShippingCost(prodId, qty) {
+    const container = document.getElementById('shipping-cost-container');
+    const costEl = document.getElementById('shipping-cost');
+    const estEl = document.getElementById('shipping-estimation');
+
+    if (!container || !costEl) return;
+
+    container.style.display = 'block';
+    
+    // Simple Debounce/Throttle check if needed, or just show loading
+    // Prevent UI flicker if rapid clicking: only show "Memuat..." if it takes time? 
+    // For now, simple textual update
+    // costEl.textContent = '...'; 
+
+    try {
+        const response = await fetch(`../api/user/get-shipping-cost.php?product_id=${prodId}&qty=${qty}`);
+        const result = await response.json();
+
+        if (result.success) {
+            costEl.textContent = result.data.formatted_cost;
+            estEl.textContent = `Estimasi: ${result.data.estimation} (${result.data.weight_total_kg}kg, ${result.data.origin} ➔ ${result.data.destination})`;
+        } else {
+            if (result.code === 'LOGIN_REQUIRED') {
+                costEl.innerHTML = '<a href="../pages/auth/login.html" style="color:#3533cd; text-decoration:underline;">Login untuk lihat ongkir</a>';
+            } else if (result.code === 'ADDRESS_REQUIRED') {
+                costEl.innerHTML = '<a href="profile.html" style="color:#3533cd; text-decoration:underline;">Lengkapi alamat di profil</a>';
+            } else {
+                costEl.textContent = result.message || 'Gagal memuat ongkir';
+                costEl.style.color = '#e74c3c';
+            }
+        }
+    } catch (error) {
+        console.error('Error loading shipping:', error);
+        costEl.textContent = 'Gagal memuat info ongkir';
+        costEl.style.color = '#e74c3c';
+    }
+}
+
+// STORE PRODUCTS LOGIC
+async function loadStoreProducts(sellerId, excludeProductId) {
+    const container = document.getElementById('store-products-grid');
+    if (!container) return;
+
+    try {
+        const response = await fetch(`../api/user/get-seller-products.php?id=${sellerId}`);
+        const result = await response.json();
+
+        if (result.success && result.products && result.products.length > 0) {
+            // Filter out the current product and limit to 6
+            const filtered = result.products.filter(p => p.id != excludeProductId).slice(0, 6);
+            
+            if (filtered.length > 0) {
+                container.innerHTML = filtered.map(product => createProductCard(product)).join('');
+            } else {
+                container.innerHTML = '<p style="text-align:center; color:#888;">Tidak ada produk lain dari toko ini.</p>';
+            }
+        } else {
+            container.innerHTML = '<p style="text-align:center; color:#888;">Tidak ada produk lain dari toko ini.</p>';
+        }
+    } catch (error) {
+        console.error('Error loading store products:', error);
+        container.innerHTML = '<p style="text-align:center; color:red;">Gagal memuat produk.</p>';
+    }
+}
+
+// SIMILAR PRODUCTS LOGIC
+async function loadSimilarProducts(categoryId, excludeProductId) {
+    const container = document.getElementById('similar-products-grid');
+    if (!container) return;
+
+    try {
+        const response = await fetch(`../api/user/get-products.php?category_id=${categoryId}&limit=12`);
+        const result = await response.json();
+
+        if (result.success && result.data.length > 0) {
+            // Filter out the current product and limit to 6
+            const filtered = result.data.filter(p => p.id != excludeProductId).slice(0, 6);
+            
+            if (filtered.length > 0) {
+                container.innerHTML = filtered.map(product => createProductCard(product)).join('');
+            } else {
+                container.innerHTML = '<p style="text-align:center; color:#888;">Tidak ada produk serupa.</p>';
+            }
+        } else {
+            container.innerHTML = '<p style="text-align:center; color:#888;">Tidak ada produk serupa.</p>';
+        }
+    } catch (error) {
+        console.error('Error loading similar products:', error);
+        container.innerHTML = '<p style="text-align:center; color:red;">Gagal memuat produk serupa.</p>';
+    }
+}
+
+function createProductCard(product) {
+    // Handle image path
+    let imgSrc = '../assets/images/no-image.png';
+    if (product.image) {
+        if (product.image.startsWith('http')) {
+            imgSrc = product.image;
+        } else {
+            imgSrc = `../assets/images/products/${product.image}`;
+        }
+    }
+    
+    const price = 'Rp ' + Number(product.price).toLocaleString('id-ID');
+    const rating = Number(product.avg_rating || 0);
+    const soldCount = product.sold_count || 0;
+    const reviewCount = product.review_count || soldCount; // Use sold_count as fallback for review count
+    const storeName = product.store_name || 'Official Store';
+    
+    // Generate stars
+    let stars = '';
+    const fullStars = Math.round(rating);
+    for (let i = 1; i <= 5; i++) {
+        if (i <= fullStars && rating > 0) {
+            stars += `<i class="fas fa-star" style="color: #ffad33;"></i>`;
+        } else {
+            stars += `<i class="fas fa-star" style="color: #ccc;"></i>`;
+        }
+    }
+    
+    return `
+        <a href="product-detail.html?id=${product.id}" class="section-product-card">
+            <div class="product-image-box">
+                <img src="${imgSrc}" alt="${product.name}" onerror="this.src='../assets/images/no-image.png'">
+                <div class="product-actions">
+                    <button class="action-btn"><i class="far fa-eye"></i></button>
+                </div>
+            </div>
+            <div class="product-details">
+                <h3 class="product-name">${product.name}</h3>
+                <div class="price-row">
+                    <span class="current-price">${price}</span>
+                </div>
+                <div class="rating-row">
+                    <div class="stars">
+                        ${stars} 
+                    </div>
+                    <span class="rating-count">(${reviewCount})</span>
+                </div>
+                <div class="store-info" style="display: flex; align-items: center; gap: 5px; margin-top: 8px; font-size: 12px; color: #888;">
+                    <i class="fas fa-store" style="color: var(--primary);"></i>
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${storeName}</span>
+                </div>
+            </div>
+        </a>
+    `;
 }
 
 // 4. CHECKOUT LOGIC (FIXED)
@@ -274,8 +441,10 @@ function formatRupiah(amount) {
 function increaseQty() {
     let val = parseInt(qtyInput.value);
     if (val < currentStock) {
-        qtyInput.value = val + 1;
+        val = val + 1;
+        qtyInput.value = val;
         updateTotalPrice();
+        if (productId) loadShippingCost(productId, val);
     } else {
         showToast('Stok maksimum tercapai', 'error');
     }
@@ -284,8 +453,10 @@ function increaseQty() {
 function decreaseQty() {
     let val = parseInt(qtyInput.value);
     if (val > 1) {
-        qtyInput.value = val - 1;
+        val = val - 1;
+        qtyInput.value = val;
         updateTotalPrice();
+        if (productId) loadShippingCost(productId, val);
     }
 }
 
@@ -558,6 +729,7 @@ function increaseModalQty() {
     }
 }
 
+// Modal Quantity Controls
 function decreaseModalQty() {
     let val = parseInt(modalQtyInput.value);
     if (val > 1) {
@@ -733,10 +905,4 @@ function createReviewCard(review) {
         </div>
     `;
 }
-
-// Tambahkan pemanggilan loadProductReviews di renderProduct atau init
-const originalRenderProduct = renderProduct;
-renderProduct = function(data) {
-    originalRenderProduct(data);
-    loadProductReviews(data.id); // Fetch reviews after product data
-};
+// Reviews are loaded directly inside renderProduct

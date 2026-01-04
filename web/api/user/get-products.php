@@ -4,6 +4,7 @@ require '../config/config.php';
 header('Content-Type: application/json');
 
 $category = $_GET['category'] ?? null;
+$category_id = $_GET['category_id'] ?? null;
 $search = $_GET['search'] ?? null;
 $sort = $_GET['sort'] ?? null;
 $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 20;
@@ -34,7 +35,12 @@ try {
     ";
     
     $params = [];
-    if ($category) {
+    
+    // Support both category slug and category_id
+    if ($category_id) {
+        $sql .= " AND p.category_id = :category_id";
+        $params['category_id'] = (int)$category_id;
+    } elseif ($category) {
         $sql .= " AND LOWER(REPLACE(c.name, ' ', '-')) = :category";
         $params['category'] = strtolower($category);
     }
