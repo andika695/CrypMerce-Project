@@ -149,17 +149,8 @@ window.loadProductsByCategory = function(category) {
     if (title) title.innerHTML = `<i class="fas fa-shopping-cart"></i> Keranjang: ${category.replace('-', ' ')}`;
 };
 
-window.performSearch = function(query) {
-    console.log("Searching cart for:", query);
-    const q = query.toLowerCase().trim();
-    
-    cartItems = allCartItems.filter(item => 
-        item.product_name.toLowerCase().includes(q) || 
-        (item.category_name && item.category_name.toLowerCase().includes(q))
-    );
-    
-    renderCartItems();
-};
+// Removed: performSearch is now handled by header.js globally
+// All pages should redirect to search-results.html
 
 function resetFilter() {
     cartItems = [...allCartItems];

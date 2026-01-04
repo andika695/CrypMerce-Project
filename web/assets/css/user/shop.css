@@ -40,7 +40,6 @@ body {
   align-items: center;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   margin-bottom: 24px;
-  border-left: 6px solid #f5c444; /* Dashboard Accent */
   transition: all 0.3s ease;
 }
 
@@ -172,6 +171,43 @@ body {
   font-size: 18px;
 }
 
+/* ===== PRODUCT TABS ===== */
+.product-tabs {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.product-tab {
+  background: transparent;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: "Inter", sans-serif;
+}
+
+.product-tab:hover {
+  background: #f3f4f6;
+  color: #3533cd;
+}
+
+.product-tab.active {
+  background: #eff6ff;
+  color: #3533cd;
+}
+
+.tab-icon {
+  font-size: 18px;
+}
+
 .store-search-box {
   display: flex;
   align-items: center;
@@ -299,6 +335,25 @@ body {
   margin: 2px 0;
 }
 
+.product-rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0;
+}
+
+.rating-stars {
+  display: flex;
+  gap: 2px;
+  font-size: 12px;
+}
+
+.rating-value {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
 .product-meta {
   display: flex;
   justify-content: space-between;
@@ -423,6 +478,16 @@ body {
     gap: 16px;
   }
 
+  .product-tabs {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .product-tab {
+    flex: 1;
+    justify-content: center;
+  }
+
   .store-search-box {
     width: 100%;
   }
@@ -440,7 +505,6 @@ body {
 
   .store-new-header {
     padding: 16px;
-    border-left-width: 4px;
   }
 
   .store-avatar-circle {

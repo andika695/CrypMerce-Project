@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasil Pencarian - CrypMerce</title>
+    <link rel="stylesheet" href="../assets/css/user/header-dashboard.css?v=2">
+    <link rel="stylesheet" href="../assets/css/user/body.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../assets/css/user/category-carousel.css">
+    <link rel="stylesheet" href="../assets/css/user/footer.css">
+    <link rel="icon" type="image/png" href="../../../assets/images/logo.png">
+    <style>
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+        .no-results-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="main-container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="dashboard.html">
+                        <img src="../assets/images/logotesk.png" alt="Logo">
+                    </a>
+                </div>
+                <button class="menu-btn" id="menuBtn">☰</button>
+                
+                <!-- Desktop Category & Search Wrapper -->
+                <div class="search-wrapper">
+                     <div class="search-bar">
+                        <input type="search" id="searchInput" placeholder="Cari di CrypMerce">
+                        <button class="search-btn" id="searchBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.35-4.35"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="header-right">
+                    <button class="icon-btn" onclick="window.location.href='cart.html'">
+                        <img src="../assets/images/bag.png" alt="Keranjang">
+                    </button>
+                    <button class="icon-btn" id="notificationBtn">
+                        <img src="../assets/images/bell.png" alt="Notif">
+                    </button>
+                    <a href="profile.php" class="akun-btn icon-btn">
+                        <img src="../assets/images/person.png" alt="User">
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Search Results -->
+    <div class="main-container">
+        <div class="dashboard-section">
+            <div class="section-header-row">
+                <p class="search-query" style="margin-top: 10px; color: #6b7280;">Hasil Pencarian : <strong id="searchQueryText" style="color: #3533cd;">-</strong></p>
+            </div>
+            <div class="product-grid-6" id="searchResultsGrid">
+                <p style="text-align: center; padding: 40px; color: #666; grid-column: 1/-1;">Memuat hasil pencarian...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="footer-content">
+            <!-- Brand Column -->
+            <div class="footer-col">
+                <img src="../assets/images/logotesk.png" alt="CrypMerce Logo" class="footer-logo">
+                <p class="footer-description">
+                    Crypmerce adalah platform e-commerce berbasis web yang mengintegrasikan cryptocurrency sebagai metode pembayaran.
+                </p>
+                <div class="footer-contact">
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <span>crypmerce@gmail.com</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Service -->
+            <div class="footer-col">
+                <h3 class="footer-heading">Layanan Pelanggan</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Bantuan</a></li>
+                    <li><a href="#payment-methods">Metode Pembayaran</a></li>
+                    <li><a href="#">Lacak Pesanan</a></li>
+                    <li><a href="#">Hubungi Kami</a></li>
+                </ul>
+            </div>
+
+            <!-- About -->
+            <div class="footer-col">
+                <h3 class="footer-heading">Jelajahi</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Tentang Kami</a></li>
+                    <li><a href="#">Kebijakan Privasi</a></li>
+                    <li><a href="#">Syarat & Ketentuan</a></li>
+                    <li><a href="#">Karir</a></li>
+                </ul>
+            </div>
+
+            <!-- Social -->
+            <div class="footer-col">
+                <h3 class="footer-heading">Ikuti Kami</h3>
+                <div class="social-links">
+                    <a href="#" class="social-btn"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-btn"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-btn"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-btn"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Methods -->
+        <div class="footer-payments" id="payment-methods">
+            <h3 class="payment-title">Metode Pembayaran</h3>
+            <div class="payment-logos">
+                <img src="../assets/images/payment/payment_1_ewallet.png" alt="E-Wallets" class="payment-logo-img" style="height: 35px;">
+                <img src="../assets/images/payment/payment_2_cards.png" alt="Credit Cards" class="payment-logo-img" style="height: 35px;">
+                <img src="../assets/images/payment/payment_3_banks.png" alt="Bank Transfer" class="payment-logo-img" style="height: 50px;">
+                <img src="../assets/images/payment/payment_4_partners.png" alt="Bank Partners" class="payment-logo-img" style="height: 35px;">
+                <img src="../assets/images/payment/payment_5_retail.png" alt="Retail" class="payment-logo-img" style="height: 30px;">
+                <img src="../assets/images/payment/payment_6_paylater.png" alt="PayLater" class="payment-logo-img" style="height: 30px;">
+            </div>
+
+            <h3 class="payment-title" style="margin-top: 25px;">Pembayaran Crypto</h3>
+            <div class="payment-logos">
+                <img src="../assets/images/payment/payment_crypto_btc.png" alt="Bitcoin" class="payment-logo-img" style="height: 35px;">
+                <img src="../assets/images/payment/payment_crypto_eth.png" alt="Ethereum" class="payment-logo-img" style="height: 35px;">
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2025-2026 CrypMerce. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script src="../assets/js/user/header.js?v=3"></script>
+    <script src="../assets/js/user/search-results.js"></script>
+</body>
+</html>
+

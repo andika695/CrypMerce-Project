@@ -24,9 +24,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (searchInput) {
         searchInput.addEventListener('input', (e) => filterProducts(e.target.value));
     }
+
+    // Tab Handler
+    const tabAll = document.getElementById('tab-all');
+    const tabBestseller = document.getElementById('tab-bestseller');
+    if (tabAll) {
+        tabAll.addEventListener('click', () => switchTab('all'));
+    }
+    if (tabBestseller) {
+        tabBestseller.addEventListener('click', () => switchTab('bestseller'));
+    }
 });
 
 let allProducts = [];
+let currentTab = 'all';
 
 async function loadShopProfile(id) {
     try {
@@ -64,12 +75,25 @@ async function loadShopProducts(id) {
 
         if (result.success) {
             allProducts = result.products;
-            renderProducts(allProducts);
+            switchTab(currentTab);
         }
     } catch (error) {
         console.error('Error loading products:', error);
         grid.innerHTML = '<p style="text-align: center; color: red;">Gagal memuat produk</p>';
     }
+}
+
+function generateStars(rating) {
+    let stars = '';
+    const fullStars = Math.round(rating);
+    for (let i = 1; i <= 5; i++) {
+        if (i <= fullStars && rating > 0) {
+            stars += `<i class="fas fa-star" style="color: #ffad33;"></i>`;
+        } else {
+            stars += `<i class="fas fa-star" style="color: #ccc;"></i>`;
+        }
+    }
+    return stars;
 }
 
 function renderProducts(products) {
@@ -81,6 +105,10 @@ function renderProducts(products) {
 
     grid.innerHTML = products.map(p => {
         const imgSrc = p.image ? (p.image.startsWith('http') ? p.image : `../assets/images/products/${p.image}`) : '../assets/images/bag.png';
+        const rating = parseFloat(p.avg_rating || 0);
+        const stars = generateStars(rating);
+        const ratingDisplay = rating > 0 ? rating.toFixed(1) : '-';
+        
         return `
         <div class="product-card" onclick="window.location.href='product-detail.html?id=${p.id}'">
             <div class="product-image">
@@ -89,6 +117,10 @@ function renderProducts(products) {
             <div class="product-info">
                 <h3>${p.name}</h3>
                 <p class="price">Rp ${parseInt(p.price).toLocaleString('id-ID')}</p>
+                <div class="product-rating">
+                    <div class="rating-stars">${stars}</div>
+                    <span class="rating-value">${ratingDisplay}</span>
+                </div>
                 <div class="product-meta">
                     <span class="stock-tag">Stok: ${p.stock}</span>
                     <span class="category-tag">${p.category_name}</span>
@@ -98,11 +130,47 @@ function renderProducts(products) {
     }).join('');
 }
 
+function switchTab(tab) {
+    currentTab = tab;
+    const tabAll = document.getElementById('tab-all');
+    const tabBestseller = document.getElementById('tab-bestseller');
+    
+    // Update active state
+    if (tabAll && tabBestseller) {
+        tabAll.classList.remove('active');
+        tabBestseller.classList.remove('active');
+        if (tab === 'all') {
+            tabAll.classList.add('active');
+        } else {
+            tabBestseller.classList.add('active');
+        }
+    }
+    
+    // Get search query
+    const searchQuery = document.getElementById('store-inner-search')?.value || '';
+    let productsToShow = allProducts;
+    
+    // Apply search filter
+    if (searchQuery) {
+        productsToShow = productsToShow.filter(p => 
+            p.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }
+    
+    // Sort products
+    if (tab === 'bestseller') {
+        productsToShow = [...productsToShow].sort((a, b) => {
+            const soldA = parseInt(a.sold_count || 0);
+            const soldB = parseInt(b.sold_count || 0);
+            return soldB - soldA; // Sort descending (highest first)
+        });
+    }
+    
+    renderProducts(productsToShow);
+}
+
 function filterProducts(query) {
-    const filtered = allProducts.filter(p => 
-        p.name.toLowerCase().includes(query.toLowerCase())
-    );
-    renderProducts(filtered);
+    switchTab(currentTab);
 }
 
 async function checkFollowStatus(id) {
@@ -192,16 +260,10 @@ function updateFollowButton(isFollowing) {
 // Global Handlers for header.js
 window.loadProductsByCategory = function(category) {
     console.log("Filtering store products by category:", category);
-    const filtered = allProducts.filter(p => 
-        p.category_name.toLowerCase().includes(category.toLowerCase().replace('-', ' '))
-    );
-    renderProducts(filtered);
-    
-    // Update store section title if exists
-    const title = document.querySelector('.shop-container .section-title');
-    if (title) title.textContent = `📦 Produk: ${category.replace('-', ' ')}`;
+    // Note: This function is called from header.js for category filtering
+    // The actual filtering should be done at the API level
+    switchTab(currentTab);
 };
 
-window.performSearch = function(query) {
-    filterProducts(query);
-};
+// Removed: performSearch is now handled by header.js globally
+// All pages should redirect to search-results.html

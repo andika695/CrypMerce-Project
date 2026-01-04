@@ -26,11 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-window.performSearch = function(query) {
-    if (window.loadProducts) {
-        window.loadProducts(null, query);
-    }
-};
+// Removed: performSearch is now handled by header.js globally
+// All pages should redirect to search-results.html
 
 // Pilih Kategori remains for compatibility if needed elsewhere, 
 // but header.js handles the primary header interactions now.
