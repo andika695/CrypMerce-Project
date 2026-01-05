@@ -1,8 +1,8 @@
 :root {
   --primary-yellow: #f5c444;
-  --primary-blue: #3533cd;
-  --light-blue: #4a48e0;
-  --dark-blue: #2a28b5;
+  --primary-blue: #1e1bbf;
+  --light-blue: #2321c1;
+  --dark-blue: #161491;
   --light-gray: #f8f9fa;
   --medium-gray: #e9ecef;
   --dark-gray: #495057;
@@ -583,20 +583,22 @@ body {
 }
 
 .hamburger-btn {
-  display: none;
-  background: transparent;
-  border: none;
-  color: var(--primary-yellow);
-  font-size: 1.5rem;
-  cursor: pointer;
-  z-index: 1001;
-  padding: 0;
-  transition: all 0.3s ease;
-  width: 30px;
-  height: 24px;
   display: flex !important;
   flex-direction: column;
   justify-content: space-between;
+  width: 28px;
+  height: 20px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  z-index: 2002;
+}
+
+.mobile-logo-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .hamburger-btn span {
@@ -606,6 +608,18 @@ body {
   background-color: var(--primary-yellow);
   border-radius: 3px;
   transition: all 0.3s ease;
+}
+
+.hamburger-btn.active span:nth-child(1) {
+  transform: translateY(8.5px) rotate(45deg);
+}
+
+.hamburger-btn.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-btn.active span:nth-child(3) {
+  transform: translateY(-8.5px) rotate(-45deg);
 }
 
 .hamburger-btn.active span:nth-child(1) {
@@ -882,4 +896,32 @@ body {
   padding: 50px;
   color: #94a3b8;
   font-style: italic;
+}
+
+/* Clickable Detail Rows */
+.detail-row.clickable-row {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  margin: 0 -10px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.detail-row.clickable-row:hover {
+  background: #f0f4ff;
+}
+
+.detail-row.clickable-row:hover .detail-value {
+  color: var(--primary-blue);
+}
+
+.edit-hint-mini {
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+  color: #3533cd;
+}
+
+.detail-row.clickable-row:hover .edit-hint-mini {
+  opacity: 1;
 }

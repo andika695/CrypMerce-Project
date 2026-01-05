@@ -21,7 +21,7 @@
 .main-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 5px; /* Reduced from 20px to 5px to push logo left */
   width: 100%;
 }
 
@@ -46,6 +46,7 @@
 /* LOGO */
 .logo {
   flex-shrink: 0;
+  margin-left: -15px; /* Nudge logo further left */
 }
 
 .logo img {
@@ -363,7 +364,7 @@
   }
 
   .menu-btn {
-    display: block; /* Tampilkan burger menu */
+    display: none !important; /* Hide burger menu specifically */
   }
 
   .search-wrapper {
@@ -379,7 +380,7 @@
 /* Mobile & Tablet Portrait */
 @media (max-width: 768px) {
   .logo {
-    display: none !important; /* Force hide logo */
+    display: none !important;
   }
 
   /* Make Search fill available space */
@@ -426,6 +427,10 @@
   .icon-btn img {
     width: 18px;
     height: 18px;
+  }
+
+  .logo {
+    display: none !important;
   }
 
   .header-content {

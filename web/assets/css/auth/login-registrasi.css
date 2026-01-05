@@ -30,18 +30,18 @@ body {
 }
 
 .right-card {
-    background-color: #ffffff;
-    width: 100%;
-    max-width: 480px; 
-    padding: 25px 40px; 
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); 
-    box-sizing: border-box;
-    height: auto; 
-    max-height: 95vh; 
-    margin: 0; 
-    overflow-y: auto; 
-    margin-right: 10%;
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 480px;
+  padding: 25px 40px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+  height: auto;
+  max-height: 95vh;
+  margin: 0;
+  overflow-y: auto;
+  margin-right: 10%;
 }
 
 .form-login h3 {
@@ -377,17 +377,15 @@ body {
     padding: 0;
   }
 
-    .right-card {
-        width: 90%;
-        max-width: 400px; 
-        padding: 20px; 
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15); 
-        border-radius: 8px; 
-        margin-top: 50px;
-        margin-bottom: 50px;
-        min-height: auto;
-        margin-right: 0; 
-    }
+  .right-card {
+    width: 90%;
+    max-width: 400px;
+    padding: 20px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    margin: 50px auto;
+    min-height: auto;
+  }
 
   .right-card {
     width: 90%;
@@ -424,14 +422,13 @@ body {
 
 @media (min-width: 769px) and (max-width: 1024px) {
   .login-container {
-    padding-right: 5%;
-    justify-content: flex-end;
+    padding: 0;
+    justify-content: center;
   }
 
-    .right-card {
-        max-width: 380px; 
-        padding: 25px;
-        margin: auto 0;
-        margin-right: 5%;
-    }
+  .right-card {
+    max-width: 380px;
+    padding: 25px;
+    margin: auto;
+  }
 }

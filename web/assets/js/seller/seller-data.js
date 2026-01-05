@@ -370,7 +370,9 @@ function updateProfileView(data) {
         setEl('store-name', data.store_name);
         setEl('join-date', data.join_date);
         setEl('profile-total-products', data.total_products);
-        setEl('seller-location', data.location || 'Belum diatur');
+        const sellerLoc = (data.address || data.location || '').trim();
+        const locDisplay = sellerLoc ? `📍 ${sellerLoc}` : '📍 Belum diatur';
+        setEl('seller-location', locDisplay);
         
         const profileFollowers = document.getElementById('profile-followers');
         if (profileFollowers) profileFollowers.textContent = data.follower_count || 0;
@@ -505,7 +507,7 @@ async function loadMyStoreData() {
             const reviewsElem = document.getElementById('store-reviews');
             if (ratingElem) {
                 const rating = data.rating > 0 ? data.rating : '-';
-                ratingElem.textContent = `⭐ ${rating}`;
+                ratingElem.textContent = rating;
             }
             if (reviewsElem) {
                 reviewsElem.textContent = data.total_reviews || '0';

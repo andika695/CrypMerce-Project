@@ -11,6 +11,7 @@
 body {
   background: var(--bg-light);
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .cart-container {
@@ -544,15 +545,23 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .cart-container {
+    padding-bottom: 240px !important; /* Extra space for fixed summary */
+  }
+
   .cart-summary-section {
-    position: sticky;
-    bottom: 0;
-    top: auto;
-    background: white;
-    margin: 0 -20px;
-    padding: 16px 20px;
-    border-top: 1px solid #e5e7eb;
-    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+    position: fixed !important;
+    bottom: 0 !important;
+    top: auto !important; /* Overriding desktop top: 90px */
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    background-color: white !important;
+    margin: 0 !important;
+    padding: 16px 20px !important;
+    border-top: 1px solid #e5e7eb !important;
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.15) !important;
+    z-index: 9999 !important;
   }
 
   .summary-card {
@@ -591,7 +600,7 @@ body {
   display: none;
   align-items: center;
   justify-content: center;
-  z-index: 3000;
+  z-index: 10000; /* Higher than fixed checkout bar */
   backdrop-filter: blur(4px);
   opacity: 0;
   transition: opacity 0.3s ease;

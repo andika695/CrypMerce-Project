@@ -181,4 +181,19 @@ body {
     grid-template-columns: 1fr;
     gap: 30px;
   }
+
+  .payment-logos {
+    gap: 15px; /* Tighter gap for mobile */
+    padding: 0 10px;
+  }
+
+  .payment-logo-img {
+    height: 25px !important; /* Scale down all logos proportionally */
+  }
+
+  /* Split bank logos specific height for mobile */
+  img[src*="payment_3a_banks.png"].payment-logo-img,
+  img[src*="payment_3b_banks.png"].payment-logo-img {
+    height: 30px !important;
+  }
 }

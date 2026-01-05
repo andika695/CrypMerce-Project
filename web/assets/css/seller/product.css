@@ -1,6 +1,6 @@
 /* ===== FORM CONTAINER ===== */
 .form-container {
-  max-width: 1150px;
+  max-width: 1400px; /* Increased from 1150px for a wider layout */
   background: #ffffff;
   padding: 48px;
   border-radius: 20px;

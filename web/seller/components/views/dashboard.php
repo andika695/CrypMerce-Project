@@ -21,24 +21,26 @@
 
     <section class="product-table">
         <h2>Produk Terbaru</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Nama</th>
-                    <th>Harga</th>
-                    <th>Stok</th>
-                    <th>Berat</th>
-                    <th>Kategori</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody id="product-list">
-                <tr>
-                    <td colspan="6" style="text-align: center; color: #9ca3af;">
-                        Belum ada produk
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nama</th>
+                        <th>Harga</th>
+                        <th>Stok</th>
+                        <th>Berat</th>
+                        <th>Kategori</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="product-list">
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #9ca3af;">
+                            Belum ada produk
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </section>
 </div>

@@ -60,8 +60,8 @@
                     </div>
                     <div class="detail-row clickable-row" onclick="document.querySelector('.menu-item[data-page=\'location-settings\']').click()">
                         <span class="detail-label">Lokasi Toko</span>
-                        <span class="detail-value" id="seller-location"> Belum diatur</span>
-                        <span class="edit-hint-mini" style="margin-left:8px; color:#3533cd; font-size:0.8rem;">✎</span>
+                        <span class="detail-value" id="seller-location"> 📍 Belum diatur</span>
+                        <span class="edit-hint-mini" style="margin-left:10px; color:#3533cd; font-size:0.8rem;">✎</span>
                     </div>
                 </div>
             </div>

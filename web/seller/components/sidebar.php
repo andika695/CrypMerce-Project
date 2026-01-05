@@ -1,7 +1,7 @@
 <aside class="sidebar">
     <!-- Tombol Hamburger untuk mobile (hanya muncul di mobile) -->
     <div class="mobile-header">
-        <button class="hamburger-btn" id="hamburgerBtn">
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle Menu">
             <span></span>
             <span></span>
             <span></span>

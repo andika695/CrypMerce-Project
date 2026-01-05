@@ -67,7 +67,7 @@
 
                 <div class="info-section-wrapper">
                     <h3 class="section-heading-new">Lokasi Saya</h3>
-                    <div class="detail-row">
+                    <div class="detail-row clickable-row" onclick="document.querySelector('.menu-item[data-page=\'alamat\']').click()">
                         <span class="detail-label">Alamat</span>
                         <span class="detail-value">
                             <?php 
@@ -80,6 +80,7 @@
                             }
                             ?>
                         </span>
+                        <span class="edit-hint-mini" style="margin-left:10px; color:#3533cd; font-size:0.8rem;">✎</span>
                     </div>
                 </div>
             </div>

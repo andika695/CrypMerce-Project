@@ -56,7 +56,7 @@ try {
 <body>
     <!-- Mobile Header -->
     <div class="mobile-header">
-        <button class="hamburger-btn" id="hamburgerBtn">
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menu">
             <span></span>
             <span></span>
             <span></span>
