@@ -2,7 +2,13 @@
 let currentPrice = 0;
 let currentStock = 0;
 let productId = null; 
+let currentTotalPrice = 0; // Global for crypto conversion
+let purchaseModal = null;
 const qtyInput = document.getElementById('qty'); 
+let cryptoRates = {
+    'btc': 0.00000065, // Fallback (1 IDR = x BTC)
+    'eth': 0.000018    // Fallback (1 IDR = x ETH)
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -16,20 +22,127 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadProductDetail(productId);
     setupEventListeners();
+    fetchCryptoRates(); // Initialize rates
 });
+
+// Fetch Live Crypto Rates (CoinGecko)
+async function fetchCryptoRates() {
+    try {
+        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=idr');
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        
+        if (data.bitcoin && data.bitcoin.idr) {
+             cryptoRates.btc = 1 / data.bitcoin.idr;
+        }
+        if (data.ethereum && data.ethereum.idr) {
+             cryptoRates.eth = 1 / data.ethereum.idr;
+        }
+        console.log('Live Crypto Rates fetched:', cryptoRates);
+        
+        // Update crypto modal if it's already open and a coin is selected
+        const currentCoin = document.getElementById('cryptoSelect')?.value;
+        if (currentCoin) {
+            handleCryptoCoinSelect({ target: { value: currentCoin } });
+        }
+
+    } catch (error) {
+        console.warn('Failed to fetch live crypto rates, using fallback:', error);
+    }
+}
 
 // 2. EVENT LISTENERS SETUP
 function setupEventListeners() {
-    // Buy Now Button
+    // Buy Now Button (Desktop)
     const buyBtn = document.querySelector('.btn-buy-now');
     if (buyBtn) {
-        buyBtn.addEventListener('click', handleBuyNow);
+        buyBtn.addEventListener('click', () => openPurchaseModal(2)); // Skip Choice Qty on Desktop
     }
 
-    // Add to Cart Button
+    // Add to Cart Button (Desktop)
     const cartBtn = document.querySelector('.btn-add-cart');
     if (cartBtn) {
         cartBtn.addEventListener('click', handleAddToCart);
+    }
+
+    // Buy Now Button (Mobile)
+    const btnBuyMobile = document.getElementById('btnBuyMobile');
+    if (btnBuyMobile) {
+        btnBuyMobile.addEventListener('click', () => openPurchaseModal(1)); // Start at Choice Qty on Mobile
+    }
+
+    // Add to Cart Button (Mobile)
+    const btnCartMobile = document.getElementById('btnCartMobile');
+    if (btnCartMobile) {
+        btnCartMobile.addEventListener('click', handleAddToCart);
+    }
+
+    // Crypto Select Listener
+    const cryptoSelect = document.getElementById('cryptoSelect');
+    if (cryptoSelect) {
+        cryptoSelect.addEventListener('change', handleCryptoCoinSelect);
+    }
+
+    // Crypto Modal Close
+    const closeCryptoModal = document.getElementById('closeCryptoModal');
+    if (closeCryptoModal) {
+        closeCryptoModal.addEventListener('click', () => {
+            document.getElementById('cryptoPaymentModal').style.display = 'none';
+        });
+    }
+
+    // Step Navigation
+    const btnNextStep = document.getElementById('btnNextStep');
+    if (btnNextStep) {
+        btnNextStep.addEventListener('click', () => showModalStep(2));
+    }
+
+    const btnPrevStep = document.getElementById('btnPrevStep');
+    if (btnPrevStep) {
+        btnPrevStep.addEventListener('click', () => showModalStep(1));
+    }
+
+    // Modal Qty Listeners
+    const modalDecreaseQty = document.getElementById('modalDecreaseQty');
+    if (modalDecreaseQty) {
+        modalDecreaseQty.addEventListener('click', decreaseModalQty);
+    }
+
+    const modalIncreaseQty = document.getElementById('modalIncreaseQty');
+    if (modalIncreaseQty) {
+        modalIncreaseQty.addEventListener('click', increaseModalQty);
+    }
+
+    // Confirm Crypto Payment
+    const confirmCryptoBtn = document.getElementById('confirmCryptoBtn');
+    if (confirmCryptoBtn) {
+        confirmCryptoBtn.addEventListener('click', processCryptoPayment);
+    }
+
+    // IDR Checkout Button (inside purchaseModal)
+    const btnConfirmPurchase = document.getElementById('btnConfirmPurchase'); 
+    if (btnConfirmPurchase) {
+        btnConfirmPurchase.addEventListener('click', processMidtransCheckout);
+    }
+
+    // Crypto Checkout Button (inside purchaseModal)
+    const btnConfirmCrypto = document.getElementById('btnConfirmCrypto'); 
+    if (btnConfirmCrypto) {
+        btnConfirmCrypto.addEventListener('click', openCryptoModal);
+    }
+
+    // Close Purchase Modal
+    const closeModal = document.getElementById('closeModal');
+    if (closeModal) {
+        closeModal.addEventListener('click', closePurchaseModal);
+    }
+
+    // Overlay click to close
+    const purchaseModalEl = document.getElementById('purchaseModal');
+    if (purchaseModalEl) {
+        purchaseModalEl.addEventListener('click', (e) => {
+            if (e.target === purchaseModalEl) closePurchaseModal();
+        });
     }
 }
 
@@ -253,8 +366,8 @@ async function loadSimilarProducts(categoryId, excludeProductId) {
         const result = await response.json();
 
         if (result.success && result.data.length > 0) {
-            // Filter out the current product and limit to 6
-            const filtered = result.data.filter(p => p.id != excludeProductId).slice(0, 6);
+            // Filter out the current product and limit to 12 (2 rows on desktop)
+            const filtered = result.data.filter(p => p.id != excludeProductId).slice(0, 12);
             
             if (filtered.length > 0) {
                 container.innerHTML = filtered.map(product => createProductCard(product)).join('');
@@ -326,11 +439,119 @@ function createProductCard(product) {
     `;
 }
 
-// 4. CHECKOUT LOGIC (FIXED)
-async function handleBuyNow() {
-    if (currentStock <= 0) return showToast('Stok habis!', 'error');
+// 4. CHECKOUT LOGIC
+function openCryptoModal() {
+    const modal = document.getElementById('cryptoPaymentModal');
+    modal.style.display = 'flex';
+    
+    // Reset state
+    document.getElementById('cryptoSelect').value = "";
+    document.getElementById('cryptoPaymentDetails').style.display = 'none';
 
-    const quantity = parseInt(qtyInput.value); 
+    // Update currentTotalPrice based on current quantity
+    const quantity = parseInt(qtyInput.value);
+    currentTotalPrice = currentPrice * quantity;
+}
+
+function handleCryptoCoinSelect(e) {
+    const coin = e.target.value;
+    const details = document.getElementById('cryptoPaymentDetails');
+    const qrImg = document.getElementById('cryptoQr');
+    const walletText = document.getElementById('walletAddress');
+    const amountText = document.getElementById('cryptoAmount');
+    const currencyText = document.getElementById('cryptoCurrency');
+    const fiatText = document.getElementById('fiatAmount');
+    
+    if (!coin) {
+        details.style.display = 'none';
+        return;
+    }
+    
+    details.style.display = 'block';
+    
+    // Simulation Data
+    const wallets = {
+        'btc': '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+        'eth': '0x742d35Cc6634C0532925a3b844Bc454e4438f44e'
+    };
+    
+    const address = wallets[coin];
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${address}`;
+    
+    walletText.textContent = address;
+    currencyText.textContent = coin.toUpperCase();
+    fiatText.textContent = formatRupiah(currentTotalPrice);
+    
+    const rate = cryptoRates[coin] || 0;
+    const cryptoVal = currentTotalPrice * rate;
+    amountText.textContent = cryptoVal.toFixed(8);
+}
+
+// Process Crypto Payment
+async function processCryptoPayment() {
+    const confirmBtn = document.getElementById('confirmCryptoBtn');
+    const coinType = document.getElementById('cryptoSelect').value;
+    const quantity = parseInt(qtyInput.value);
+    const productName = document.getElementById('product-name').textContent;
+    const selectedSize = document.querySelector('#size-options .variant-btn.active')?.textContent || null;
+    const selectedColor = document.querySelector('#color-options .variant-btn.active')?.textContent || null;
+
+    try {
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+        
+        // Prepare Payload
+        const payload = {
+            total_price: currentPrice * quantity,
+            items: [{
+                id: productId,
+                name: productName,
+                price: currentPrice,
+                quantity: quantity,
+                size: selectedSize,
+                color: selectedColor
+            }],
+            coin_type: coinType
+        };
+        
+        // 1. Create Order
+        const createRes = await fetch('../checkout/PlaceOrderCrypto.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        const createData = await createRes.json();
+        if (!createData.success) throw new Error(createData.message || 'Gagal membuat pesanan Crypto');
+        
+        const orderUuid = createData.order_uuid;
+        
+        // 2. Simulate Payment Confirmation (Wait for 2 seconds)
+        await new Promise(r => setTimeout(r, 2000));
+        
+        const confirmRes = await fetch('../checkout/ConfirmCryptoPayment.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order_uuid: orderUuid })
+        });
+        
+        const confirmData = await confirmRes.json();
+        if (!confirmData.success) throw new Error(confirmData.message || 'Gagal konfirmasi pembayaran');
+        
+        window.location.href = '../user/success.html';
+        
+    } catch (error) {
+        console.error('Crypto payment error:', error);
+        showToast(error.message, 'error');
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Selesai Pembayaran';
+    }
+}
+
+// Process Midtrans Checkout
+async function processMidtransCheckout() {
+    const buyBtn = document.getElementById('btnConfirmPurchase');
+    const quantity = parseInt(qtyInput.value);
     const productName = document.getElementById('product-name').textContent;
     const selectedSize = document.querySelector('#size-options .variant-btn.active')?.textContent || null;
     const selectedColor = document.querySelector('#color-options .variant-btn.active')?.textContent || null;
@@ -347,11 +568,9 @@ async function handleBuyNow() {
         }]
     };
 
-    const buyBtn = document.querySelector('.btn-buy-now');
-    
     try {
         buyBtn.disabled = true;
-        buyBtn.textContent = 'Processing...';
+        buyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
         const response = await fetch('../checkout/PlaceOrder.php', {
             method: 'POST',
@@ -362,12 +581,11 @@ async function handleBuyNow() {
         const rawData = await response.text();
         let snapToken = "";
 
-        // PROTEKSI PARSING: Cek apakah response JSON atau String
         if (rawData.trim().startsWith('{')) {
             const result = JSON.parse(rawData);
             if (!result.success) {
                 showToast(result.message || 'Gagal memproses', 'error');
-                resetBuyBtn(buyBtn);
+                resetConfirmBtn(buyBtn);
                 return;
             }
             snapToken = result.token || result.snap_token;
@@ -375,41 +593,45 @@ async function handleBuyNow() {
             snapToken = rawData.trim();
         }
 
-        // VALIDASI SNAP OBJECT
         if (snapToken && snapToken.length > 10) {
             if (typeof window.snap !== 'undefined') {
                 window.snap.pay(snapToken, {
                     onSuccess: function(result) {
-                        // Pass order_id to success page for verification
                         window.location.href = `../user/success.html?order_id=${result.order_id}`;
                     },
                     onPending: () => alert('Selesaikan pembayaran Anda'),
                     onError: () => {
                         showToast('Pembayaran gagal', 'error');
-                        resetBuyBtn(buyBtn);
+                        resetConfirmBtn(buyBtn);
                     },
-                    onClose: () => resetBuyBtn(buyBtn)
+                    onClose: () => resetConfirmBtn(buyBtn)
                 });
             } else {
                 showToast('Library pembayaran belum siap, coba lagi', 'error');
-                resetBuyBtn(buyBtn);
+                resetConfirmBtn(buyBtn);
             }
         } else {
             showToast('Token tidak valid', 'error');
-            resetBuyBtn(buyBtn);
+            resetConfirmBtn(buyBtn);
         }
 
     } catch (error) {
         console.error('Checkout error:', error);
         showToast('Terjadi kesalahan sistem', 'error');
-        resetBuyBtn(buyBtn);
+        resetConfirmBtn(buyBtn);
     }
 }
 
-// 5. HELPER FUNCTIONS
-function resetBuyBtn(btn) {
+function resetConfirmBtn(btn) {
     btn.disabled = false;
-    btn.textContent = 'Beli Sekarang';
+    const qty = parseInt(qtyInput.value);
+    btn.innerHTML = `Checkout IDR ( <span class="item-count">${qty}</span> )`;
+}
+
+// Wrapper for Buy Now button (retains name but opens modal)
+function handleBuyNow() {
+    if (currentStock <= 0) return showToast('Stok habis!', 'error');
+    openPurchaseModal();
 }
 
 function renderVariants(containerId, options) {
@@ -456,7 +678,21 @@ function decreaseQty() {
         val = val - 1;
         qtyInput.value = val;
         updateTotalPrice();
+        updateModalSummary(); // Sync modal if open
         if (productId) loadShippingCost(productId, val);
+    }
+}
+
+function increaseQty() {
+    let val = parseInt(qtyInput.value);
+    if (val < currentStock) {
+        val = val + 1;
+        qtyInput.value = val;
+        updateTotalPrice();
+        updateModalSummary(); // Sync modal if open
+        if (productId) loadShippingCost(productId, val);
+    } else {
+        showToast('Stok maksimum tercapai', 'error');
     }
 }
 
@@ -464,6 +700,13 @@ function updateTotalPrice() {
     const qty = parseInt(qtyInput.value);
     const total = currentPrice * qty;
     document.getElementById('total-price').textContent = formatRupiah(total);
+}
+
+function closePurchaseModal() {
+    if (purchaseModal) {
+        purchaseModal.classList.remove('show');
+        document.body.style.overflow = ''; // Restore scroll
+    }
 }
 
 // Fungsi Toast yang diperbaiki
@@ -624,211 +867,105 @@ async function handleAddToCart(e) {
 window.increaseQty = increaseQty;
 window.decreaseQty = decreaseQty;
 
-// ================= MOBILE PURCHASE MODAL =================
+// ================= PURCHASE MODAL LOGIC =================
 
 // Modal Elements - initialized after DOM loads
-let purchaseModal = null;
-let modalQtyInput = null;
-let modalTotalPrice = null;
-
-// Mobile Button Handlers
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize modal elements
     purchaseModal = document.getElementById('purchaseModal');
-    modalQtyInput = document.getElementById('modalQty');
-    modalTotalPrice = document.getElementById('modal-total-price');
-
-    // Open Modal: Buy Button (Mobile)
-    const btnBuyMobile = document.getElementById('btnBuyMobile');
-    if (btnBuyMobile) {
-        btnBuyMobile.addEventListener('click', openPurchaseModal);
-        console.log('Buy mobile button attached');
-    } else {
-        console.log('Buy mobile button NOT found');
-    }
-
-    // Add to Cart: Mobile
-    const btnCartMobile = document.getElementById('btnCartMobile');
-    if (btnCartMobile) {
-        btnCartMobile.addEventListener('click', handleAddToCart);
-        console.log('Cart mobile button attached');
-    } else {
-        console.log('Cart mobile button NOT found');
-    }
-
-    // Close Modal
-    const closeModal = document.getElementById('closeModal');
-    if (closeModal) {
-        closeModal.addEventListener('click', closePurchaseModal);
-    }
-
-    // Close on overlay click
-    if (purchaseModal) {
-        purchaseModal.addEventListener('click', (e) => {
-            if (e.target === purchaseModal) {
-                closePurchaseModal();
-            }
-        });
-    }
-
-    // Modal Quantity Controls
-    const modalDecreaseQty = document.getElementById('modalDecreaseQty');
-    const modalIncreaseQty = document.getElementById('modalIncreaseQty');
-    
-    if (modalDecreaseQty) {
-        modalDecreaseQty.addEventListener('click', decreaseModalQty);
-    }
-    if (modalIncreaseQty) {
-        modalIncreaseQty.addEventListener('click', increaseModalQty);
-    }
-
-    // Confirm Purchase Button
-    const btnConfirmPurchase = document.getElementById('btnConfirmPurchase');
-    if (btnConfirmPurchase) {
-        btnConfirmPurchase.addEventListener('click', handleModalBuyNow);
-    }
 });
 
 // Open Purchase Modal
-function openPurchaseModal() {
+function openPurchaseModal(startStep = 1) {
     if (currentStock <= 0) {
         return showToast('Stok habis!', 'error');
     }
 
-    // Populate modal with product info
+    // Sync quantity from main input to modal
+    const currentQty = parseInt(qtyInput.value) || 1;
+    document.getElementById('modalQty').value = currentQty;
+
+    // Populate Step 1 (Preview)
     const productName = document.getElementById('product-name').textContent;
     const productImg = document.getElementById('main-img').src;
     
-    document.getElementById('modal-product-name').textContent = productName;
-    document.getElementById('modal-product-img').src = productImg;
-    document.getElementById('modal-product-price').textContent = formatRupiah(currentPrice);
-    
-    // Reset quantity
-    if (modalQtyInput) modalQtyInput.value = 1;
-    updateModalTotalPrice();
+    document.getElementById('modal-prev-name').textContent = productName;
+    document.getElementById('modal-prev-img').src = productImg;
+    document.getElementById('modal-prev-price').textContent = formatRupiah(currentPrice);
+
+    // Populate Step 2 (Summary)
+    document.getElementById('modal-product-name-summary').textContent = productName;
+
+    // Show requested step
+    showModalStep(startStep, startStep === 2);
 
     // Show modal
     purchaseModal.classList.add('show');
-    document.body.style.overflow = 'hidden'; // Prevent background scroll
+    document.body.style.overflow = 'hidden';
 }
 
-// Close Purchase Modal
-function closePurchaseModal() {
-    purchaseModal.classList.remove('show');
-    document.body.style.overflow = ''; // Restore scroll
+function showModalStep(step, isDesktop = false) {
+    const step1 = document.getElementById('modal-step-1');
+    const step2 = document.getElementById('modal-step-2');
+    const btnPrev = document.getElementById('btnPrevStep');
+
+    if (step === 1) {
+        step1.style.display = 'block';
+        step2.style.display = 'none';
+    } else {
+        step1.style.display = 'none';
+        step2.style.display = 'block';
+        
+        // Hide back button if opened from desktop (Step 2 direct)
+        if (btnPrev) {
+            btnPrev.style.display = isDesktop ? 'none' : 'block';
+        }
+        
+        updateModalSummary();
+    }
 }
 
-// Modal Quantity Controls
 function increaseModalQty() {
-    let val = parseInt(modalQtyInput.value);
+    const input = document.getElementById('modalQty');
+    let val = parseInt(input.value);
     if (val < currentStock) {
-        modalQtyInput.value = val + 1;
-        updateModalTotalPrice();
+        input.value = val + 1;
+        // Sync back to main input
+        qtyInput.value = input.value;
+        updateTotalPrice();
+        if (productId) loadShippingCost(productId, parseInt(input.value));
     } else {
         showToast('Stok maksimum tercapai', 'error');
     }
 }
 
-// Modal Quantity Controls
 function decreaseModalQty() {
-    let val = parseInt(modalQtyInput.value);
+    const input = document.getElementById('modalQty');
+    let val = parseInt(input.value);
     if (val > 1) {
-        modalQtyInput.value = val - 1;
-        updateModalTotalPrice();
+        input.value = val - 1;
+        // Sync back to main input
+        qtyInput.value = input.value;
+        updateTotalPrice();
+        if (productId) loadShippingCost(productId, parseInt(input.value));
     }
 }
 
-function updateModalTotalPrice() {
-    if (!modalQtyInput || !modalTotalPrice) return;
-    const qty = parseInt(modalQtyInput.value);
+function updateModalSummary() {
+    if (!purchaseModal || !qtyInput) return;
+    
+    const qty = parseInt(qtyInput.value);
     const total = currentPrice * qty;
-    modalTotalPrice.textContent = formatRupiah(total);
-}
-
-// Handle Buy Now from Modal
-async function handleModalBuyNow() {
-    if (currentStock <= 0) return showToast('Stok habis!', 'error');
-
-    const quantity = parseInt(modalQtyInput.value);
-    const productName = document.getElementById('product-name').textContent;
-    const selectedSize = document.querySelector('#size-options .variant-btn.active')?.textContent || null;
-    const selectedColor = document.querySelector('#color-options .variant-btn.active')?.textContent || null;
-
-    const itemData = {
-        total_price: currentPrice * quantity,
-        items: [{
-            id: productId,
-            name: productName,
-            price: currentPrice,
-            quantity: quantity,
-            size: selectedSize,
-            color: selectedColor
-        }]
-    };
-
-    const confirmBtn = document.getElementById('btnConfirmPurchase');
-
-    try {
-        confirmBtn.disabled = true;
-        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
-
-        const response = await fetch('../checkout/PlaceOrder.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(itemData)
-        });
-
-        const rawData = await response.text();
-        let snapToken = "";
-
-        // Parse response
-        if (rawData.trim().startsWith('{')) {
-            const result = JSON.parse(rawData);
-            if (!result.success) {
-                showToast(result.message || 'Gagal memproses', 'error');
-                resetConfirmBtn(confirmBtn);
-                return;
-            }
-            snapToken = result.token || result.snap_token;
-        } else {
-            snapToken = rawData.trim();
-        }
-
-        // Validate and open Snap
-        if (snapToken && snapToken.length > 10) {
-            if (typeof window.snap !== 'undefined') {
-                closePurchaseModal(); // Close modal before payment
-                window.snap.pay(snapToken, {
-                    onSuccess: function(result) {
-                         // Pass order_id to success page for verification
-                         window.location.href = `../user/success.html?order_id=${result.order_id}`;
-                    },
-                    onPending: () => alert('Selesaikan pembayaran Anda'),
-                    onError: () => {
-                        showToast('Pembayaran gagal', 'error');
-                        resetConfirmBtn(confirmBtn);
-                    },
-                    onClose: () => resetConfirmBtn(confirmBtn)
-                });
-            } else {
-                showToast('Library pembayaran belum siap, coba lagi', 'error');
-                resetConfirmBtn(confirmBtn);
-            }
-        } else {
-            showToast('Token tidak valid', 'error');
-            resetConfirmBtn(confirmBtn);
-        }
-
-    } catch (error) {
-        console.error('Checkout error:', error);
-        showToast('Terjadi kesalahan sistem', 'error');
-        resetConfirmBtn(confirmBtn);
-    }
-}
-
-function resetConfirmBtn(btn) {
-    btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-check-circle"></i> Beli Sekarang';
+    
+    const countEl = document.getElementById('modal-product-count');
+    const priceEl = document.getElementById('modal-total-price');
+    const btnCounts = document.querySelectorAll('.btn-confirm-purchase .item-count');
+    
+    if (countEl) countEl.textContent = qty;
+    if (priceEl) priceEl.textContent = formatRupiah(total);
+    
+    btnCounts.forEach(el => {
+        el.textContent = qty;
+    });
 }
 
 // 6. REVIEWS LOGIC

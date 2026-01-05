@@ -120,6 +120,7 @@
 
         <!-- Bottom Section: Description & Reviews -->
         <div class="product-content-bottom">
+            <hr class="section-divider">
             <div class="description-section">
                 <h3>Deskripsi Produk</h3>
                 <div id="product-description" class="description-content">
@@ -133,24 +134,25 @@
                      <p>Memuat ulasan...</p>
                 </div>
             </div>
-        </div>
 
-        <!-- Other Products from Store Section -->
-        <section class="similar-products-section">
-            <div class="category-header">
-                <div class="category-title-group">
-                    <div class="category-tag">Produk Lainnya</div>
-                    <h2 class="category-title">Dari Toko Ini</h2>
+            <!-- Store Products Section (Integrated) -->
+            <div class="store-products-integrated">
+                <hr class="section-divider">
+                <div class="category-header" style="margin-bottom: 24px;">
+                    <div class="category-title-group">
+                        <div class="category-tag">Produk Lainnya</div>
+                        <h2 class="category-title">Dari Toko Ini</h2>
+                    </div>
+                </div>
+                <div class="product-grid-6" id="store-products-grid">
+                    <p style="text-align:center; color:#888;">Memuat produk...</p>
                 </div>
             </div>
-            <div class="product-grid-6" id="store-products-grid">
-                <p style="text-align:center; color:#888;">Memuat produk...</p>
-            </div>
-        </section>
+        </div>
 
-        <!-- Similar Products Section -->
+        <!-- Similar Products Section (Separate Card) -->
         <section class="similar-products-section">
-            <div class="category-header">
+            <div class="category-header" style="margin-bottom: 24px;">
                 <div class="category-title-group">
                     <div class="category-tag">Produk Serupa</div>
                     <h2 class="category-title">Produk Kategori Sama</h2>
@@ -277,39 +279,125 @@
         </div>
     </div>
 
-    <!-- PURCHASE POPUP MODAL -->
+    <!-- PURCHASE POPUP MODAL (TWO-STEP FLOW) -->
     <div class="purchase-modal-overlay" id="purchaseModal">
-        <div class="purchase-modal">
-            <div class="modal-header">
-                <h3>Konfirmasi Pembelian</h3>
-                <button class="modal-close" id="closeModal">&times;</button>
+        <div class="purchase-modal summary-card" style="max-width: 400px; padding: 24px; position: relative;">
+            <button class="modal-close" id="closeModal" style="position: absolute; top: 15px; right: 15px; z-index: 10; border: none; background: #f1f5f9; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b; font-size: 20px;">&times;</button>
+
+            <!-- STEP 1: QUANTITY SELECTION -->
+            <div id="modal-step-1" class="modal-step active">
+                <div class="modal-header" style="margin-bottom: 20px; border-bottom: none; padding: 0;">
+                    <h3 style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">Pilih Jumlah</h3>
+                </div>
+                
+                <div class="modal-product-preview" style="display: flex; gap: 16px; margin-bottom: 24px; padding: 12px; background: #f8fafc; border-radius: 12px;">
+                    <img id="modal-prev-img" src="../assets/images/no-image.png" alt="Product" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;">
+                    <div class="modal-prev-info">
+                        <h4 id="modal-prev-name" style="font-size: 1rem; font-weight: 600; color: #1e293b; margin-bottom: 4px;">Nama Produk</h4>
+                        <p id="modal-prev-price" style="color: #3533cd; font-weight: 700; font-size: 1.1rem;">Rp 0</p>
+                    </div>
+                </div>
+
+                <div class="modal-quantity-section" style="margin-bottom: 24px;">
+                    <label style="display: block; margin-bottom: 12px; color: #64748b; font-weight: 500;">Jumlah Barang</label>
+                    <div class="modal-quantity-control" style="display: flex; align-items: center; gap: 20px; background: #f1f5f9; padding: 8px 16px; border-radius: 12px; width: fit-content;">
+                        <button class="qty-btn" id="modalDecreaseQty" style="border: none; background: none; font-size: 1.5rem; color: #3533cd; cursor: pointer; padding: 0 10px;">-</button>
+                        <input type="number" id="modalQty" value="1" min="1" readonly style="border: none; background: none; text-align: center; width: 40px; font-weight: 700; font-size: 1.2rem; outline: none;">
+                        <button class="qty-btn" id="modalIncreaseQty" style="border: none; background: none; font-size: 1.5rem; color: #3533cd; cursor: pointer; padding: 0 10px;">+</button>
+                    </div>
+                </div>
+
+                <button id="btnNextStep" style="width: 100%; padding: 14px; border: none; border-radius: 12px; background: #3533cd; color: white; cursor: pointer; font-weight: 600; font-size: 1rem; transition: all 0.2s;">
+                    Lanjut ke Ringkasan
+                </button>
             </div>
-            
-            <div class="modal-product-info">
-                <img id="modal-product-img" src="../assets/images/no-image.png" alt="Product">
-                <div class="modal-product-details">
-                    <h4 id="modal-product-name">Nama Produk</h4>
-                    <p id="modal-product-price" class="modal-price">Rp 0</p>
+
+            <!-- STEP 2: SHOPPING SUMMARY -->
+            <div id="modal-step-2" class="modal-step" style="display: none;">
+                <div class="modal-header" style="margin-bottom: 20px; border-bottom: none; padding: 0;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button id="btnPrevStep" style="border: none; background: none; color: #64748b; cursor: pointer; font-size: 1.2rem; padding: 0;"><i class="fas fa-arrow-left"></i></button>
+                        <h3 style="font-size: 1.25rem; font-weight: 700; color: #1e293b;">Ringkasan Belanja</h3>
+                    </div>
+                </div>
+                
+                <div class="summary-details" style="border-top: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; padding: 20px 0; margin-bottom: 24px;">
+                    <div class="summary-product-name" style="margin-bottom: 16px;">
+                        <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 4px;">Produk</p>
+                        <strong id="modal-product-name-summary" style="color: #1e293b; display: block; line-height: 1.4;">Nama Produk</strong>
+                    </div>
+
+                    <div class="summary-row" style="display: flex; justify-content: space-between; margin-bottom: 12px; color: #64748b;">
+                        <span>Total Produk</span>
+                        <strong id="modal-product-count" style="color: #1e293b;">1</strong>
+                    </div>
+                    
+                    <div class="summary-row" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 600; color: #1e293b; font-size: 1.1rem;">Total Harga</span>
+                        <strong id="modal-total-price" style="font-size: 1.5rem; font-weight: 700; color: #3533cd;">Rp 0</strong>
+                    </div>
+                </div>
+                
+                <div class="modal-checkout-actions" style="display: flex; flex-direction: column; gap: 12px;">
+                    <button class="btn-confirm-purchase midtrans-btn" id="btnConfirmPurchase" style="width: 100%; padding: 14px; border: none; border-radius: 12px; background: #3533cd; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; font-size: 1rem; transition: all 0.2s;">
+                        Checkout IDR ( <span class="item-count">1</span> )
+                    </button>
+                    <button class="btn-confirm-purchase crypto-btn" id="btnConfirmCrypto" style="width: 100%; padding: 14px; border: none; border-radius: 12px; background: #f7931a; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; font-size: 1rem; transition: all 0.2s;">
+                        Checkout Crypto ( <span class="item-count">1</span> )
+                    </button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Crypto Payment Modal -->
+    <div id="cryptoPaymentModal" class="modal-overlay" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; align-items: center; justify-content: center;">
+        <div class="modal-content crypto-modal-content" style="background: white; border-radius: 12px; width: 90%; max-width: 450px; padding: 20px; position: relative;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>Crypto Payment (Simulasi)</h3>
+                <button class="close-modal" id="closeCryptoModal" style="border: none; background: none; font-size: 24px; cursor: pointer;">&times;</button>
+            </div>
             
-            <div class="modal-quantity-section">
-                <label>Jumlah Barang</label>
-                <div class="modal-quantity-control">
-                    <button class="qty-btn" id="modalDecreaseQty">-</button>
-                    <input type="number" id="modalQty" value="1" min="1" readonly>
-                    <button class="qty-btn" id="modalIncreaseQty">+</button>
+            <div class="crypto-selection" style="margin-bottom: 20px;">
+                <label for="cryptoSelect" style="display: block; margin-bottom: 8px; font-weight: 500;">Pilih Coin:</label>
+                <div class="select-wrapper">
+                    <select id="cryptoSelect" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
+                        <option value="" disabled selected>-- Pilih Coin --</option>
+                        <option value="btc">Bitcoin (BTC)</option>
+                        <option value="eth">Ethereum (ETH)</option>
+                    </select>
                 </div>
             </div>
-            
-            <div class="modal-total-section">
-                <span>Total Pembayaran</span>
-                <strong id="modal-total-price">Rp 0</strong>
+
+            <div id="cryptoPaymentDetails" class="crypto-details" style="display: none;">
+                <div class="qr-container" style="text-align: center; margin-bottom: 20px;">
+                    <img id="cryptoQr" src="" alt="QR Code" class="qr-image" style="width: 160px; height: 160px; border: 1px solid #eee; padding: 10px;">
+                </div>
+                
+                <div class="wallet-info" style="margin-bottom: 15px;">
+                    <p class="label" style="font-size: 0.9em; color: #666; margin-bottom: 5px;">Alamat Wallet:</p>
+                    <div class="wallet-address-box" style="background: #f8fafc; padding: 10px; border-radius: 8px; font-family: monospace; font-size: 0.85em; display: flex; justify-content: space-between; align-items: center;">
+                        <span id="walletAddress" style="word-break: break-all;">...</span>
+                        <button class="copy-btn" title="Salin" style="border: none; background: none; color: var(--primary); cursor: pointer;"><i class="far fa-copy"></i></button>
+                    </div>
+                </div>
+
+                <div class="amount-info" style="margin-bottom: 15px;">
+                    <p class="label" style="font-size: 0.9em; color: #666; margin-bottom: 5px;">Total Pembayaran:</p>
+                    <div class="amount-box" style="background: #f8fafc; padding: 10px; border-radius: 8px; font-weight: 600;">
+                        <span id="cryptoAmount">...</span> <span id="cryptoCurrency">BTC</span>
+                        <br>
+                        <small style="font-weight: 400; color: #666;">(<span id="fiatAmount">Rp ...</span>)</small>
+                    </div>
+                </div>
+
+                <div class="alert-box" style="background: #fff8eb; border: 1px solid #ffd8a8; padding: 10px; border-radius: 8px; display: flex; gap: 10px; align-items: center; margin-bottom: 20px;">
+                    <i class="fas fa-info-circle" style="color: #f7931a;"></i>
+                    <p style="font-size: 0.85em; color: #855e28;">Ini hanya simulasi. Klik "Selesai Pembayaran" untuk menyelesaikan pesanan.</p>
+                </div>
+
+                <button id="confirmCryptoBtn" class="confirm-btn" style="width: 100%; padding: 12px; border: none; border-radius: 8px; background: #10b981; color: white; font-weight: 600; cursor: pointer;">Selesai Pembayaran</button>
             </div>
-            
-            <button class="btn-confirm-purchase" id="btnConfirmPurchase">
-                <i class="fas fa-check-circle"></i> Beli Sekarang
-            </button>
         </div>
     </div>
 
