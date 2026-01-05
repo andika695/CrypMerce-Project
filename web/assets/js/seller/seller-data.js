@@ -27,26 +27,37 @@ async function loadDashboardData() {
 }
 
 function updateStats(stats) {
-    document.getElementById('total-products').textContent = stats.total_products;
-    document.getElementById('total-stock').textContent = stats.total_stock;
-    document.getElementById('total-orders').textContent = stats.total_orders;
+    if (!stats) return;
     
-    // Add follower count to stats if element exists
-    const followerStat = document.getElementById('follower-count');
-    if (followerStat) followerStat.textContent = stats.follower_count;
+    const elements = {
+        'total-products': stats.total_products,
+        'total-stock': stats.total_stock,
+        'total-orders': stats.total_orders,
+        'follower-count': stats.follower_count
+    };
+
+    for (const [id, value] of Object.entries(elements)) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value !== undefined ? value : '0';
+    }
     
     // Add total revenue with currency formatting
     const revenueStat = document.getElementById('total-revenue');
-    if (revenueStat) revenueStat.textContent = 'Rp ' + Number(stats.total_revenue || 0).toLocaleString('id-ID');
+    if (revenueStat) {
+        revenueStat.textContent = 'Rp ' + Number(stats.total_revenue || 0).toLocaleString('id-ID');
+    }
 }
 
 function updateProductTable(products) {
     const tbody = document.getElementById('product-list');
-    
+    if (!tbody) {
+        console.error('Element "product-list" not found!');
+        return;
+    }
     if (!products || products.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="5" style="text-align: center; color: #9ca3af;">
+                <td colspan="6" style="text-align: center; color: #9ca3af;">
                     Belum ada produk. Tambahkan produk pertama Anda!
                 </td>
             </tr>

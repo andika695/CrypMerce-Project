@@ -62,38 +62,47 @@ try {
     }
     
     // 5. Get recent products
-    $productsQuery = "
-        SELECT 
-            p.id,
-            p.name,
-            p.price,
-            p.stock,
-            p.weight,
-            p.image,
-            c.name as category_name,
-            (
-                SELECT COALESCE(SUM(oi.quantity), 0)
-                FROM order_items oi
-                JOIN orders o ON oi.order_id = o.id
-                WHERE oi.product_id = p.id AND o.status = 'completed'
-            ) as sold_count,
-            (
-                SELECT COALESCE(AVG(r.rating), 0)
-                FROM store_ratings r
-                JOIN orders o ON r.order_id = o.id
-                JOIN order_items oi ON o.id = oi.order_id
-                WHERE oi.product_id = p.id
-            ) as avg_rating,
-            p.created_at
-        FROM products p
-        LEFT JOIN categories c ON p.category_id = c.id
-        WHERE p.seller_id = :seller_id
-        ORDER BY p.created_at DESC
-    ";
-    
-    $stmt = $pdo->prepare($productsQuery);
-    $stmt->execute(['seller_id' => $seller_id]);
-    $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $products = [];
+    try {
+        $productsQuery = "
+            SELECT 
+                p.id,
+                p.name,
+                p.price,
+                p.stock,
+                p.weight,
+                p.image,
+                c.name as category_name,
+                (
+                    SELECT COALESCE(SUM(oi.quantity), 0)
+                    FROM order_items oi
+                    JOIN orders o ON oi.order_id = o.id
+                    WHERE oi.product_id = p.id AND o.status = 'completed'
+                ) as sold_count,
+                p.created_at
+            FROM products p
+            LEFT JOIN categories c ON p.category_id = c.id
+            WHERE p.seller_id = :seller_id
+            ORDER BY p.created_at DESC
+        ";
+        
+        $stmt = $pdo->prepare($productsQuery);
+        $stmt->execute(['seller_id' => $seller_id]);
+        $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        // Fallback for missing tables or query errors
+        $productsQuery = "
+            SELECT p.id, p.name, p.price, p.stock, p.weight, p.image, 
+                   c.name as category_name, 0 as sold_count, p.created_at
+            FROM products p
+            LEFT JOIN categories c ON p.category_id = c.id
+            WHERE p.seller_id = :seller_id
+            ORDER BY p.created_at DESC
+        ";
+        $stmt = $pdo->prepare($productsQuery);
+        $stmt->execute(['seller_id' => $seller_id]);
+        $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
     
     // Format data
     foreach ($products as &$product) {
