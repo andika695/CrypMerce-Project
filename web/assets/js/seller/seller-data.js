@@ -361,7 +361,7 @@ function updateProfileView(data) {
         // Update profile view with safe checks
         const setEl = (id, val) => {
             const el = document.getElementById(id);
-            if (el) el.textContent = val;
+            if (el) el.textContent = val || '-';
             else console.warn(`Element #${id} not found in DOM`);
         };
 
@@ -370,6 +370,7 @@ function updateProfileView(data) {
         setEl('store-name', data.store_name);
         setEl('join-date', data.join_date);
         setEl('profile-total-products', data.total_products);
+        setEl('seller-location', data.location || 'Belum diatur');
         
         const profileFollowers = document.getElementById('profile-followers');
         if (profileFollowers) profileFollowers.textContent = data.follower_count || 0;
@@ -384,13 +385,14 @@ function updateProfileView(data) {
             profileReviews.textContent = data.total_reviews || 0;
         }
         
-        const avatarDiv = document.querySelector('.profile-avatar');
-        if (avatarDiv) {
+        // Handle photo in new unified structure
+        const photoWrapper = document.getElementById('seller-avatar-container');
+        if (photoWrapper) {
             if (data.profile_photo) {
                 const imgSrc = data.profile_photo.startsWith('http') ? data.profile_photo : `../${data.profile_photo}`;
-                avatarDiv.innerHTML = `<img src="${imgSrc}" alt="Profile Photo">`;
+                photoWrapper.innerHTML = `<img src="${imgSrc}" alt="Profile Photo" onerror="this.src='../assets/images/person.png'">`;
             } else {
-                avatarDiv.innerHTML = '<span>👤</span>';
+                photoWrapper.innerHTML = '<div class="profile-avatar"><span>👤</span></div>';
             }
         }
     } catch (error) {
@@ -493,7 +495,9 @@ async function loadMyStoreData() {
         if (profResult.success) {
             const data = profResult.data;
             document.getElementById('store-page-name').textContent = data.store_name || 'Nama Toko';
-            document.getElementById('store-location').textContent = data.location || 'Gudang Blibli';
+            const loc = data.location ? data.location.trim().toLowerCase() : '';
+            const isPlaceholder = !loc || loc === 'gudang blibli' || loc === 'gudang crypmerce' || loc === 'indonesia';
+            document.getElementById('store-location').textContent = isPlaceholder ? 'Belum menentukan lokasi' : data.location;
             document.getElementById('store-followers').textContent = data.follower_count || '0';
             
             // Populate Rating Stats
@@ -535,10 +539,40 @@ async function loadMyStoreData() {
     }
 }
 
+let currentStoreTab = 'all';
+
+function switchStoreTab(tab) {
+    currentStoreTab = tab;
+    
+    // Update active UI
+    document.querySelectorAll('.product-tab').forEach(t => t.classList.remove('active'));
+    if (tab === 'all') document.getElementById('tab-all').classList.add('active');
+    else document.getElementById('tab-bestseller').classList.add('active');
+    
+    // Process products
+    let productsToDisplay = [...currentStoreProducts];
+    
+    if (tab === 'bestseller') {
+        productsToDisplay.sort((a, b) => (b.sold_count || 0) - (a.sold_count || 0));
+    } else {
+        // Sort by created_at desc (newest)
+        productsToDisplay.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    }
+    
+    updateStoreProductGrid(productsToDisplay);
+}
+
 function filterStoreProducts(query) {
-    const filtered = currentStoreProducts.filter(p => 
+    let filtered = currentStoreProducts.filter(p => 
         p.name.toLowerCase().includes(query.toLowerCase())
     );
+    
+    if (currentStoreTab === 'bestseller') {
+        filtered.sort((a, b) => (b.sold_count || 0) - (a.sold_count || 0));
+    } else {
+        filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    }
+    
     updateStoreProductGrid(filtered);
 }
 
@@ -569,7 +603,7 @@ function updateStoreProductGrid(products) {
                 <p class="price">Rp ${Number(p.price).toLocaleString('id-ID')}</p>
                 <div class="product-stats">
                     <span>Stok: ${p.stock}</span>
-                    <span>Terjual 0</span>
+                    <span class="sold-count">Terjual ${p.sold_count || 0}</span>
                 </div>
             </div>
         `;
@@ -647,7 +681,9 @@ async function viewStoreProductDetail(productId) {
             // Seller Info
             if (data.seller) {
                 document.getElementById('seller-view-name').textContent = data.seller.store_name;
-                document.getElementById('seller-view-location').textContent = data.seller.location || 'Indonesia';
+                const loc = data.seller.location ? data.seller.location.trim().toLowerCase() : '';
+                const isPlaceholder = !loc || loc === 'gudang blibli' || loc === 'gudang crypmerce' || loc === 'indonesia';
+                document.getElementById('seller-view-location').textContent = isPlaceholder ? 'Belum menentukan lokasi' : data.seller.location;
                 if (data.seller.photo) {
                     const photoSrc = data.seller.photo.startsWith('http') ? data.seller.photo : `../${data.seller.photo}`;
                     document.getElementById('seller-view-photo').src = photoSrc;
@@ -756,6 +792,7 @@ window.editProduct = editProduct;
 window.deleteProduct = deleteProduct;
 window.closeEditProductModal = closeEditProductModal;
 window.loadMyStoreData = loadMyStoreData;
+window.switchStoreTab = switchStoreTab;
 window.filterStoreProducts = filterStoreProducts;
 window.viewStoreProductDetail = viewStoreProductDetail;
 window.backToStore = backToStore;

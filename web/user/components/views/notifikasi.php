@@ -1,8 +1,6 @@
 <div id="notifikasi-view" class="view">
-    <div class="header-section">
-        <h2>Notifikasi</h2>
-        <p class="text-muted">Pantau status pesanan dan info terbaru Anda di sini.</p>
-    </div>
+    <h1 class="profile-title-new">Notifikasi</h1>
+    <p style="text-align:center; margin-bottom: 2rem; color: #666;">Pantau status pesanan dan info terbaru Anda di sini.</p>
 
     <div id="notification-list" class="notification-list">
         <div style="text-align:center; padding: 40px; color:#bdc3c7;">

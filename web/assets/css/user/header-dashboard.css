@@ -7,7 +7,7 @@
 }
 
 :root {
-  --primary: #3533cd;
+  --primary: #1e1bbf;
   --secondary: #f5c444;
   --bg-light: #f0f3f7;
   --text-dark: #1f2937;
@@ -263,7 +263,7 @@
 }
 
 .icon-btn:hover {
-  background: #eff6ff;
+  background: #e0e7ff;
 }
 
 .icon-btn img {
@@ -275,11 +275,11 @@
 
 /* AKUN BUTTON */
 .akun-btn {
-  background: #f3f4f6;
+  background: transparent;
 }
 
 .akun-btn:hover {
-  background: var(--secondary); /* Warna kuning Brand */
+  background: #e0e7ff;
 }
 
 /* MOBILE MENU BTN */

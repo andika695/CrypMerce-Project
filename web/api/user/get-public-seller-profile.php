@@ -78,7 +78,7 @@ try {
         'data' => [
             'store_name' => $profile['store_name'],
             'profile_photo' => $profile['profile_photo'],
-            'location' => $profile['location'] ?? 'Gudang Blibli',
+            'location' => $profile['location'] ?? 'Gudang CrypMerce',
             'join_date' => $joinDate,
             'total_products' => (int)$profile['total_products'],
             'follower_count' => $follower_count,

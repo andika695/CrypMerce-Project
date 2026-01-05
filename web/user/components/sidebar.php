@@ -10,7 +10,7 @@
              ?>" alt="Profile">
         </div>
         <h3 id="sidebar-user-name" class="sidebar-user-name"><?php echo htmlspecialchars($userProfile['full_name'] ?? $userProfile['username'] ?? 'User'); ?></h3>
-        <p class="sidebar-user-role">Member</p>
+        <p class="sidebar-user-role">Pembeli (Verified)</p>
     </div>
     <ul>
         <li class="menu-item active" data-page="profile">

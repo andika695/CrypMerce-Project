@@ -1,8 +1,6 @@
 <div id="alamat-view" class="view" style="display: none;">
-    <div class="location-header">
-        <h2>📍 Alamat Pengiriman</h2>
-        <p>Tentukan lokasi alamat Anda untuk pengiriman pesanan yang akurat</p>
-    </div>
+    <h1 class="profile-title-new">Alamat Pengiriman</h1>
+    <p style="text-align:center; margin-bottom: 2rem; color: #666;">Tentukan lokasi alamat Anda untuk pengiriman pesanan yang akurat</p>
     
     <!-- Status Debugger (Temporary) -->
     <div id="debug-status" style="font-size: 10px; color: #aaa; margin-bottom: 5px;">Ready</div>
@@ -46,8 +44,10 @@
         <div class="location-alert info" style="margin-top: 20px;">
             <strong>💡 Info:</strong> 
             <ul style="margin: 8px 0 0 20px; padding: 0;">
-                <li>Pastikan titik lokasi sesuai dengan tempat tinggal Anda</li>
-                <li>Alamat ini akan otomatis muncul saat Checkout</li>
+                <li>Klik atau seret marker untuk mengatur lokasi anda</li>
+                <li>Gunakan tombol "Deteksi Lokasi Saya" untuk otomatis mendeteksi posisi Anda</li>
+                <li>Pastikan titik sesuai dengan lokasi alamat rumah anda</li>
+                <li>Alamat ini akan otomatis muncul di profile anda</li>
             </ul>
         </div>
     </div>

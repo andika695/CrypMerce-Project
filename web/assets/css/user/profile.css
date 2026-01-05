@@ -117,75 +117,170 @@ body {
   }
 }
 
-h1 {
-  color: var(--dark-blue);
-  margin-bottom: 1.5rem;
-  font-size: 1.8rem;
-}
-
-/* --- PROFILE CARD STYLE --- */
-.profile-card {
-  background: white;
-  padding: 2.5rem;
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-  max-width: 600px;
+.profile-title-new {
+  color: var(--primary-blue);
+  margin-bottom: 1.2rem; /* Reduced from 2rem */
+  font-size: 2.2rem;
   text-align: center;
+  font-weight: 800;
+  letter-spacing: -0.5px;
 }
 
-.profile-header {
-  margin-bottom: 2rem;
+.profile-unified-card-main {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+  max-width: 1180px; /* Increased from 1100px */
+  margin: 0 auto;
+  width: 100%;
+  overflow: hidden; /* Prevent internal scrollbars */
 }
 
-.profile-avatar {
-  width: 100px;
-  height: 100px;
-  background: var(--medium-gray);
-  border-radius: 50%;
-  margin: 0 auto 1rem;
+.unified-content-flex {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 3rem;
-  border: 3px solid var(--primary-yellow);
+  min-height: auto; /* Removed fixed min-height */
 }
 
-.info-item {
+/* --- PHOTO COLUMN --- */
+.photo-column-new {
+  flex: 0 0 340px;
+  padding: 25px 30px; /* Reduced from 35px */
   display: flex;
-  justify-content: space-between;
-  padding: 1rem 0;
-  border-bottom: 1px solid var(--medium-gray);
+  flex-direction: column;
+  background: #fafbfc;
+  border-right: 1px solid #f0f0f0;
 }
 
-.info-item label {
-  font-weight: 600;
-  color: var(--dark-gray);
+.profile-photo-wrapper {
+  width: 100%;
+  aspect-ratio: 1/1;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--white);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border: 1px solid #eee;
 }
 
-.coming-soon {
-  color: #999;
-  font-style: italic;
-  background: #f0f0f0;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.9rem;
+.profile-photo-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-.btn-edit-profile {
-  margin-top: 2rem;
+.photo-action-wrapper {
+  margin-top: auto;
+  padding-top: 25px;
+}
+
+.btn-edit-profile-trigger {
   width: 100%;
   padding: 12px;
   background: var(--primary-blue);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
+  font-weight: 700;
   font-size: 1rem;
-  transition: 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(53, 51, 205, 0.2);
 }
 
-.btn-edit-profile:hover {
+.btn-edit-profile-trigger:hover {
   background: var(--dark-blue);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 15px rgba(53, 51, 205, 0.3);
+}
+
+/* --- INFO COLUMN --- */
+.info-column-new {
+  flex: 1;
+  padding: 25px 45px; /* Reduced vertical padding */
+  display: flex;
+  flex-direction: column;
+  gap: 25px; /* Reduced from 40px */
+}
+
+.section-heading-new {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-bottom: 12px; /* Reduced from 20px */
+  position: relative;
+  padding-bottom: 8px;
+}
+
+.section-heading-new::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 3px;
+  background: var(--primary-yellow);
+  border-radius: 2px;
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 0; /* Reduced from 16px */
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  width: 180px; /* Slimmer */
+  color: #777;
+  font-weight: 500;
+  font-size: 0.95rem; /* Slightly smaller */
+}
+
+.detail-value {
+  flex: 1;
+  color: #222;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+/* --- RESPONSIVE FIX --- */
+@media screen and (max-width: 1024px) {
+  .unified-content-flex {
+    flex-direction: column;
+  }
+
+  .photo-column-new {
+    flex: none;
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #f0f0f0;
+    align-items: center;
+    padding: 30px;
+  }
+
+  .profile-photo-wrapper {
+    max-width: 250px;
+  }
+
+  .photo-action-wrapper {
+    width: 100%;
+    max-width: 250px;
+  }
+
+  .info-column-new {
+    padding: 30px;
+  }
+}
+
+/* Hide scrollbars fix */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 /* --- ORDER / PESANAN STYLE --- */

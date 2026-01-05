@@ -6,15 +6,15 @@
             </div>
             <div class="store-details">
                 <div class="name-row">
-                    <h1 id="store-page-name">Nama Toko</h1>
+                    <h1 id="store-page-name">🏠 Nama Toko</h1>
                     <span class="arrow-icon">›</span>
                 </div>
                 <div class="store-stats-mini">
                     <span class="followers-count">👥 <strong id="store-followers">0</strong> pengikut</span>
                 </div>
-                <div class="location-box editable-loc" onclick="alert('Fitur edit lokasi akan segera hadir!')">
+               <div class="location-box editable-loc" onclick="document.querySelector('.menu-item[data-page=\'location-settings\']').click()">
                     <span class="loc-icon">📍</span> 
-                    <span class="loc-text" id="store-location">Gudang Blibli</span>
+                    <span class="loc-text" id="store-location">Gudang CrypMerce</span>
                     <span class="edit-hint">✎</span>
                 </div>
                 <div class="action-buttons">
@@ -37,7 +37,14 @@
     </div>
 
     <div class="store-info-bar">
-        <div class="section-title">📦 Semua Produk</div>
+        <div class="product-tabs">
+            <button class="product-tab active" id="tab-all" onclick="switchStoreTab('all')">
+                <span class="tab-icon">📦</span> Semua Produk
+            </button>
+            <button class="product-tab" id="tab-bestseller" onclick="switchStoreTab('bestseller')">
+                <span class="tab-icon">🔥</span> Produk Terlaris
+            </button>
+        </div>
         <div class="store-search-box">
             <span class="search-icon">🔍</span>
             <input type="text" id="store-inner-search" placeholder="Cari di toko ini..." onkeyup="filterStoreProducts(this.value)">

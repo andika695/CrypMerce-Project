@@ -1,11 +1,11 @@
 /* ===== FORM CONTAINER ===== */
 .form-container {
-  max-width: 900px;
+  max-width: 1150px;
   background: #ffffff;
   padding: 48px;
   border-radius: 20px;
   box-shadow: 0 4px 24px rgba(53, 51, 205, 0.12);
-  border-top: 5px solid #3533cd;
+  margin: 0 auto;
 }
 
 /* ===== FORM GROUPS ===== */

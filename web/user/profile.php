@@ -29,7 +29,7 @@ if (!$isUserLoggedIn) {
 require_once __DIR__ . '/../api/config/config.php';
 
 try {
-    $stmt = $pdo->prepare("SELECT full_name, username, email, profile_photo, created_at, address, city, latitude, longitude, address_detail FROM users WHERE id = :id");
+    $stmt = $pdo->prepare("SELECT full_name, username, email, phone, profile_photo, created_at, address, city, latitude, longitude, address_detail FROM users WHERE id = :id");
     $stmt->execute([':id' => $_SESSION['user_id']]);
     $userProfile = $stmt->fetch(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {

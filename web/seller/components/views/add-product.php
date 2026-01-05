@@ -1,5 +1,5 @@
 <div id="add-product-view" class="view">
-    <h1>Tambah Produk Baru</h1>
+    <h1 class="profile-title-new">Tambah Produk Baru</h1>
     <div class="form-container">
         <form id="add-product-form" enctype="multipart/form-data">
             <div class="form-group">

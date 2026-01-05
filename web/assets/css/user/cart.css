@@ -1,6 +1,6 @@
 /* Cart Page Specific Styles */
 :root {
-  --primary: #3533cd;
+  --primary: #1e1bbf;
   --secondary: #f5c444;
   --text-dark: #1f2937;
   --text-gray: #6b7280;
@@ -40,10 +40,10 @@ body {
 /* Cart Header */
 .cart-header {
   margin-bottom: 24px;
-  background-color: #3533cd;
+  background-color: #1e1bbf;
   padding: 14px 20px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(53, 51, 205, 0.2);
+  box-shadow: 0 4px 12px rgba(30, 27, 191, 0.2);
 }
 
 .cart-title {
@@ -681,7 +681,7 @@ body {
 .option-icon {
   width: 48px;
   height: 48px;
-  background: #eff6ff;
+  background: #e0e7ff;
   border-radius: 10px;
   display: flex;
   align-items: center;

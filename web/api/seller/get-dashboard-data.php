@@ -71,6 +71,19 @@ try {
             p.weight,
             p.image,
             c.name as category_name,
+            (
+                SELECT COALESCE(SUM(oi.quantity), 0)
+                FROM order_items oi
+                JOIN orders o ON oi.order_id = o.id
+                WHERE oi.product_id = p.id AND o.status = 'completed'
+            ) as sold_count,
+            (
+                SELECT COALESCE(AVG(r.rating), 0)
+                FROM store_ratings r
+                JOIN orders o ON r.order_id = o.id
+                JOIN order_items oi ON o.id = oi.order_id
+                WHERE oi.product_id = p.id
+            ) as avg_rating,
             p.created_at
         FROM products p
         LEFT JOIN categories c ON p.category_id = c.id

@@ -1,8 +1,6 @@
 <div id="location-settings-view" class="view">
-    <div class="location-header">
-        <h2>📍 Lokasi Toko</h2>
-        <p>Tentukan lokasi toko Anda untuk perhitungan ongkir yang akurat</p>
-    </div>
+    <h1 class="profile-title-new">Lokasi Toko</h1>
+    <p style="text-align:center; margin-bottom: 2rem; color: #666;">Tentukan lokasi alamat Anda untuk pengiriman pesanan yang akurat</p>
     
     <!-- Alert message container -->
     <div id="location-alert" style="display: none;"></div>
@@ -41,11 +39,12 @@
         
         <!-- Info box -->
         <div class="location-alert info" style="margin-top: 20px;">
-            <strong>💡 Tips:</strong> 
+            <strong>💡 Info:</strong> 
             <ul style="margin: 8px 0 0 20px; padding: 0;">
                 <li>Klik atau seret marker untuk mengatur lokasi toko</li>
                 <li>Gunakan tombol "Deteksi Lokasi Saya" untuk otomatis mendeteksi posisi Anda</li>
-                <li>Lokasi ini akan digunakan untuk menghitung ongkir ke pembeli</li>
+                <li>Pastikan titik sesuai dengan lokasi toko anda</li>
+                <li>Alamat ini akan otomatis muncul di toko anda</li>
             </ul>
         </div>
     </div>

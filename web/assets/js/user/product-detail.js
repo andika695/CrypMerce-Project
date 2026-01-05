@@ -180,6 +180,7 @@ function renderProduct(data) {
     updateTotalPrice();
 
     currentStock = Number(data.stock);
+    document.getElementById('product-stock').textContent = currentStock;
 
     // Handle images array (new multi-image feature)
     const imagesArray = data.images && data.images.length > 0 ? data.images : (data.image ? [data.image] : []);
@@ -220,7 +221,9 @@ function renderProduct(data) {
     // Seller Info
     if (data.seller) {
         document.getElementById('seller-name').textContent = data.seller.store_name;
-        document.getElementById('seller-location').textContent = data.seller.location || 'Indonesia';
+        const loc = data.seller.location ? data.seller.location.trim().toLowerCase() : '';
+        const isPlaceholder = !loc || loc === 'gudang blibli' || loc === 'gudang crypmerce' || loc === 'indonesia';
+        document.getElementById('seller-location').textContent = isPlaceholder ? 'Belum menentukan lokasi' : data.seller.location;
         
         const sellerLink = document.getElementById('seller-link');
         if (sellerLink) sellerLink.href = `shop.html?id=${data.seller.id}`;

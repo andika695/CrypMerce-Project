@@ -1,6 +1,6 @@
 /* GLOBAL SETTINGS */
 :root {
-  --primary: #3533cd;
+  --primary: #1e1bbf;
   --secondary: #f5c444;
   --text-dark: #1f2937;
   --text-gray: #6b7280;
@@ -130,10 +130,10 @@ body {
   display: flex;
   align-items: center;
   padding: 18px;
-  margin: auto;
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
+  width: 100%; /* Ensure it fills the column */
 }
 
 .seller-header {
@@ -292,7 +292,7 @@ body {
 .section-divider {
   border: none;
   border-top: 1px solid #000; /* Solid Black */
-  margin: 32px 24px; /* Inset from sides */
+  margin: 32px 8px; /* Reduced inset from 24px to 8px */
   opacity: 1;
 }
 

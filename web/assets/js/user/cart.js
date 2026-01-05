@@ -147,7 +147,11 @@ function renderSellerGroup(sellerId, group) {
                 <div>
                     <div class="seller-name">${group.seller_name}</div>
                     <div class="seller-location">📍 ${
-                      group.seller_location
+                      (() => {
+                        const loc = group.seller_location ? group.seller_location.trim().toLowerCase() : '';
+                        const isPlaceholder = !loc || loc === 'gudang blibli' || loc === 'gudang crypmerce' || loc === 'indonesia';
+                        return isPlaceholder ? 'Belum menentukan lokasi' : group.seller_location;
+                      })()
                     }</div>
                 </div>
             </div>

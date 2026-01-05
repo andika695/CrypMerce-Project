@@ -27,25 +27,25 @@
 
         <ul>
             <li class="menu-item" data-page="profile">
-                Profil
+                <span>👤</span> Profil
             </li>
             <li class="menu-item active" data-page="dashboard">
-                Dashboard
+                <span>📊</span> Dashboard
             </li>
             <li class="menu-item" data-page="add-product">
-                Tambah Produk
+                <span>➕</span> Tambah Produk
             </li>
             <li class="menu-item" data-page="my-store">
-                Toko Saya
+                <span>🏠</span> Toko Saya
             </li>
             <li class="menu-item" data-page="orders">
-                Pesanan
+                <span>📦</span> Pesanan
             </li>
             <li class="menu-item" data-page="location-settings">
-                Lokasi Toko
+                <span>📍</span> Lokasi Toko
             </li>
             <li class="menu-item" data-page="logout">
-                Logout
+                <span>🚪</span> Logout
             </li>
         </ul>
     </div>

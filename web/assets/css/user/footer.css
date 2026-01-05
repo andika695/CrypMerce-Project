@@ -1,9 +1,14 @@
-/* ================= FOOTER STYLE ================= */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
 .main-footer {
   background-color: #ffffff; /* White Background */
   color: #4b5563; /* Dark Gray Text */
   padding-top: 60px;
-  margin-top: 60px;
+  margin-top: auto; /* Push to bottom */
   font-size: 14px;
   border-top: 1px solid #e5e7eb; /* Subtle top border */
 }
@@ -53,7 +58,7 @@
 }
 
 .contact-item i {
-  color: #3533cd; /* Primary Blue Accent */
+  color: #1e1bbf; /* Primary Blue Accent */
   width: 20px;
   text-align: center;
 }
@@ -81,7 +86,7 @@
 }
 
 .footer-links li a:hover {
-  color: #3533cd; /* Primary Blue on Hover */
+  color: #1e1bbf; /* Primary Blue on Hover */
   text-decoration: underline;
 }
 
@@ -105,7 +110,7 @@
 }
 
 .social-btn:hover {
-  background: #3533cd;
+  background: #1e1bbf;
   color: #fff;
   transform: translateY(-3px);
 }
@@ -152,11 +157,16 @@
 /* Bottom Bar */
 .footer-bottom {
   border-top: 1px solid #e5e7eb;
-  padding: 24px 0 120px; /* Added 120px to bottom */
+  padding: 24px 0;
   text-align: center;
   color: #9ca3af;
   font-size: 13px;
   background: #f9fafb; /* Very light gray */
+}
+
+/* Extra padding for pages with sticky purchasing bar (like Product Detail) */
+.main-footer.has-sticky-bar .footer-bottom {
+  padding-bottom: 120px;
 }
 
 /* Responsive */

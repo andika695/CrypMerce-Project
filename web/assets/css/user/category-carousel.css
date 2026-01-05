@@ -21,7 +21,7 @@
 .category-tag {
   display: inline-flex;
   align-items: center;
-  color: #3533cd; /* Primary color */
+  color: #1e1bbf; /* Primary color */
   font-weight: 600;
   font-size: 14px;
   gap: 8px;
@@ -102,10 +102,10 @@
 
 .category-card:hover,
 .category-card.active {
-  background-color: #3533cd;
+  background-color: #1e1bbf;
   color: white;
-  border-color: #3533cd;
-  box-shadow: 0 4px 15px rgba(53, 51, 205, 0.3);
+  border-color: #1e1bbf;
+  box-shadow: 0 4px 15px rgba(30, 27, 191, 0.3);
   transform: translateY(-2px);
 }
 
@@ -169,7 +169,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #3533cd; /* Primary */
+  color: #1e1bbf; /* Primary */
   font-weight: 600;
   font-size: 14px;
 }
@@ -196,7 +196,7 @@
 }
 
 .view-all-btn {
-  background-color: #3533cd; /* Primary */
+  background-color: #1e1bbf; /* Primary */
   color: white;
   border: none;
   padding: 10px 24px;
@@ -233,7 +233,7 @@
 
 .section-product-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 24px rgba(53, 51, 205, 0.1);
+  box-shadow: 0 12px 24px rgba(30, 27, 191, 0.1);
 }
 
 /* Image Box */
@@ -287,7 +287,7 @@
 }
 
 .action-btn:hover {
-  background: #3533cd;
+  background: #1e1bbf;
   color: white;
 }
 
@@ -317,7 +317,7 @@
 }
 
 .current-price {
-  color: #3533cd; /* Primary */
+  color: #1e1bbf; /* Primary */
 }
 
 .rating-row {

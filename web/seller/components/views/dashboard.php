@@ -1,24 +1,20 @@
 <div id="dashboard-view" class="view active">
-    <h1>Dashboard Seller</h1>
+    <h1 class="profile-title-new">Dashboard Seller</h1>
     <div class="stats">
         <div class="card">
-            <h3>Total Produk</h3>
+            <h3>🛍️ Total Produk</h3>
             <p id="total-products">0</p>
         </div>
         <div class="card">
-            <h3>Total Stok</h3>
-            <p id="total-stock">0</p>
-        </div>
-        <div class="card">
-            <h3>Pesanan</h3>
+            <h3>📦 Pesanan</h3>
             <p id="total-orders">0</p>
         </div>
         <div class="card">
-            <h3>Pengikut</h3>
+            <h3>👥 Pengikut</h3>
             <p id="follower-count">0</p>
         </div>
         <div class="card">
-            <h3>Total Keuntungan</h3>
+            <h3>💰 Total Keuntungan</h3>
             <p id="total-revenue">Rp 0</p>
         </div>
     </div>

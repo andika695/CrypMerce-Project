@@ -1,64 +1,88 @@
 <div class="view active" id="profile-view">
-    <h1>Profile Saya</h1>
-    <div class="profile-container">
-        <div class="profile-card">
-            <div class="profile-header">
-                <div class="profile-avatar" style="overflow: hidden;">
+    <h1 class="profile-title-new">Profil</h1>
+    
+    <div class="profile-unified-card-main">
+        <div class="unified-content-flex">
+            <!-- Left Side: Photo -->
+            <div class="photo-column-new">
+                <div class="profile-photo-wrapper">
                     <img id="profile-view-img" src="<?php 
                         if (!empty($userProfile['profile_photo'])) {
                             echo (strpos($userProfile['profile_photo'], 'http') === 0) ? $userProfile['profile_photo'] : '../assets/images/user/' . $userProfile['profile_photo'];
                         } else {
                             echo '../assets/images/person.png';
                         }
-                    ?>" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+                    ?>" alt="Profile">
+                </div>
+                <div class="photo-action-wrapper">
+                    <button class="btn-edit-profile-trigger" onclick="openEditProfileModal()">Edit Profile</button>
                 </div>
             </div>
-            <h2 id="user-name"><?php echo htmlspecialchars($userProfile['full_name'] ?? $userProfile['username'] ?? 'Guest'); ?></h2>
-            <p id="user-email"><?php echo htmlspecialchars($userProfile['email'] ?? 'Belum ada email'); ?></p>
-        </div>
 
-        <div class="profile-info">
-            <div class="info-item">
-                <label>Status Akun</label>
-                <p>Pembeli (Verified)</p>
-            </div>
-            <div class="info-item">
-                <label>Bergabung Sejak</label>
-                <p id="join-date">
-                    <?php 
-                    if (!empty($userProfile['created_at'])) {
-                        $joinTime = strtotime($userProfile['created_at']);
-                        $months = [
-                            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April', 
-                            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus', 
-                            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
-                        ];
-                        echo date('d', $joinTime) . ' ' . $months[(int)date('m', $joinTime)] . ' ' . date('Y', $joinTime);
-                    } else {
-                        echo '-';
-                    }
-                    ?>
-                </p>
-            </div>
+            <div class="vertical-divider"></div>
 
-            <div class="info-item">
-                <label>Lokasi Saya</label>
-                <p id="profile-location-display">
-                    <?php 
-                    if (!empty($userProfile['address'])) {
-                        echo "📍 " . htmlspecialchars($userProfile['address']);
-                    } elseif (!empty($userProfile['city'])) {
-                        echo "📍 " . htmlspecialchars($userProfile['city']);
-                    } else {
-                        echo '<span style="color: #888; font-style: italic;">Belum diatur</span>';
-                    }
-                    ?>
-                </p>
-            </div>
+            <!-- Right Side: Info Groups -->
+            <div class="info-column-new">
+                <div class="info-section-wrapper">
+                    <h3 class="section-heading-new">Biodata Diri</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Nama</span>
+                        <span class="detail-value"><?php echo htmlspecialchars($userProfile['full_name'] ?? $userProfile['username'] ?? 'Guest'); ?></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Status Akun</span>
+                        <span class="detail-value">Pembeli (Verified)</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Bergabung Sejak</span>
+                        <span class="detail-value">
+                            <?php 
+                            if (!empty($userProfile['created_at'])) {
+                                $joinTime = strtotime($userProfile['created_at']);
+                                $months = [
+                                    1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April', 
+                                    5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus', 
+                                    9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                                ];
+                                echo date('d', $joinTime) . ' ' . $months[(int)date('m', $joinTime)] . ' ' . date('Y', $joinTime);
+                            } else {
+                                echo '-';
+                            }
+                            ?>
+                        </span>
+                    </div>
+                </div>
 
-            <button class="btn-edit-profile" onclick="openEditProfileModal()">
-               Edit Profile
-            </button>
+                <div class="info-section-wrapper">
+                    <h3 class="section-heading-new">Kontak</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Email</span>
+                        <span class="detail-value"><?php echo htmlspecialchars($userProfile['email'] ?? 'Belum ada email'); ?></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Nomor Telepon</span>
+                        <span class="detail-value"><?php echo htmlspecialchars($userProfile['phone'] ?? 'Belum ada nomor'); ?></span>
+                    </div>
+                </div>
+
+                <div class="info-section-wrapper">
+                    <h3 class="section-heading-new">Lokasi Saya</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Alamat</span>
+                        <span class="detail-value">
+                            <?php 
+                            if (!empty($userProfile['address'])) {
+                                echo "📍 " . htmlspecialchars($userProfile['address']);
+                            } elseif (!empty($userProfile['city'])) {
+                                echo "📍 " . htmlspecialchars($userProfile['city']);
+                            } else {
+                                echo '<span style="color: #888; font-style: italic;">Belum diatur</span>';
+                            }
+                            ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

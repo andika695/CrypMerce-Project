@@ -196,12 +196,12 @@ body {
 
 .product-tab:hover {
   background: #f3f4f6;
-  color: #3533cd;
+  color: #1e1bbf;
 }
 
 .product-tab.active {
-  background: #eff6ff;
-  color: #3533cd;
+  background: #e0e7ff;
+  color: #1e1bbf;
 }
 
 .tab-icon {

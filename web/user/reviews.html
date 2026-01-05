@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="../assets/css/user/product-detail.css?v=2.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="../assets/css/user/footer.css">
     <link rel="icon" type="image/png" href="../../../assets/images/logo.png">
     
     <style>
@@ -19,7 +20,7 @@
             border-radius: 16px; /* Matched to product detail radius */
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* Matched shadow */
             min-height: 400px;
-            border-left: 5px solid #3533cd; /* Consistent accent */
+            border-left: 5px solid #1e1bbf; /* Consistent accent */
         }
         
         .reviews-header-full {
@@ -103,8 +104,82 @@
             <div id="reviews-list">
                 <div style="text-align:center; padding:50px; color:#888;">Memuat ulasan...</div>
             </div>
-        </div>
     </div>
+
+    <!-- FOOTER -->
+    <footer class="main-footer">
+        <div class="footer-content">
+            <!-- Brand Column -->
+            <div class="footer-col">
+                <img src="../assets/images/logotesk.png" alt="CrypMerce Logo" class="footer-logo">
+                <p class="footer-description">
+                    Crypmerce adalah platform e-commerce berbasis web yang mengintegrasikan cryptocurrency sebagai metode pembayaran.
+                </p>
+                <div class="footer-contact">
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <span>crypmerce@gmail.com</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Service -->
+            <div class="footer-col">
+                <h3 class="footer-heading">Layanan Pelanggan</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Bantuan</a></li>
+                    <li><a href="#payment-methods">Metode Pembayaran</a></li>
+                    <li><a href="#">Lacak Pesanan</a></li>
+                    <li><a href="#">Hubungi Kami</a></li>
+                </ul>
+            </div>
+
+            <!-- About -->
+            <div class="footer-col">
+                <h3 class="footer-heading">Jelajahi</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Tentang Kami</a></li>
+                    <li><a href="#">Kebijakan Privasi</a></li>
+                    <li><a href="#">Syarat & Ketentuan</a></li>
+                    <li><a href="#">Karir</a></li>
+                </ul>
+            </div>
+
+            <!-- Social -->
+            <div class="footer-col">
+                <h3 class="footer-heading">Ikuti Kami</h3>
+                <div class="social-links">
+                    <a href="#" class="social-btn"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-btn"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-btn"><i class="fab fa-twitter"></i></a>
+                    <a href="https://youtu.be/KI4W-9Kdxdo?si=FpilYqKGHnQ54UYb" class="social-btn"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Methods -->
+        <div class="footer-payments" id="payment-methods">
+            <h3 class="payment-title">Metode Pembayaran</h3>
+            <div class="payment-logos">
+                <img src="../assets/images/payment/payment_1_ewallet.png" alt="E-Wallets" class="payment-logo-img" style="height: 35px;">
+                <img src="../assets/images/payment/payment_2_cards.png" alt="Credit Cards" class="payment-logo-img" style="height: 35px;">
+                <img src="../assets/images/payment/payment_3_banks.png" alt="Bank Transfer" class="payment-logo-img" style="height: 50px;">
+                <img src="../assets/images/payment/payment_4_partners.png" alt="Bank Partners" class="payment-logo-img" style="height: 35px;">
+                <img src="../assets/images/payment/payment_5_retail.png" alt="Retail" class="payment-logo-img" style="height: 30px;">
+                <img src="../assets/images/payment/payment_6_paylater.png" alt="PayLater" class="payment-logo-img" style="height: 30px;">
+            </div>
+
+            <h3 class="payment-title" style="margin-top: 25px;">Pembayaran Crypto</h3>
+            <div class="payment-logos">
+                <img src="../assets/images/payment/payment_crypto_btc.png" alt="Bitcoin" class="payment-logo-img" style="height: 35px;">
+                <img src="../assets/images/payment/payment_crypto_eth.png" alt="Ethereum" class="payment-logo-img" style="height: 35px;">
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2025-2026 CrypMerce. All Rights Reserved.</p>
+        </div>
+    </footer>
 
     <script src="../assets/js/user/reviews.js?v=1.0"></script>
 </body>

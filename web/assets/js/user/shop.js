@@ -47,7 +47,9 @@ async function loadShopProfile(id) {
         if (result.success) {
             const data = result.data;
             document.getElementById('store-page-name').textContent = data.store_name;
-            document.getElementById('store-location').textContent = data.location;
+            const loc = data.location ? data.location.trim().toLowerCase() : '';
+            const isPlaceholder = !loc || loc === 'gudang blibli' || loc === 'gudang crypmerce' || loc === 'indonesia';
+            document.getElementById('store-location').textContent = isPlaceholder ? 'Belum menentukan lokasi' : data.location;
             document.getElementById('store-followers').textContent = data.follower_count;
             document.getElementById('store-total-products').textContent = data.total_products;
             

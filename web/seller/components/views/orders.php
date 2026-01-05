@@ -1,5 +1,5 @@
 <div id="orders-view" class="view">
-    <h1>Pesanan Masuk</h1>
+    <h1 class="profile-title-new">Pesanan Masuk</h1>
     <div class="order-container">
         <table class="order-table">
             <thead>

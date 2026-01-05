@@ -20,7 +20,7 @@ try {
     $userId = $_SESSION['user']['user_id'];
     
     $stmt = $pdo->prepare("
-        SELECT id, username, email, full_name, phone_number, profile_photo,
+        SELECT id, username, email, full_name, phone, profile_photo,
                latitude, longitude, address, city, province, address_detail
         FROM users 
         WHERE id = :id
