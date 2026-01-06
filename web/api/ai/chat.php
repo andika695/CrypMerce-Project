@@ -15,65 +15,106 @@ if (empty($userMessage)) {
 // Kita cari produk yang namanya mirip dengan pesan user untuk dijadikan konteks
 $contextData = "";
 try {
-    // 2. RAG Sederhana: Keyword Extraction
-    // Bersihkan tanda baca (titik, koma, tanya, seru) agar keyword bersih
+    // 2. RAG Sederhana: Keyword Extraction/Category Match
+    // Bersihkan tanda baca
     $cleanMessage = preg_replace('/[^\w\s]/', ' ', $userMessage);
     $keywords = explode(' ', $cleanMessage);
     
     $searchTerms = [];
     foreach ($keywords as $word) {
         $word = trim($word);
-        // Abaikan kata pendek, tapi izinkan kata 2 huruf seperti 'hp', 'tv', 'pc'
-        if ((strlen($word) >= 3 || in_array(strtolower($word), ['hp', 'tv', 'pc', 'lg'])) && !in_array(strtolower($word), ['saya', 'aku', 'kami', 'anda', 'yang', 'dari', 'untuk', 'ingin', 'mau', 'cari', 'butuh', 'adalah', 'nama', 'bisa', 'tolong', 'tanya', 'dimana', 'apakah', 'penjual', 'toko'])) {
+        // Abaikan kata pendek/umum, kecuali kata 2 huruf tertentu
+        if ((strlen($word) >= 3 || in_array(strtolower($word), ['hp', 'tv', 'pc', 'lg'])) && 
+            !in_array(strtolower($word), ['saya', 'aku', 'kami', 'anda', 'yang', 'dari', 'untuk', 'ingin', 'mau', 'cari', 'butuh', 'adalah', 'nama', 'bisa', 'tolong', 'tanya', 'dimana', 'apakah', 'penjual', 'toko', 'rekomendasi', 'saran'])) {
             $searchTerms[] = $word;
         }
     }
 
     $products = [];
+    $matchedCategories = [];
+
+    // Ambil daftar kategori untuk konteks
+    $catStmt = $pdo->query("SELECT name FROM categories");
+    $allCategories = $catStmt->fetchAll(PDO::FETCH_COLUMN);
+    $categoryListStr = implode(", ", $allCategories);
+
     if (!empty($searchTerms)) {
-        // Buat query dinamis: (name LIKE %word1% OR description LIKE %word1%) OR (name LIKE %word2%...)
+        // Buat query dinamis: Cek di Produk Name, Desc, DAN Category Name
         $paramSql = [];
         $params = [];
         foreach ($searchTerms as $i => $term) {
-            $paramSql[] = "(p.name LIKE :term{$i} OR p.description LIKE :term{$i})";
+            $paramSql[] = "(p.name LIKE :term{$i} OR p.description LIKE :term{$i} OR c.name LIKE :term{$i})";
             $params["term{$i}"] = "%" . $term . "%";
         }
         
-        // Update SQL: Join dengan tabel sellers
-        $sql = "SELECT p.id, p.name, p.price, p.stock, p.description, s.store_name, s.city 
+        // Update SQL: Join dengan Categories dan Sellers
+        $sql = "SELECT p.id, p.name, p.price, p.stock, p.description, s.store_name, s.city, c.name as category_name
                 FROM products p
                 JOIN sellers s ON p.seller_id = s.id
-                WHERE p.stock > 0 AND (" . implode(' OR ', $paramSql) . ") LIMIT 5";
+                JOIN categories c ON p.category_id = c.id
+                WHERE p.stock > 0 AND (" . implode(' OR ', $paramSql) . ") 
+                LIMIT 5";
         
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
         $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
+    // Fallback: Jika search biasa kosong, cek apakah ada keyword yang COCOK BANGET dengan nama Kategori
+    if (empty($products) && !empty($searchTerms)) {
+        foreach ($searchTerms as $term) {
+            // Cari kategori yang mirip dengan term
+            $matchedCat = null;
+            foreach ($allCategories as $catName) {
+                if (stripos($catName, $term) !== false) {
+                    $matchedCat = $catName;
+                    break;
+                }
+            }
+            
+            if ($matchedCat) {
+                // Query khusus berdasarkan Kategori match
+                $stmt = $pdo->prepare("SELECT p.id, p.name, p.price, p.stock, p.description, s.store_name, s.city, c.name as category_name
+                                       FROM products p
+                                       JOIN sellers s ON p.seller_id = s.id
+                                       JOIN categories c ON p.category_id = c.id
+                                       WHERE c.name = :catName AND p.stock > 0
+                                       LIMIT 5");
+                $stmt->execute(['catName' => $matchedCat]);
+                $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                
+                if (!empty($products)) break; // Jika sudah ketemu produk, stop loop
+            }
+        }
+    }
 
     if ($products) {
-        $contextData .= "Stok Produk Real-time (sesuai pencarian user):\n";
+        $contextData .= "Stok Produk Real-time (sesuai pencarian/kategori user):\n";
         foreach ($products as $p) {
            $storeInfo = $p['store_name'] . ($p['city'] ? " ({$p['city']})" : "");
            $link = "product-detail.html?id=" . $p['id'];
-           $contextData .= "- {$p['name']}: Rp " . number_format($p['price'], 0, ',', '.') . 
+           $contextData .= "- [{$p['category_name']}] {$p['name']}: Rp " . number_format($p['price'], 0, ',', '.') . 
                            " | Stok: {$p['stock']} | Toko: {$storeInfo} | Link: {$link}\n";
         }
     } else {
-         // Jika tidak ada keyword spesifik, ambil beberapa produk unggulan/terbaru sebagai overview
-         // Update juga di sini untuk menampilkan nama toko (jika ada)
-         // Note: Kita pakai LEFT JOIN di backup query jaga-jaga kalau ada produk tanpa seller valid
-         $stmt = $pdo->query("SELECT p.id, p.name, p.price, s.store_name 
+         // Fallback: Produk Unggulan
+         $stmt = $pdo->query("SELECT p.id, p.name, p.price, s.store_name, c.name as category_name
                               FROM products p
                               LEFT JOIN sellers s ON p.seller_id = s.id 
+                              LEFT JOIN categories c ON p.category_id = c.id
                               ORDER BY p.created_at DESC LIMIT 3");
          $feature = $stmt->fetchAll(PDO::FETCH_ASSOC);  
-         $contextData .= "Info Produk Terbaru (Katakan ini rekomendasi umum karena pencarian spesifik tidak ketemu):\n";
+         $contextData .= "Info Produk Terbaru (Pencarian spesifik tidak ketemu):\n";
          foreach ($feature as $p) {
             $storeName = $p['store_name'] ?? 'CrypMerce Official';
+            $catName = $p['category_name'] ?? 'Umum';
             $link = "product-detail.html?id=" . $p['id'];
-            $contextData .= "- {$p['name']}: Rp " . number_format($p['price'], 0, ',', '.') . " (Toko: {$storeName}) | Link: {$link}\n";
+            $contextData .= "- [{$catName}] {$p['name']}: Rp " . number_format($p['price'], 0, ',', '.') . " (Toko: {$storeName}) | Link: {$link}\n";
          }
     }
+    
+    // Tambahkan daftar kategori ke konteks agar AI tahu apa saja yang tersedia
+    $contextData .= "\nKategori Tersedia di Toko: " . $categoryListStr . "\n";
 } catch (Exception $e) { 
     error_log("Context Error: " . $e->getMessage());
 }

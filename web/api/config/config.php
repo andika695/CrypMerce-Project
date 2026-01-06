@@ -48,13 +48,18 @@ foreach ($possiblePaths as $path) {
 }
 
 // Database configuration
-$host = 'crypmerce_db';
-$db = 'crypmerce_database';
-$user = 'root';
-$pass = 'rootpass123';
+$host = getenv('DB_HOST') ?: 'crypmerce_db';
+$db = getenv('DB_NAME') ?: 'crypmerce_database';
+$user = getenv('DB_USER') ?: 'root';
+$pass = getenv('DB_PASS') ?: 'rootpass123';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+// Support custom port if host format is hostname;port=1234 or manually handled
+if (strpos($host, ':') !== false) {
+    list($h, $p) = explode(':', $host);
+    $dsn = "mysql:host=$h;port=$p;dbname=$db;charset=$charset";
+}
 
 $options = [
     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
